@@ -5,6 +5,7 @@
   "runServices": ["app", "database", "cache", "local-storage"],
   "workspaceFolder": "/workspace",
   "initializeCommand": "touch .env",
+  "postCreateCommand": "cp .env.development .env",
   "customizations": {
     "vscode": {
       "extensions": [
