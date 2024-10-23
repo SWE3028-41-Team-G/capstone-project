@@ -88,6 +88,12 @@ apps/backend/schema.gql
 # Docker Mount
 /mnt
 
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
 # PEM-encoded certificate data
 *.pem
 
