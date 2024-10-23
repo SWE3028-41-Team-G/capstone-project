@@ -1,0 +1,31 @@
+{
+  "name": "skkudm",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "runServices": ["app", "database", "cache", "local-storage"],
+  "workspaceFolder": "/workspace",
+  "initializeCommand": "touch .env",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "prisma.prisma",
+        "hashicorp.terraform"
+      ],
+      "settings": {
+        "extensions.verifySignature": false
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/pnpm:2": {},
+    "ghcr.io/devcontainers/features/terraform:1": {}
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.aws,target=/home/node/.aws,type=bind,consistency=cached"
+  ],
+  // Connect as non-root user (https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user)
+  "remoteUser": "node"
+}

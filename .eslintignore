@@ -1,0 +1,6 @@
+dist
+node_modules
+.pnpm-store
+.eslintrc.js
+*.config.js
+apps/frontend
