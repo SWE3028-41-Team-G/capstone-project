@@ -57,6 +57,7 @@ class _InitialPageState extends State<InitialPage> {
                 height: 30,
               ),
               Form(
+                  // Form 시작------------------------------------------------------
                   key: _formKey, // Assign the GlobalKey to Form
                   child: Column(
                     children: [
@@ -130,8 +131,9 @@ class _InitialPageState extends State<InitialPage> {
                       ),
                       Container(
                         width: double.infinity,
+                        height: 50,
                         margin:
-                            EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                         child: ElevatedButton(
                           //로그인 버튼 -----------------------------------------
                           style: ElevatedButton.styleFrom(
