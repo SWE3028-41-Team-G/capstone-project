@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/home.dart';
+import 'package:frontend/register.dart';
 
 class InitialPage extends StatefulWidget {
   const InitialPage({
@@ -11,6 +13,7 @@ class InitialPage extends StatefulWidget {
 
 class _InitialPageState extends State<InitialPage> {
   final _formKey = GlobalKey<FormState>(); // GlobalKey for Form
+  final _emailController = TextEditingController(); //email 유효성 검사
 
   String _idValue = "";
   String _pwValue = "";
@@ -61,6 +64,7 @@ class _InitialPageState extends State<InitialPage> {
                         margin: EdgeInsets.symmetric(horizontal: 20),
                         child: TextFormField(
                           // 이메일 입력 TextFormField --------------------------------
+                          controller: _emailController,
                           decoration: InputDecoration(
                             labelText: "이메일을 입력해 주세요",
                             floatingLabelBehavior: FloatingLabelBehavior
@@ -73,9 +77,21 @@ class _InitialPageState extends State<InitialPage> {
                                 borderSide: BorderSide.none),
                           ),
                           validator: (value) {
-                            // 적당히 처리해둔 것
-                            if (value!.isEmpty) {
+                            // 입력값이 null 이거나 비었을 때 처리
+                            if (value == null || value.isEmpty) {
                               return '이메일을 입력해 주세요.';
+                            }
+
+                            // 이메일 형식이 맞는지 확인
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                .hasMatch(value)) {
+                              return '이메일 형식으로 입력해 주세요';
+                            }
+
+                            // 학교 이메일 형식 확인
+                            if (!(value.endsWith('@g.skku.edu') ||
+                                value.endsWith('@skku.edu'))) {
+                              return '학교 구글 이메일로 로그인해 주세요';
                             }
                             return null;
                           },
@@ -129,23 +145,11 @@ class _InitialPageState extends State<InitialPage> {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
 
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title:
-                                        Text("id: $_idValue \npw: $_pwValue"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('OK'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
+                              // 화면 전환
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Home()));
                             }
                           },
                           child: Text(
@@ -158,7 +162,13 @@ class _InitialPageState extends State<InitialPage> {
                   )),
               TextButton(
                   // 회원가입 버튼 ----------------------------------
-                  onPressed: () {},
+                  onPressed: () {
+                    // 화면 전환
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Register()));
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                         border: Border(
