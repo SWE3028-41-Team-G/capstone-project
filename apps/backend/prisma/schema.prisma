@@ -12,3 +12,49 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  /// @HideField()
+  password String
+  nickname String @unique
+  email    String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  UserMajor UserMajor[]
+  Profile   Profile[]
+}
+
+model Major {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  meta Json
+
+  UserMajor UserMajor[]
+}
+
+model UserMajor {
+  userId  Int
+  majorId Int
+  User    User  @relation(fields: [userId], references: [id])
+  Major   Major @relation(fields: [majorId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@id([userId, majorId])
+  @@map("user_major")
+}
+
+model Profile {
+  id       Int     @id @default(autoincrement())
+  imageUrl String  @map("image_url")
+  intro    String
+  public   Boolean
+
+  User   User @relation(fields: [userId], references: [id])
+  userId Int
+}
