@@ -62,6 +62,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^10.0.0
         version: 10.4.6(@nestjs/common@10.4.6)(@nestjs/core@10.4.6)
+      '@prisma/client':
+        specifier: 5.21.1
+        version: 5.21.1(prisma@5.21.1)
       reflect-metadata:
         specifier: ^0.2.0
         version: 0.2.2
@@ -100,7 +103,7 @@ importers:
         specifier: ^9.4.3
         version: 9.5.1(typescript@5.6.3)(webpack@5.95.0)
       ts-node:
-        specifier: ^10.9.1
+        specifier: ^10.9.2
         version: 10.9.2(@types/node@20.17.0)(typescript@5.6.3)
       tsconfig-paths:
         specifier: ^4.2.0
@@ -1443,13 +1446,24 @@ packages:
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
     dev: true
 
+  /@prisma/client@5.21.1(prisma@5.21.1):
+    resolution: {integrity: sha512-3n+GgbAZYjaS/k0M03yQsQfR1APbr411r74foknnsGpmhNKBG49VuUkxIU6jORgvJPChoD4WC4PqoHImN1FP0w==}
+    engines: {node: '>=16.13'}
+    requiresBuild: true
+    peerDependencies:
+      prisma: '*'
+    peerDependenciesMeta:
+      prisma:
+        optional: true
+    dependencies:
+      prisma: 5.21.1
+    dev: false
+
   /@prisma/debug@5.21.1:
     resolution: {integrity: sha512-uY8SAhcnORhvgtOrNdvWS98Aq/nkQ9QDUxrWAgW8XrCZaI3j2X7zb7Xe6GQSh6xSesKffFbFlkw0c2luHQviZA==}
-    dev: true
 
   /@prisma/engines-version@5.21.1-1.bf0e5e8a04cada8225617067eaa03d041e2bba36:
     resolution: {integrity: sha512-qvnEflL0//lh44S/T9NcvTMxfyowNeUxTunPcDfKPjyJNrCNf2F1zQLcUv5UHAruECpX+zz21CzsC7V2xAeM7Q==}
-    dev: true
 
   /@prisma/engines@5.21.1:
     resolution: {integrity: sha512-hGVTldUkIkTwoV8//hmnAAiAchi4oMEKD3aW5H2RrnI50tTdwza7VQbTTAyN3OIHWlK5DVg6xV7X8N/9dtOydA==}
@@ -1459,7 +1473,6 @@ packages:
       '@prisma/engines-version': 5.21.1-1.bf0e5e8a04cada8225617067eaa03d041e2bba36
       '@prisma/fetch-engine': 5.21.1
       '@prisma/get-platform': 5.21.1
-    dev: true
 
   /@prisma/fetch-engine@5.21.1:
     resolution: {integrity: sha512-70S31vgpCGcp9J+mh/wHtLCkVezLUqe/fGWk3J3JWZIN7prdYSlr1C0niaWUyNK2VflLXYi8kMjAmSxUVq6WGQ==}
@@ -1467,13 +1480,11 @@ packages:
       '@prisma/debug': 5.21.1
       '@prisma/engines-version': 5.21.1-1.bf0e5e8a04cada8225617067eaa03d041e2bba36
       '@prisma/get-platform': 5.21.1
-    dev: true
 
   /@prisma/get-platform@5.21.1:
     resolution: {integrity: sha512-sRxjL3Igst3ct+e8ya/x//cDXmpLbZQ5vfps2N4tWl4VGKQAmym77C/IG/psSMsQKszc8uFC/q1dgmKFLUgXZQ==}
     dependencies:
       '@prisma/debug': 5.21.1
-    dev: true
 
   /@smithy/abort-controller@3.1.6:
     resolution: {integrity: sha512-0XuhuHQlEqbNQZp7QxxrFTdVWdwxch4vjxYgfInF91hZFkPxf9QDrdQka0KfxFMPqLNzSw0b95uGTrLliQUavQ==}
@@ -3485,7 +3496,6 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
     requiresBuild: true
-    dev: true
     optional: true
 
   /function-bind@1.1.2:
@@ -4371,7 +4381,6 @@ packages:
       '@prisma/engines': 5.21.1
     optionalDependencies:
       fsevents: 2.3.3
-    dev: true
 
   /process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
