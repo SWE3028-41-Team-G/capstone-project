@@ -26,7 +26,11 @@ class _HomeState extends State<Home> {
       // resizeToAvoidBottomInset: false,
       body: IndexedStack(
         index: _selectedIndex,
-        children: <Widget>[],
+        children: <Widget>[
+          BulletinBoard(),
+          Square(),
+          Profile(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
