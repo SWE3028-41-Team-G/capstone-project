@@ -42,33 +42,32 @@ class SquareState extends State<Square> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: Column(
-          children: [
-            Text(
-              'DM',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            Text(
-              'Square',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
-        leadingWidth: 100,
-      ),
       body: Column(
-        children: [],
+        children: [
+          // Menu selection
+          Row(
+            children: [
+              Text(
+                'DM',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                ),
+              ),
+              Text(
+                'Square',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                ),
+              ),
+            ],
+          ),
+          // filters
+          // user profiles
+        ],
       ),
     );
   }

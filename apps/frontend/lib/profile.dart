@@ -13,38 +13,6 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   Map<String, dynamic>? userProfile; // 사용자 프로필 정보를 저장할 변수
-  List<Map<String, dynamic>> schedules = [
-    {
-      'spaceid': '테니스 코트 1',
-      'starttime': '12:00',
-      'endtime': '15:00',
-      'people': '8명',
-      'details': [
-        '박성준 01012345678',
-        '박형준 01012345578',
-        '김성준 01012655578',
-        '김도현 01098655578',
-        '이현준 01033874297',
-        '한민수 01022853408',
-        '최성은 01097345521',
-        '박상준 01012345679'
-      ]
-    },
-    {
-      'spaceid': '농구장 2',
-      'starttime': '14:00',
-      'endtime': '17:00',
-      'people': '6명',
-      'details': [
-        '박성준 01012345678',
-        '이한수 01098765432',
-        '김승엽 01087654321',
-        '신형권 01075422774',
-        '김재영 01044982215',
-        '황종훈 01046855744'
-      ]
-    },
-  ]; // 스케줄 정보를 저장할 변수
 
   @override
   void initState() {
@@ -130,17 +98,15 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: Text(
+        title: Text(
           'Profile',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 25,
           ),
         ),
-        leadingWidth: 100,
+        shape: Border(bottom: BorderSide(color: Colors.grey, width: 1)),
       ),
       body: Column(
         children: [
@@ -148,14 +114,14 @@ class _ProfileState extends State<Profile> {
           Row(
             children: [
               // Title and fix info button
-              Column(
+              Row(
                 children: [
                   Text(
                     '내 프로필',
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: 20,
                     ),
                   ),
                   TextButton(
@@ -163,7 +129,7 @@ class _ProfileState extends State<Profile> {
                     child: Text('정보 수정',
                         style: TextStyle(
                           color: Colors.grey,
-                          fontSize: 10,
+                          fontSize: 15,
                         )),
                   ),
                 ],
