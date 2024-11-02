@@ -17,7 +17,7 @@ class _RegisterState extends State<Register> {
 
   void _onVerifyPressed() {
     final email = '${_emailController.text}${_selectedDomain ?? ''}';
-    // 여기에 이메일 인증 로직 추가
+    // 이메일 인증 로직 추가
     print('인증할 이메일: $email');
   }
 
