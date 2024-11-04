@@ -14,6 +14,13 @@ class InitialPage extends StatefulWidget {
 class _InitialPageState extends State<InitialPage> {
   final _formKey = GlobalKey<FormState>(); // GlobalKey for Form
   final _emailController = TextEditingController(); //email 유효성 검사
+  String? _selectedDomain;
+
+  void _onVerifyPressed() {
+    final email = '${_emailController.text}${_selectedDomain ?? ''}';
+    // 이메일
+    print('인증할 이메일: $email');
+  }
 
   String _idValue = "";
   String _pwValue = "";
@@ -59,108 +66,79 @@ class _InitialPageState extends State<InitialPage> {
               Form(
                   // Form 시작------------------------------------------------------
                   key: _formKey, // Assign the GlobalKey to Form
-                  child: Column(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 20),
-                        child: TextFormField(
-                          // 이메일 입력 TextFormField --------------------------------
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: "이메일을 입력해 주세요",
-                            floatingLabelBehavior: FloatingLabelBehavior
-                                .never, //labeltext 올라가는 거 안 보이게 하기
-                            contentPadding: EdgeInsets.all(20),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none),
-                          ),
-                          validator: (value) {
-                            // 입력값이 null 이거나 비었을 때 처리
-                            if (value == null || value.isEmpty) {
-                              return '이메일을 입력해 주세요.';
-                            }
-
-                            // 이메일 형식이 맞는지 확인
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                .hasMatch(value)) {
-                              return '이메일 형식으로 입력해 주세요';
-                            }
-
-                            // 학교 이메일 형식 확인
-                            if (!(value.endsWith('@g.skku.edu') ||
-                                value.endsWith('@skku.edu'))) {
-                              return '학교 구글 이메일로 로그인해 주세요';
-                            }
-                            return null;
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        EmailInputRow(
+                          emailController: _emailController,
+                          selectedDomain: _selectedDomain,
+                          onDomainChanged: (newDomain) {
+                            setState(() {
+                              _selectedDomain = newDomain;
+                            });
                           },
-                          onSaved: (value) {
-                            _idValue = value!;
-                          },
+                          onVerifyPressed: _onVerifyPressed,
                         ),
-                      ),
-                      Container(
-                        margin:
-                            EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                        child: TextFormField(
-                          // 비밀번호 입력 TextFormField------------------------------
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: "비밀번호를 입력해 주세요",
-                            floatingLabelBehavior: FloatingLabelBehavior
-                                .never, //labeltext 올라가는 거 안 보이게 하기
-                            contentPadding: EdgeInsets.all(20),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none),
-                          ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return '비밀번호를 입력해 주세요.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _pwValue = value!;
-                          },
-                        ),
-                      ),
-                      Container(
-                        width: double.infinity,
-                        height: 50,
-                        margin:
-                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                        child: ElevatedButton(
-                          //로그인 버튼 -----------------------------------------
-                          style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor:
-                                  const Color.fromARGB(255, 30, 85, 33),
-                              side: BorderSide.none,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10))),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
-
-                              // 화면 전환
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Home()));
-                            }
-                          },
-                          child: Text(
-                            "로그인",
-                            style: TextStyle(color: Colors.white),
+                        Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          child: TextFormField(
+                            // 비밀번호 입력 TextFormField------------------------------
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: "비밀번호를 입력해 주세요",
+                              floatingLabelBehavior: FloatingLabelBehavior
+                                  .never, //labeltext 올라가는 거 안 보이게 하기
+                              contentPadding: EdgeInsets.all(20),
+                              filled: true,
+                              fillColor: Colors.grey[200],
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none),
+                            ),
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return '비밀번호를 입력해 주세요.';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _pwValue = value!;
+                            },
                           ),
                         ),
-                      ),
-                    ],
+                        Container(
+                          width: double.infinity,
+                          height: 50,
+                          margin: EdgeInsets.symmetric(vertical: 15),
+                          child: ElevatedButton(
+                            //로그인 버튼 -----------------------------------------
+                            style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor:
+                                    const Color.fromARGB(255, 30, 85, 33),
+                                side: BorderSide.none,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10))),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
+
+                                // 화면 전환
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Home()));
+                              }
+                            },
+                            child: Text(
+                              "로그인",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   )),
               TextButton(
                   // 회원가입 버튼 ----------------------------------
@@ -188,6 +166,89 @@ class _InitialPageState extends State<InitialPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// 이메일 입력
+class EmailInputRow extends StatelessWidget {
+  final TextEditingController emailController;
+  final String? selectedDomain;
+  final Function(String?) onDomainChanged;
+  final VoidCallback onVerifyPressed;
+
+  const EmailInputRow({
+    super.key,
+    required this.emailController,
+    required this.selectedDomain,
+    required this.onDomainChanged,
+    required this.onVerifyPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // 아이디 입력 필드
+        Expanded(
+          flex: 2,
+          child: TextFormField(
+            decoration: InputDecoration(
+              labelText: "아이디",
+              floatingLabelBehavior:
+                  FloatingLabelBehavior.never, //labeltext 올라가는 거 안 보이게 하기
+              contentPadding: EdgeInsets.all(20),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '아이디를 입력해 주세요.';
+              }
+              return null;
+            },
+            onSaved: (value) {
+              emailController.text = value!;
+            },
+          ),
+        ),
+
+        SizedBox(width: 8),
+
+        // 도메인 선택 드롭다운
+        Expanded(
+          flex: 3,
+          child: DropdownButtonFormField<String>(
+            decoration: InputDecoration(
+              labelText: "도메인 선택",
+              floatingLabelBehavior:
+                  FloatingLabelBehavior.never, //labeltext 올라가는 거 안 보이게 하기
+              contentPadding: EdgeInsets.all(20),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none),
+            ),
+            value: selectedDomain,
+            items: [
+              DropdownMenuItem(
+                  value: '@g.skku.edu', child: Text('@g.skku.edu')),
+              DropdownMenuItem(value: '@skku.edu', child: Text('@skku.edu')),
+            ],
+            onChanged: onDomainChanged,
+            validator: (value) {
+              if (value == null) {
+                return '도메인을 선택해 주세요.';
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
     );
   }
 }
