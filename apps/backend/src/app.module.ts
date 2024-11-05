@@ -1,10 +1,34 @@
+import { MailerModule } from '@nestjs-modules/mailer'
+import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+import { APP_GUARD } from '@nestjs/core'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { AuthModule } from './auth/auth.module'
+import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard'
+import { CacheConfigService } from './common/cache/cache-config.service'
+import { EmailModule } from './email/email.module'
+import { MailerConfigService } from './email/mailer-config.service'
+import { PrismaModule } from './prisma/prisma.module'
+import { UserModule } from './user/user.module'
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MailerModule.forRootAsync({
+      useClass: MailerConfigService
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useClass: CacheConfigService
+    }),
+    AuthModule,
+    PrismaModule,
+    UserModule,
+    EmailModule
+  ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }]
 })
 export class AppModule {}
