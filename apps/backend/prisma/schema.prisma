@@ -25,8 +25,13 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  UserMajor UserMajor[]
-  Profile   Profile[]
+  UserMajor     UserMajor[]
+  Profile       Profile[]
+  Square        Square[]
+  UserSquare    UserSquare[]
+  SquareMessage SquarePost[]
+  Post          Post[]
+  Comment       Comment[]
 }
 
 model Major {
@@ -34,17 +39,21 @@ model Major {
   name String @unique
   meta Json
 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   UserMajor UserMajor[]
 }
 
 model UserMajor {
-  userId  Int
-  majorId Int
-  User    User  @relation(fields: [userId], references: [id])
-  Major   Major @relation(fields: [majorId], references: [id])
+  userId  Int @map("user_id")
+  majorId Int @map("major_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  User  User  @relation(fields: [userId], references: [id])
+  Major Major @relation(fields: [majorId], references: [id])
 
   @@id([userId, majorId])
   @@map("user_major")
@@ -55,9 +64,98 @@ model Profile {
   imageUrl String  @map("image_url")
   intro    String
   public   Boolean
+  userId   Int     @map("user_id")
 
-  User   User @relation(fields: [userId], references: [id])
-  userId Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Square {
+  id       Int    @id @default(autoincrement())
+  name     String @unique
+  leaderId Int    @map("leader_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  leader      User         @relation(fields: [leaderId], references: [id])
+  UserSquare  UserSquare[] /// members
+  SquarePosts SquarePost[]
+}
+
+model UserSquare {
+  userId   Int @map("user_id")
+  squareId Int @map("square_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  square Square @relation(fields: [squareId], references: [id])
+
+  @@id([userId, squareId])
+  @@map("user_square")
+}
+
+model SquarePost {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @map("user_id")
+  squareId Int    @map("square_id")
+  title    String /// 글 제목
+  content  String /// 글 본문
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  square Square @relation(fields: [squareId], references: [id])
+
+  @@map("square_post")
+}
+
+model Post {
+  id      Int    @id @default(autoincrement())
+  title   String
+  content String
+  userId  Int /// 글 작성자
+
+  tags    Tag[]
+  Comment Comment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Comment {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @map("user_id")
+  postId   Int    @map("post_id")
+  parentId Int?   @map("parent_id")
+  content  String
+
+  children Comment[] @relation("NestedComment")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User     @relation(fields: [userId], references: [id])
+  post   Post     @relation(fields: [postId], references: [id])
+  parent Comment? @relation("NestedComment", fields: [parentId], references: [id])
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  Post   Post? @relation(fields: [postId], references: [id])
+  postId Int?
 }
 
 enum Role {
