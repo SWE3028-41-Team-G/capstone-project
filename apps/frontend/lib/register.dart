@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/register_profile.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -178,7 +179,7 @@ class _RegisterState extends State<Register> {
                 width: double.infinity,
                 margin: EdgeInsets.symmetric(vertical: 5),
                 child: ElevatedButton(
-                  //회원가입 버튼 -----------------------------------------
+                  //다음 버튼 -----------------------------------------
                   style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: const Color.fromARGB(255, 30, 85, 33),
@@ -189,6 +190,12 @@ class _RegisterState extends State<Register> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
+
+                      // 프로필 등록이로 이동
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const RegisterProfile()));
                     }
                   },
                   child: Text(
@@ -308,8 +315,6 @@ class CustomTextFormField extends StatelessWidget {
   final String? Function(String?)? validator;
   final void Function(String?)? onSaved;
   final bool obscureText;
-  final int? minLines;
-  final int? maxLines;
 
   const CustomTextFormField({
     super.key,
@@ -317,8 +322,6 @@ class CustomTextFormField extends StatelessWidget {
     this.validator,
     this.onSaved,
     this.obscureText = false,
-    this.minLines,
-    this.maxLines,
   });
 
   @override
@@ -327,8 +330,6 @@ class CustomTextFormField extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 12),
       child: TextFormField(
         obscureText: obscureText,
-        minLines: minLines,
-        maxLines: maxLines ?? 1,
         decoration: InputDecoration(
           labelText: labelText,
           floatingLabelBehavior: FloatingLabelBehavior.always,
