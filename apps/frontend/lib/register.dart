@@ -175,35 +175,22 @@ class _RegisterState extends State<Register> {
               //     return null;
               //   },
               // ),
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.symmetric(vertical: 5),
-                child: ElevatedButton(
-                  //다음 버튼 -----------------------------------------
-                  style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: const Color.fromARGB(255, 30, 85, 33),
-                      padding: EdgeInsets.symmetric(vertical: 13),
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
+              CustomButton(
+                backgroundColor: const Color.fromARGB(255, 30, 85, 33),
+                text: "다음",
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
 
-                      // 프로필 등록이로 이동
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegisterProfile()));
-                    }
-                  },
-                  child: Text(
-                    "다음",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
+                    // 프로필 등록으로 이동
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterProfile()),
+                    );
+                  }
+                },
+              )
             ],
           ),
         ),
@@ -375,6 +362,44 @@ class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
             _selectedValue = newValue; // 선택된 값 업데이트
           });
         },
+      ),
+    );
+  }
+}
+
+// 버튼 커스텀
+class CustomButton extends StatelessWidget {
+  final Color backgroundColor;
+  final String text;
+  final VoidCallback onPressed;
+
+  const CustomButton({
+    Key? key,
+    required this.backgroundColor,
+    required this.text,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: backgroundColor,
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          side: BorderSide.none,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        onPressed: onPressed,
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }

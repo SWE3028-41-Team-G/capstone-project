@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:frontend/bulletin_board.dart';
+import 'package:frontend/message.dart';
 import 'package:frontend/square.dart';
 import 'package:frontend/profile.dart';
 
@@ -29,6 +31,7 @@ class _HomeState extends State<Home> {
         children: <Widget>[
           BulletinBoard(),
           Square(),
+          Message(),
           Profile(),
         ],
       ),
@@ -37,21 +40,28 @@ class _HomeState extends State<Home> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
+            icon: Icon(Icons.article),
             label: '게시판',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline_rounded),
+            icon: Icon(Icons.people_alt),
             label: '광장',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_box_outlined),
+            icon: Icon(CupertinoIcons.chat_bubble_2_fill),
+            label: '메시지',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.person_crop_square_fill),
             label: '프로필',
           ),
         ],
         selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
+        unselectedItemColor: Colors.grey[400],
+        selectedFontSize: 11,
+        unselectedFontSize: 11,
+        iconSize: 23,
+        // backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
       ),
     );

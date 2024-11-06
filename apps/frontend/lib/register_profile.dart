@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/home.dart';
 import 'package:frontend/register.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -13,8 +14,10 @@ class RegisterProfile extends StatefulWidget {
 }
 
 class _RegisterProfileState extends State<RegisterProfile> {
+  final _formKey = GlobalKey<FormState>(); // GlobalKey for Form
   XFile? _image; //이미지를 담을 변수 선언
   final ImagePicker picker = ImagePicker(); //ImagePicker 초기화
+  String _selectedOption = '공개';
 
   //이미지를 가져오는 함수
   Future getImage(ImageSource imageSource) async {
@@ -66,21 +69,57 @@ class _RegisterProfileState extends State<RegisterProfile> {
       ),
       body: SingleChildScrollView(
         child: Form(
+            key: _formKey, // Assign the GlobalKey to Form
             child: Container(
-          width: double.infinity,
-          margin: EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 30),
-              _buildProfilePhoto(),
-              SizedBox(
-                height: 30,
+              width: double.infinity,
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 30),
+                  _buildProfilePhoto(),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  CustomTextFormField(labelText: "닉네임을 설정해 주세요"),
+                  _openProfile(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  CustomTextFormField(labelText: "첫번째 관심사 키워드를 입력해 주세요"),
+                  CustomTextFormField(labelText: "두번째 관심사 키워드를 입력해 주세요"),
+                  CustomButton(
+                    backgroundColor: Colors.grey[400]!,
+                    text: "이전",
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+
+                        // 프로필 등록으로 이동
+                        Navigator.pop(
+                          context,
+                        );
+                      }
+                    },
+                  ),
+                  CustomButton(
+                    backgroundColor: const Color.fromARGB(255, 30, 85, 33),
+                    text: "회원가입 완료",
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+
+                        // 프로필 등록으로 이동
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Home()),
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
-              CustomTextFormField(labelText: "닉네임을 설정해 주세요")
-            ],
-          ),
-        )),
+            )),
       ),
     );
   }
@@ -129,6 +168,42 @@ class _RegisterProfileState extends State<RegisterProfile> {
               )
             : null, // 이미지를 업로드한 경우 Icon 숨김
       ),
+    );
+  }
+
+  Widget _openProfile() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 5,
+        ),
+        Text(
+          "프로필 공개 여부를 선택해 주세요",
+        ),
+        Radio<String>(
+          value: '공개',
+          groupValue: _selectedOption,
+          activeColor: const Color.fromARGB(255, 30, 85, 33),
+          onChanged: (value) {
+            setState(() {
+              _selectedOption = value!;
+            });
+          },
+        ),
+        Text('공개'),
+        Radio<String>(
+          value: '비공개',
+          groupValue: _selectedOption,
+          activeColor: const Color.fromARGB(255, 30, 85, 33),
+          onChanged: (value) {
+            setState(() {
+              _selectedOption = value!;
+            });
+          },
+        ),
+        Text('비공개'),
+      ],
     );
   }
 }
