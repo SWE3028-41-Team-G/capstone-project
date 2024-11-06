@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   AWS_REGION: ap-northeast-2
 
@@ -42,7 +46,6 @@ jobs:
     defaults:
       run:
         shell: bash
-
     steps:
       - uses: actions/checkout@v4
 
