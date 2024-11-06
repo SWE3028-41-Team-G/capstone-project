@@ -44,13 +44,11 @@ services:
     volumes:
       - skkudm-database:/var/lib/postgresql/data
 
-
   cache:
     container_name: skkudm-cache
     image: redis:7-alpine
     ports:
       - 6380:6379
-
 
 volumes:
   skkudm-storage:
