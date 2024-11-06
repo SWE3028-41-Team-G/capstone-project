@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 // import 'package:fluttertoast/fluttertoast.dart';
@@ -7,11 +5,13 @@ import 'package:flutter/material.dart';
 // import 'dart:convert';
 
 class Profile extends StatefulWidget {
+  const Profile({super.key});
+
   @override
-  _ProfileState createState() => _ProfileState();
+  ProfileState createState() => ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class ProfileState extends State<Profile> {
   Map<String, dynamic>? userProfile; // 사용자 프로필 정보를 저장할 변수
 
   @override

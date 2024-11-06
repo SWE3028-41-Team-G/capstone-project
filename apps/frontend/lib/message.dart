@@ -4,12 +4,19 @@ class Message extends StatefulWidget {
   const Message({super.key});
 
   @override
-  State<Message> createState() => _MessageState();
+  MessageState createState() => MessageState();
 }
 
-class _MessageState extends State<Message> {
+class MessageState extends State<Message> {
+  // List<dynamic> chatrooms = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return Scaffold();
   }
 }
