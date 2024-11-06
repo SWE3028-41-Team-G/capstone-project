@@ -16,7 +16,7 @@ FROM node:20.18.0-alpine
 ENV NODE_ENV=production
 
 COPY --from=builder /build/out /app
-COPY ./backend/entrypoint.sh /app
+COPY ./apps/backend/entrypoint.sh /app
 WORKDIR /app
 
 ENTRYPOINT ["/app/entrypoint.sh"]
