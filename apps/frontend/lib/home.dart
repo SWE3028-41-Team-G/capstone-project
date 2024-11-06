@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:frontend/bulletin_board.dart';
 import 'package:frontend/square.dart';
+import 'package:frontend/message.dart';
 import 'package:frontend/profile.dart';
 
 class Home extends StatefulWidget {
@@ -29,6 +30,7 @@ class _HomeState extends State<Home> {
         children: <Widget>[
           BulletinBoard(),
           Square(),
+          Message(),
           Profile(),
         ],
       ),
@@ -41,8 +43,12 @@ class _HomeState extends State<Home> {
             label: '게시판',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline_rounded),
+            icon: Icon(Icons.groups),
             label: '광장',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            label: '메시지',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_box_outlined),

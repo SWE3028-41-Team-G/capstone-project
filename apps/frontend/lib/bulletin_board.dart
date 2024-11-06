@@ -58,92 +58,98 @@ class BulletinBoardState extends State<BulletinBoard> {
       body: Column(
         children: [
           // write button and filter settings
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.filter_alt),
-                  label: Text(
-                    '필터 수정',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  )),
-              ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.edit),
-                  label: Text(
-                    '새 글 작성',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  )),
-            ],
+          Container(
+            margin: EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.filter_alt),
+                    label: Text(
+                      '필터 수정',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    )),
+                ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.edit),
+                    label: Text(
+                      '새 글 작성',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    )),
+              ],
+            ),
           ),
           // filter menus
-          Column(
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(4, (index) {
-                    String text = ['필터 #1', '필터 #2', '필터 #3', '필터 #4'][index];
-                    return Row(
-                      children: [
-                        if (index < 4) SizedBox(width: 15),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedFilterIndex = index;
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _selectedFilterIndex == index
-                                ? Colors.blueAccent
-                                : Colors.grey,
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            child: Column(
+              children: [
+                // Filter lists
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(4, (index) {
+                      String text = ['필터 #1', '필터 #2', '필터 #3', '필터 #4'][index];
+                      return Row(
+                        children: [
+                          if (index < 4) SizedBox(width: 15),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedFilterIndex = index;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _selectedFilterIndex == index
+                                  ? Colors.blueAccent
+                                  : Colors.grey,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[Text(text)],
+                            ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[Text(text)],
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
-              ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(4, (index) {
-                    String text = ['#수학', '#전공진입', '#수업추천', '#꿀팁'][index];
-                    return Row(
-                      children: [
-                        if (index < 4) SizedBox(width: 15),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightGreen,
-                          ),
-                          child: Row(
+                // Tag results
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Row(
+                    children: List.generate(4, (index) {
+                      String text = ['#수학', '#전공진입', '#수업추천', '#꿀팁'][index];
+                      return Row(
+                        children: [
+                          if (index < 4) SizedBox(width: 15),
+                          Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[Text(text)],
+                            children: <Widget>[
+                              Text(text,
+                                  style: TextStyle(
+                                      fontSize: 15, color: Colors.lightBlue))
+                            ],
                           ),
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          SizedBox(height: 20),
+          // "Results" Textbox
           Container(
             alignment: Alignment.centerLeft,
-            margin: EdgeInsets.all(15),
+            margin: EdgeInsets.all(10),
             child: Text(
               '검색결과',
               style: TextStyle(
@@ -245,8 +251,8 @@ class BulletinBoardState extends State<BulletinBoard> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
+                          Container(
+                            margin: EdgeInsets.all(10),
                             child: Row(
                               children: List.generate(4, (index) {
                                 String text =
@@ -254,15 +260,14 @@ class BulletinBoardState extends State<BulletinBoard> {
                                 return Row(
                                   children: [
                                     if (index < 4) SizedBox(width: 15),
-                                    ElevatedButton(
-                                      onPressed: () {},
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.lightGreen,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[Text(text)],
-                                      ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Text(text,
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.lightBlue))
+                                      ],
                                     ),
                                   ],
                                 );
