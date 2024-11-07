@@ -332,6 +332,8 @@ class CustomTextFormField extends StatelessWidget {
 
 // 학번 Dropdown 숫자
 class NumberRangeDropdown extends StatefulWidget {
+  const NumberRangeDropdown({super.key});
+
   @override
   _NumberRangeDropdownState createState() => _NumberRangeDropdownState();
 }
@@ -374,11 +376,11 @@ class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const CustomButton({
-    Key? key,
+    super.key,
     required this.backgroundColor,
     required this.text,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

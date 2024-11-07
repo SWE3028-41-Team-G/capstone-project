@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/bulletin_board.dart';
 import 'package:frontend/message.dart';
 import 'package:frontend/square.dart';
-import 'package:frontend/message.dart';
 import 'package:frontend/profile.dart';
 
 class Home extends StatefulWidget {
