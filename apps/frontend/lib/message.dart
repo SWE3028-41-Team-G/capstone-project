@@ -34,15 +34,15 @@ class MessageState extends State<Message> {
           scrollDirection: Axis.vertical,
           child: Column(
             children: List.generate(4, (index) {
-              String room_title =
+              String roomTitle =
                   ["김성균", "이율전", "수학과-소프트웨어학과 복전생 모임", "농구 좋아하는 사람들 모임"][index];
-              String last_message = [
+              String lastMessage = [
                 "감사합니다!",
                 "저도 그 수업 듣는데",
                 "과제 너무 많네요 ㅠㅠ",
                 "내일 저녁 8시 학교 코트에서 농구하실분?",
               ][index];
-              int unread_message_counts = [2, 0, 6, 13][index];
+              int unreadMessageCounts = [2, 0, 6, 13][index];
 
               return Container(
                 decoration: BoxDecoration(
@@ -57,7 +57,7 @@ class MessageState extends State<Message> {
                           margin:
                               EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           child: Text(
-                            room_title,
+                            roomTitle,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
@@ -75,7 +75,7 @@ class MessageState extends State<Message> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  last_message,
+                                  lastMessage,
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 12,
@@ -87,7 +87,7 @@ class MessageState extends State<Message> {
                               Container(
                                   margin: EdgeInsets.all(5),
                                   child: Text(
-                                    '$unread_message_counts',
+                                    '$unreadMessageCounts',
                                     style: TextStyle(
                                       color: Colors.red,
                                       fontSize: 10,

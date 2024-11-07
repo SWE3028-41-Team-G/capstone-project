@@ -12,7 +12,15 @@ class Profile extends StatefulWidget {
 }
 
 class ProfileState extends State<Profile> {
-  Map<String, dynamic>? userProfile; // 사용자 프로필 정보를 저장할 변수
+  Map<String, dynamic>? userProfile = {
+    'imageUrl':
+        'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+    'nickname': '명륜이',
+    'primaryMajor': '경제학과',
+    'secondMajor': '소프트웨어학과',
+    'keyword1': '산책',
+    'keyword2': '헬스'
+  }; // 사용자 프로필 정보를 저장할 변수
 
   @override
   void initState() {
@@ -114,36 +122,250 @@ class ProfileState extends State<Profile> {
           Row(
             children: [
               // Title and fix info button
-              Row(
+              Container(
+                // alignment: Alignment.centerLeft,
+                margin: EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '내 프로필',
+                      style: TextStyle(
+                        color: const Color.fromARGB(255, 153, 138, 138),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Row(
+                        children: [
+                          Text('정보 수정',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 15,
+                              )),
+                          Icon(Icons.chevron_right)
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Container(
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(8),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    blurRadius: 1,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Row(
                 children: [
-                  Text(
-                    '내 프로필',
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                    child: Image.network(
+                      userProfile?['imageUrl'],
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${userProfile?['nickname']}",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Text(
+                        "❶ ${userProfile?['primaryMajor']}",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Text(
+                        "❷ ${userProfile?['secondMajor']}",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 6, horizontal: 12),
+                            margin: EdgeInsets.symmetric(horizontal: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.lightBlue[200],
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              '${userProfile?['keyword1']}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow
+                                  .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 6, horizontal: 12),
+                            // margin: EdgeInsets.symmetric(horizontal: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.lightGreen[200],
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              '${userProfile?['keyword2']}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow
+                                  .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              )),
+          // Graduation Requirements
+          Container(
+            margin: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+                border: Border.symmetric(
+                    horizontal: BorderSide(color: Colors.grey, width: 2))),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text(
+                    '졸업 요건',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: const Color.fromARGB(255, 153, 138, 138),
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text('정보 수정',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 15,
-                        )),
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text('원전공',
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 20)),
+                      ),
+                      Text('${userProfile?['primaryMajor']}',
+                          style: TextStyle(color: Colors.grey, fontSize: 20))
+                    ],
                   ),
-                ],
-              ),
-              //
-              Row(
-                children: [],
-              )
-            ],
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text('복수전공',
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 20)),
+                      ),
+                      Text('${userProfile?['secondMajor']}',
+                          style: TextStyle(color: Colors.grey, fontSize: 20))
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          // Graduation Requirements
-
-          // Account Infos
           // Settings
+          Container(
+            margin: EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text(
+                    '앱 설정',
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 153, 138, 138),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Row(
+                    children: [
+                      Text('다크모드',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          )),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Row(
+                    children: [
+                      Text('알림 설정',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          )),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Row(
+                    children: [
+                      Text('비밀번호 변경',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          )),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
