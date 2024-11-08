@@ -17,6 +17,7 @@ ENV NODE_ENV=production
 
 COPY --from=builder /build/out /app
 COPY ./apps/backend/entrypoint.sh /app
+
 WORKDIR /app
 
 ENTRYPOINT ["/app/entrypoint.sh"]

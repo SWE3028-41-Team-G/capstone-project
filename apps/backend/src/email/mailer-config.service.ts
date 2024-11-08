@@ -40,7 +40,7 @@ export class MailerConfigService implements MailerOptionsFactory {
         from: this.config.get('NODEMAILER_FROM')
       },
       template: {
-        dir: join(__dirname, 'email/templates'),
+        dir: join(__dirname, 'templates'),
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true

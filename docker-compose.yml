@@ -50,6 +50,23 @@ services:
     ports:
       - 6380:6379
 
+  skkudm-backend:
+    profiles: ['deploy']
+    image: ghcr.io/swe3028-41-team-g/skkudm-api:latest
+    container_name: skkudm-backend
+    restart: always
+    env_file:
+      - .env
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
 volumes:
   skkudm-storage:
   skkudm-database:

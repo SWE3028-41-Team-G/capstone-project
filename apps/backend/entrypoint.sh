@@ -1,3 +1,3 @@
 #!/bin/sh
 npx prisma migrate deploy
-node /app/dist/app/main.js
+node /app/dist/src/main.js
