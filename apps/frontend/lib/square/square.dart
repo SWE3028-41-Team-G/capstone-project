@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/square/recruitment.dart';
 
 // import 'package:http/http.dart' as http; // will be used later for API connection
 
@@ -112,7 +113,7 @@ class DMPage extends StatefulWidget {
 class _DMPageState extends State<DMPage> {
   @override
   Widget build(BuildContext context) {
-    const students = [
+    var students = [
       {
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
@@ -347,9 +348,167 @@ class SquarePage extends StatefulWidget {
 }
 
 class _SquarePageState extends State<SquarePage> {
+  List<Map<String, dynamic>> postList = [
+    {
+      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
+      "content":
+          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
+      "confirmNumber": 1,
+      "recruitNumber": 4
+    },
+    {
+      "title": "운영체제 같이 공부하실 솦트 복전생 찾아여",
+      "content":
+          "이번에 엄영익 교수님 운영체제 듣을 예정인데(만약 수강신청 성공한다면...) 혹시 같이 으샤으샤 공부하실 복전생있나요?? 저도 잘하는 건 아니라 같이 힘내서 xv6 뿌실 전우 구해요!!",
+      "confirmNumber": 2,
+      "recruitNumber": 4
+    },
+    {
+      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
+      "content":
+          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
+      "confirmNumber": 3,
+      "recruitNumber": 4
+    },
+    {
+      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
+      "content":
+          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
+      "confirmNumber": 3,
+      "recruitNumber": 6
+    },
+    {
+      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
+      "content":
+          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
+      "confirmNumber": 4,
+      "recruitNumber": 7
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return Scaffold(
+      body: Container(
+        margin: EdgeInsets.symmetric(horizontal: 17),
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: [
+                  MajorDropdown(
+                    hintText: '모집대상 전공',
+                    items: ['경제학과', '소프트웨어학과'], // 필요한 전공 목록을 추가
+                  ),
+                  Spacer(),
+                  ElevatedButton(
+                    // 모집글 작성 버튼 -----------------------------------------------
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                        backgroundColor: Colors.grey[400],
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                    onPressed: () {},
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                        ),
+                        SizedBox(
+                          width: 7,
+                        ),
+                        Text(
+                          '모집글 작성',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Expanded(
+              // 모집글 목록들 ----------------------------------------------------------
+              child: ListView.builder(
+                  itemCount: postList.length,
+                  itemBuilder: (context, index) {
+                    String title = postList[index]['title'];
+                    String content = postList[index]['content'];
+                    int confirmNumber = postList[index]['confirmNumber'];
+                    int recruitNumber = postList[index]['recruitNumber'];
+
+                    return GestureDetector(
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Recruitment())),
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 12),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  flex: 8,
+                                  child: Text(
+                                    title,
+                                    style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Spacer(),
+                                Text(
+                                  '($confirmNumber/$recruitNumber)',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: confirmNumber <= recruitNumber / 2
+                                        ? Colors.blue
+                                        : Colors.red,
+                                  ),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              content,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
