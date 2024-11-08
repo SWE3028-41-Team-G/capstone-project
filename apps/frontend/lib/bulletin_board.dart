@@ -187,9 +187,9 @@ class BulletinBoardState extends State<BulletinBoard> {
                         children: [
                           Row(
                             children: [
-                              Container(
-                                margin: EdgeInsets.fromLTRB(15, 0, 10, 0),
-                                child: Expanded(
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.fromLTRB(15, 0, 10, 0),
                                   child: Text(
                                     title,
                                     style: TextStyle(
