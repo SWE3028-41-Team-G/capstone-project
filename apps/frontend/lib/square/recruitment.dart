@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/square/square.dart';
 
 class Recruitment extends StatefulWidget {
   const Recruitment({super.key});
@@ -9,6 +10,7 @@ class Recruitment extends StatefulWidget {
 }
 
 class _RecruitmentState extends State<Recruitment> {
+  double _offsetX = 0.0; // 페이지의 밀리는 정도
   final _formKey = GlobalKey<FormState>();
 
   var postData = [
@@ -29,14 +31,50 @@ class _RecruitmentState extends State<Recruitment> {
     {
       'imageUrl':
           'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-      "nickname": "명륜이",
+      "nickname": "율전이",
       "content": "주로 언제 모일 예정이신가요?",
-      "timestamp": "11/08 22:15",
-    }
+      "timestamp": "11/09 16:30",
+    },
+    {
+      'imageUrl':
+          'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+      "nickname": "율전이",
+      "content": "주로 언제 모일 예정이신가요?",
+      "timestamp": "11/09 16:30",
+    },
+    {
+      'imageUrl':
+          'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+      "nickname": "율전이",
+      "content": "주로 언제 모일 예정이신가요?",
+      "timestamp": "11/09 16:30",
+    },
+    {
+      'imageUrl':
+          'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+      "nickname": "율전이",
+      "content": "주로 언제 모일 예정이신가요?",
+      "timestamp": "11/09 16:30",
+    },
+    {
+      'imageUrl':
+          'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+      "nickname": "율전이",
+      "content": "주로 언제 모일 예정이신가요?",
+      "timestamp": "11/09 16:30",
+    },
+    {
+      'imageUrl':
+          'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+      "nickname": "율전이",
+      "content": "주로 언제 모일 예정이신가요?",
+      "timestamp": "11/09 16:30",
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
+    // 모집글
     String imageUrl = postData[0]['imageUrl'] as String;
     String nickname = postData[0]['nickname'] as String;
     String timestamp = postData[0]['timestamp'] as String;
@@ -45,29 +83,47 @@ class _RecruitmentState extends State<Recruitment> {
     int confirmNumber = postData[0]['confirmNumber'] as int;
     int recruitNumber = postData[0]['recruitNumber'] as int;
 
-    return Scaffold(
-      appBar: AppBar(
-          toolbarHeight: 60,
-          // backgroundColor: Colors.grey[100],
-          title: Text(
-            "소프트웨어학과",
-            style: TextStyle(fontSize: 20),
-          ),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(2.0), // 선의 높이 설정
-            child: Container(
-              color: Colors.grey[200], // 선의 색상 설정
-              height: 1.0, // 선의 두께 설정
+    return GestureDetector(
+      onHorizontalDragUpdate: (details) {
+        setState(() {
+          // 터치에 의한 X축 방향으로 이동하는 정도를 _offsetX에 반영
+          _offsetX += details.primaryDelta!;
+        });
+      },
+      onHorizontalDragEnd: (details) {
+        if (_offsetX > 100) {
+          // 페이지가 일정 이상 밀리면 이전 페이지로 이동
+          Navigator.pop(
+              context); // 수정하기 ----------------------------------------------------
+        } else {
+          // 밀리지 않으면 원위치로 되돌린다
+          setState(() {
+            _offsetX = 0.0;
+          });
+        }
+      },
+      child: Transform.translate(
+        offset: Offset(_offsetX, 0), // 밀리는 방향
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 60,
+            title: Text(
+              "소프트웨어학과",
+              style: TextStyle(fontSize: 20),
             ),
-          )),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(2.0),
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                color: Colors.grey[200],
+                height: 1.0,
+              ),
+            ),
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   children: [
                     SizedBox(
                       height: 50,
@@ -84,17 +140,10 @@ class _RecruitmentState extends State<Recruitment> {
                               child: Image.network(
                                 imageUrl,
                                 fit: BoxFit.cover,
-                                // height: MediaQuery.of(context).size.width *
-                                //     0.5 *
-                                //     5 /
-                                //     3 *
-                                //     0.55,
                               ),
                             ),
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
+                          SizedBox(width: 10),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -107,7 +156,7 @@ class _RecruitmentState extends State<Recruitment> {
                               Text(
                                 timestamp,
                                 style: TextStyle(fontSize: 16),
-                              )
+                              ),
                             ],
                           ),
                           Spacer(),
@@ -121,15 +170,11 @@ class _RecruitmentState extends State<Recruitment> {
                                   : Colors.red,
                             ),
                           ),
-                          SizedBox(
-                            width: 10,
-                          )
+                          SizedBox(width: 10),
                         ],
                       ),
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
+                    SizedBox(height: 15),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
@@ -138,9 +183,7 @@ class _RecruitmentState extends State<Recruitment> {
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                    SizedBox(height: 10),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 13),
                       child: Text(
@@ -148,52 +191,129 @@ class _RecruitmentState extends State<Recruitment> {
                         style: TextStyle(fontSize: 15),
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                    SizedBox(height: 10),
                     Divider(),
-                    SizedBox(
-                      height: 10,
+                    SizedBox(height: 10),
+                    ListView.builder(
+                      // 댓글 ------------------------------------------------------
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: comments.length,
+                      itemBuilder: (context, index) {
+                        String cmtImage = comments[index]['imageUrl']!;
+                        String cmtName = comments[index]['nickname']!;
+                        String cmtContent = comments[index]['content']!;
+                        String cmtTime = comments[index]['timestamp']!;
+                        return Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          child: Column(
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 50,
+                                    height: 50,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(8),
+                                        topRight: Radius.circular(8),
+                                      ),
+                                      child: Image.network(
+                                        cmtImage,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              cmtName,
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text(
+                                              cmtTime,
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey[400]),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 5),
+                                        Container(
+                                          padding: EdgeInsets.only(right: 10),
+                                          child: Text(
+                                            cmtContent,
+                                            style: TextStyle(fontSize: 15),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Divider(
+                                color: Colors.grey[300],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-            child: Form(
-              key: _formKey,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        hintText: '댓글을 입력하세요...',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.all(10),
-                        suffixIcon: IconButton(
-                          icon: Icon(CupertinoIcons.paperplane_fill),
-                          onPressed: () {},
+              Container(
+                // 댓글 입력창 -----------------------------------------------------
+                margin: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                child: Form(
+                  key: _formKey,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            hintText: '댓글을 입력하세요...',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.all(10),
+                            suffixIcon: IconButton(
+                              icon: Icon(CupertinoIcons.paperplane_fill),
+                              onPressed: () {},
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return '댓글을 입력해주세요.';
+                            }
+                            return null;
+                          },
+                          onChanged: (text) {
+                            // 댓글 입력 처리
+                          },
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '댓글을 입력해주세요.';
-                        }
-                        return null;
-                      },
-                      onChanged: (text) {
-                        // 입력된 댓글 처리
-                      },
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          )
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

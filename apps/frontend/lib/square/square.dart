@@ -4,7 +4,10 @@ import 'package:frontend/square/recruitment.dart';
 // import 'package:http/http.dart' as http; // will be used later for API connection
 
 class Square extends StatefulWidget {
-  const Square({super.key});
+  final int initialPage; // 초기 페이지를 지정할 수 있는 파라미터
+
+  // 생성자에서 initialPage를 받도록 수정
+  const Square({super.key, this.initialPage = 0}); // 기본값은 0 (DMPage)
 
   @override
   SquareState createState() => SquareState();
@@ -19,8 +22,22 @@ class SquareState extends State<Square> {
   // void initState() {
   //   super.initState();
   // }
-  final PageController _pageController = PageController();
-  int _currentPage = 0; // 현재 페이지 인덱스
+
+  late PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // 외부에서 전달받은 initialPage로 PageController의 초기 페이지를 설정
+    _pageController = PageController(initialPage: widget.initialPage);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   void _onPageChanged(int index) {
     setState(() {
