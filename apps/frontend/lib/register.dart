@@ -123,7 +123,11 @@ class _RegisterState extends State<Register> {
               ),
               Row(
                 children: [
-                  NumberRangeDropdown(),
+                  NumberRangeDropdown(
+                    labelText: '학번을 선택해 주세요',
+                    start: 10,
+                    end: 24,
+                  ),
                   SizedBox(
                     width: 10,
                   ),
@@ -332,14 +336,23 @@ class CustomTextFormField extends StatelessWidget {
 
 // 학번 Dropdown 숫자
 class NumberRangeDropdown extends StatefulWidget {
-  const NumberRangeDropdown({super.key});
+  final String labelText;
+  final int start;
+  final int end;
+
+  const NumberRangeDropdown({
+    super.key,
+    required this.labelText,
+    required this.start,
+    required this.end,
+  });
 
   @override
   _NumberRangeDropdownState createState() => _NumberRangeDropdownState();
 }
 
 class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
-  int? _selectedValue; // 선택된 값 저장
+  int? _selectedValue;
 
   @override
   Widget build(BuildContext context) {
@@ -348,11 +361,13 @@ class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
       margin: EdgeInsets.symmetric(vertical: 10),
       child: DropdownButtonFormField<int>(
         decoration: InputDecoration(
-          labelText: '학번을 선택해 주세요',
+          labelText: widget.labelText,
           border: OutlineInputBorder(),
+          floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
-        value: _selectedValue, // 현재 선택된 값
-        items: List.generate(15, (index) => index + 10) // 10부터 24까지 숫자 생성
+        value: _selectedValue,
+        items: List.generate(
+                widget.end - widget.start + 1, (index) => widget.start + index)
             .map<DropdownMenuItem<int>>((int value) {
           return DropdownMenuItem<int>(
             value: value,
@@ -361,7 +376,7 @@ class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
         }).toList(),
         onChanged: (int? newValue) {
           setState(() {
-            _selectedValue = newValue; // 선택된 값 업데이트
+            _selectedValue = newValue;
           });
         },
       ),
