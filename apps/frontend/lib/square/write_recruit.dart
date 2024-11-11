@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/register.dart';
-import 'package:frontend/square/square.dart';
 
 class WriteRecruit extends StatefulWidget {
   const WriteRecruit({super.key});
@@ -15,6 +14,7 @@ class _WriteRecruitState extends State<WriteRecruit> {
 
   @override
   Widget build(BuildContext context) {
+    String? selectedMajor;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
@@ -59,11 +59,40 @@ class _WriteRecruitState extends State<WriteRecruit> {
                     ),
                     Row(
                       children: [
-                        MajorDropdown(
-                            hintText: "모집대상 전공", items: ['경제학과', '소프트웨어학과']),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 2,
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText: "모집대상 전공 선택",
+                              // labelStyle: TextStyle(color: Colors.grey[500]),
+                              border: OutlineInputBorder(),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                            ),
+                            value: selectedMajor,
+                            items: [
+                              DropdownMenuItem(
+                                  value: '경제학과', child: Text('경제학과')),
+                              DropdownMenuItem(
+                                  value: '소프트웨어학과', child: Text('소프트웨어학과')),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                selectedMajor = value; // 선택된 값 업데이트
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null) {
+                                return '전공을 선택해 주세요.';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
                         Spacer(),
                         NumberRangeDropdown(
-                          labelText: '인원 수를 선택해 주세요',
+                          labelText: '인원 수 선택',
+                          width: MediaQuery.of(context).size.width / 2.7,
                           start: 2,
                           end: 10,
                         )

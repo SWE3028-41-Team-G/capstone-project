@@ -292,7 +292,10 @@ class _RecruitmentState extends State<Recruitment> {
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.all(10),
                             suffixIcon: IconButton(
-                              icon: Icon(CupertinoIcons.paperplane_fill),
+                              icon: Icon(
+                                CupertinoIcons.paperplane_fill,
+                                color: Colors.grey[500],
+                              ),
                               onPressed: () {},
                             ),
                           ),

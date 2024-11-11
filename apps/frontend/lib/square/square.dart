@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/chatting_room.dart';
 import 'package:frontend/square/recruitment.dart';
 import 'package:frontend/square/write_recruit.dart';
 
@@ -153,11 +154,11 @@ class _DMPageState extends State<DMPage> {
       {
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': '명륜이',
-        'primaryMajor': '경제학과',
+        'nickname': '외로운 늑대',
+        'primaryMajor': '통계학과',
         'secondMajor': '소프트웨어학과',
-        'keyword1': '산책',
-        'keyword2': '운동'
+        'keyword1': '강아지랑 산책',
+        'keyword2': '침대에 누워있기'
       },
       {
         'imageUrl':
@@ -217,7 +218,7 @@ class _DMPageState extends State<DMPage> {
               itemBuilder: (context, index) {
                 var student = students[index];
                 String imageUrl = student['imageUrl']!;
-                String nickname = student['nickname']!;
+                String nickname = student['nickname'] ?? 'Unknown';
                 String primaryMajor = student['primaryMajor']!;
                 String secondMajor = student['secondMajor']!;
                 String keyword1 = student['keyword1']!;
@@ -225,127 +226,135 @@ class _DMPageState extends State<DMPage> {
 
                 index % 2 == 0; // 왼쪽, 1이면 오른쪽
 
-                return Container(
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(8),
+                return GestureDetector(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => (ChattingRoom(
+                                nickname: nickname,
+                              )))),
+                  child: Container(
+                    margin: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(8),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          blurRadius: 1,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        blurRadius: 1,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          topRight: Radius.circular(8),
-                        ),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          // height: MediaQuery.of(context).size.width *
-                          //     0.5 *
-                          //     5 /
-                          //     3 *
-                          //     0.55,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 6),
-                          padding: const EdgeInsets.all(8),
-                          width: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                nickname,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '❶ $primaryMajor',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                              Text(
-                                '❷ $secondMajor',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 6, horizontal: 12),
-                                        // margin: EdgeInsets.symmetric(horizontal: 5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.lightBlue[200],
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          keyword1,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.white,
-                                          ),
-                                          overflow: TextOverflow
-                                              .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 6, horizontal: 12),
-                                        // margin: EdgeInsets.symmetric(horizontal: 5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.lightGreen[200],
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          keyword2,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.white,
-                                          ),
-                                          overflow: TextOverflow
-                                              .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8),
+                          ),
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            // height: MediaQuery.of(context).size.width *
+                            //     0.5 *
+                            //     5 /
+                            //     3 *
+                            //     0.55,
                           ),
                         ),
-                      )
-                    ],
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 6),
+                            padding: const EdgeInsets.all(8),
+                            width: double.infinity,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  nickname,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '❶ $primaryMajor',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                Text(
+                                  '❷ $secondMajor',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 6, horizontal: 12),
+                                          // margin: EdgeInsets.symmetric(horizontal: 5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.lightBlue[200],
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            keyword1,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                            ),
+                                            overflow: TextOverflow
+                                                .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 6, horizontal: 12),
+                                          // margin: EdgeInsets.symmetric(horizontal: 5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.lightGreen[200],
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            keyword2,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                            ),
+                                            overflow: TextOverflow
+                                                .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 );
               },

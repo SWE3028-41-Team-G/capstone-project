@@ -127,6 +127,7 @@ class _RegisterState extends State<Register> {
                     labelText: '학번을 선택해 주세요',
                     start: 10,
                     end: 24,
+                    width: null,
                   ),
                   SizedBox(
                     width: 10,
@@ -339,12 +340,14 @@ class NumberRangeDropdown extends StatefulWidget {
   final String labelText;
   final int start;
   final int end;
+  final double? width;
 
   const NumberRangeDropdown({
     super.key,
     required this.labelText,
     required this.start,
     required this.end,
+    required this.width,
   });
 
   @override
@@ -356,8 +359,10 @@ class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final double effectiveWidth =
+        widget.width ?? MediaQuery.of(context).size.width / 2;
     return Container(
-      width: MediaQuery.of(context).size.width / 2,
+      width: effectiveWidth,
       margin: EdgeInsets.symmetric(vertical: 10),
       child: DropdownButtonFormField<int>(
         decoration: InputDecoration(
