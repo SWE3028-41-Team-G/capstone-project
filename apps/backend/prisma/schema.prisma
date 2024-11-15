@@ -32,6 +32,7 @@ model User {
   SquareMessage SquarePost[]
   Post          Post[]
   Comment       Comment[]
+  MockApply     MockApply[]
 }
 
 model Major {
@@ -43,6 +44,7 @@ model Major {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   UserMajor UserMajor[]
+  MockApply MockApply[]
 }
 
 model UserMajor {
@@ -156,6 +158,18 @@ model Tag {
 
   Post   Post? @relation(fields: [postId], references: [id])
   postId Int?
+}
+
+model MockApply {
+  id      Int   @id @default(autoincrement())
+  userId  Int   @map("user_id")
+  majorId Int   @map("major_id")
+  score   Float // 전체평점
+
+  user  User  @relation(fields: [userId], references: [id])
+  major Major @relation(fields: [majorId], references: [id])
+
+  @@map("mock_apply")
 }
 
 enum Role {
