@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/register_profile.dart';
+import 'package:frontend/register/register_profile.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});

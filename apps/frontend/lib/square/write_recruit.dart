@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/register.dart';
+import 'package:frontend/register/register.dart';
 
 class WriteRecruit extends StatefulWidget {
   const WriteRecruit({super.key});

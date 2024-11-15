@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
-import 'package:frontend/register.dart';
+import 'package:frontend/register/register.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterProfile extends StatefulWidget {

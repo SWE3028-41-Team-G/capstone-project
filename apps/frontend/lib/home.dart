@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/bulletin_board.dart';
 import 'package:frontend/message.dart';
 import 'package:frontend/square/square.dart';
-import 'package:frontend/profile.dart';
+import 'package:frontend/profile/profile.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

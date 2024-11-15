@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
-import 'package:frontend/register.dart';
+import 'package:frontend/register/register.dart';
 
 class InitialPage extends StatefulWidget {
   const InitialPage({
