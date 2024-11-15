@@ -66,11 +66,28 @@ async function main() {
     }
   })
 
+  // 시드 데이터 - MockApply
+  const mockApply1 = await prisma.mockApply.create({
+    data: {
+      userId: user1.id,
+      majorId: major1.id,
+      score: 4.5 // 전체 평점
+    }
+  })
+
+  const mockApply2 = await prisma.mockApply.create({
+    data: {
+      userId: user2.id,
+      majorId: major1.id,
+      score: 4.2 // 전체 평점
+    }
+  })
+
   // 시드 데이터 - Square 및 UserSquare
   const square1 = await prisma.square.create({
     data: {
       name: 'Tech Enthusiasts',
-      leader: { connect: { id: user1.id } },
+      leaderId: user1.id,
       UserSquare: {
         create: [{ userId: user1.id }, { userId: user2.id }]
       }
@@ -80,8 +97,8 @@ async function main() {
   // 시드 데이터 - SquarePost
   const squarePost1 = await prisma.squarePost.create({
     data: {
-      user: { connect: { id: user1.id } },
-      square: { connect: { id: square1.id } },
+      userId: user1.id,
+      squareId: square1.id,
       title: 'Introduction to Tech Enthusiasts',
       content: 'Welcome everyone to the Tech Enthusiasts square!'
     }
@@ -92,7 +109,7 @@ async function main() {
     data: {
       title: 'My First Post',
       content: 'This is the content of my first post.',
-      user: { connect: { id: user1.id } },
+      userId: user1.id,
       tags: {
         create: [{ name: 'Tech' }, { name: 'Introduction' }]
       }
@@ -102,19 +119,18 @@ async function main() {
   // 시드 데이터 - Comment
   const comment1 = await prisma.comment.create({
     data: {
-      user: { connect: { id: user2.id } },
-      post: { connect: { id: post1.id } },
+      userId: user2.id,
+      postId: post1.id,
       content: 'Nice post!'
-      // parent는 null로 기본값 (최상위 댓글)
     }
   })
 
   const comment2 = await prisma.comment.create({
     data: {
-      user: { connect: { id: user1.id } },
-      post: { connect: { id: post1.id } },
+      userId: user1.id,
+      postId: post1.id,
       content: 'Thank you!',
-      parent: { connect: { id: comment1.id } } // 대댓글
+      parentId: comment1.id // 대댓글
     }
   })
 
@@ -123,6 +139,8 @@ async function main() {
     user2,
     major1,
     major2,
+    mockApply1,
+    mockApply2,
     square1,
     squarePost1,
     post1,
