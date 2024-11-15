@@ -12,6 +12,7 @@ import { EmailModule } from './email/email.module'
 import { MailerConfigService } from './email/mailer-config.service'
 import { PrismaModule } from './prisma/prisma.module'
 import { UserModule } from './user/user.module'
+import { BoardModule } from './board/board.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { UserModule } from './user/user.module'
     AuthModule,
     PrismaModule,
     UserModule,
-    EmailModule
+    EmailModule,
+    BoardModule
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }]

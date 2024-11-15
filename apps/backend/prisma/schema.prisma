@@ -122,6 +122,7 @@ model Post {
   title   String
   content String
   userId  Int /// 글 작성자
+  likes   Int    @default(0)
 
   tags    Tag[]
   Comment Comment[]
