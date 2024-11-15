@@ -8,6 +8,7 @@ export class JwtAuthService {
     if (!user || !(await verify(user.password, password))) {
       return false
     }
+
     return true
   }
 }

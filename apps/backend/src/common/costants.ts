@@ -14,3 +14,5 @@ export const REFRESH_TOKEN_COOKIE_OPTIONS = {
       ? '/api/auth/reissue'
       : '/auth/reissue'
 }
+
+export const IMAGE_SIZE_LIMIT = 10 * 1024 * 1024 // 10mb

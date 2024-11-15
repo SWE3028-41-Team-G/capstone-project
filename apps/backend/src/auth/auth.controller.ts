@@ -7,9 +7,9 @@ import {
   Res,
   UnauthorizedException
 } from '@nestjs/common'
+import { Public } from '@/common/guard.decorator'
 import type { Request, Response } from 'express'
 import { REFRESH_TOKEN_COOKIE_OPTIONS } from 'src/common/costants'
-import { Public } from '../common/guard.decorator'
 import { AuthService } from './auth.service'
 import { AuthenticatedRequest } from './class/authenticated-request.interface'
 import { LoginUserDto } from './dto/login-user.dto'

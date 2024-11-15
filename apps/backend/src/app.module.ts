@@ -7,12 +7,13 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard'
+import { BoardModule } from './board/board.module'
 import { CacheConfigService } from './common/cache/cache-config.service'
 import { EmailModule } from './email/email.module'
 import { MailerConfigService } from './email/mailer-config.service'
 import { PrismaModule } from './prisma/prisma.module'
+import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
-import { BoardModule } from './board/board.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { BoardModule } from './board/board.module';
     PrismaModule,
     UserModule,
     EmailModule,
-    BoardModule
+    BoardModule,
+    StorageModule
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }]

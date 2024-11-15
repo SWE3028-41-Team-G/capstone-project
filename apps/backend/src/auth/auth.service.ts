@@ -2,13 +2,13 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService, type JwtVerifyOptions } from '@nestjs/jwt'
-import { Cache } from 'cache-manager'
+import { refreshTokenCacheKey } from '@/common/cache/keys'
 import {
   ACCESS_TOKEN_EXPIRE_TIME,
   REFRESH_TOKEN_EXPIRE_TIME
-} from 'src/common/costants'
-import { refreshTokenCacheKey } from '../common/cache/keys'
-import { UserService } from '../user/user.service'
+} from '@/common/costants'
+import { UserService } from '@/user/user.service'
+import { Cache } from 'cache-manager'
 import { LoginUserDto } from './dto/login-user.dto'
 import { JwtAuthService } from './jwt/jwt-auth.service'
 import type { JwtPayload } from './jwt/jwt.interface'
