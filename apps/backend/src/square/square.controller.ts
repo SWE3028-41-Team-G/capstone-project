@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common'
+import { Controller, Post, Body, Param, Get, Delete } from '@nestjs/common'
 import { SquareService } from './square.service'
 
 @Controller('square')
@@ -33,5 +33,20 @@ export class SquareController {
   @Get()
   async findAllSquares() {
     return this.squareService.findAllSquares()
+  }
+
+  // SquarePost에 댓글 추가
+  @Post(':postId/comments')
+  async addComment(
+    @Param('postId') postId: number,
+    @Body() commentDto: { userId: number; content: string }
+  ) {
+    return this.squareService.addComment(postId, commentDto)
+  }
+
+  // SquarePost 댓글 삭제
+  @Delete('comments/:commentId')
+  async deleteComment(@Param('commentId') commentId: number) {
+    return this.squareService.deleteComment(commentId)
   }
 }

@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common'
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException
+} from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
@@ -73,6 +77,47 @@ export class SquareService {
         },
         SquarePosts: true // 게시글 정보 포함
       }
+    })
+  }
+
+  // SquarePost에 댓글 추가
+  async addComment(
+    postId: number,
+    commentDto: { userId: number; content: string }
+  ) {
+    const { userId, content } = commentDto
+
+    // SquarePost 존재 여부 확인
+    const post = await this.prisma.squarePost.findUnique({
+      where: { id: postId }
+    })
+    if (!post) {
+      throw new NotFoundException('SquarePost not found')
+    }
+
+    // 댓글 생성
+    return this.prisma.squarePostComment.create({
+      data: {
+        squarePostId: postId,
+        userId,
+        content
+      }
+    })
+  }
+
+  // SquarePost 댓글 삭제
+  async deleteComment(commentId: number) {
+    // 댓글 존재 여부 확인
+    const comment = await this.prisma.squarePostComment.findUnique({
+      where: { id: commentId }
+    })
+    if (!comment) {
+      throw new NotFoundException('Comment not found')
+    }
+
+    // 댓글 삭제
+    return this.prisma.squarePostComment.delete({
+      where: { id: commentId }
     })
   }
 }
