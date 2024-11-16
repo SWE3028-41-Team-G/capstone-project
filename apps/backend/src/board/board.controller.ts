@@ -6,7 +6,8 @@ import {
   Param,
   Put,
   Delete,
-  Patch
+  Patch,
+  Query
 } from '@nestjs/common'
 import { BoardService } from './board.service'
 
@@ -15,8 +16,8 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Get()
-  async findAll() {
-    return this.boardService.findAll()
+  async findAll(@Query('tag') tag?: string) {
+    return this.boardService.findAll(tag)
   }
 
   @Get(':id')
@@ -52,5 +53,19 @@ export class BoardController {
   @Patch(':id/unlike')
   async decrementLikes(@Param('id') id: number) {
     return this.boardService.decrementLikes(+id)
+  }
+
+  @Post(':postId/comment')
+  async addComment(
+    @Param('postId') postId: number,
+    @Body()
+    createCommentDto: { userId: number; content: string; parentId?: number }
+  ) {
+    return this.boardService.addComment(+postId, createCommentDto)
+  }
+
+  @Delete('comment/:commentId')
+  async removeComment(@Param('commentId') commentId: number) {
+    return this.boardService.removeComment(+commentId)
   }
 }

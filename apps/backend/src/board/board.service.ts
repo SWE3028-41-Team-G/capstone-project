@@ -5,8 +5,19 @@ import { PrismaService } from '../prisma/prisma.service'
 export class BoardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(tag?: string) {
+    const whereCondition = tag
+      ? {
+          tags: {
+            some: {
+              name: tag // 태그 이름과 일치하는 조건
+            }
+          }
+        }
+      : {}
+
     return this.prisma.post.findMany({
+      where: whereCondition,
       include: {
         tags: true,
         Comment: true,
@@ -64,6 +75,26 @@ export class BoardService {
       data: {
         likes: { decrement: 1 }
       }
+    })
+  }
+
+  async addComment(
+    postId: number,
+    data: { userId: number; content: string; parentId?: number }
+  ) {
+    return this.prisma.comment.create({
+      data: {
+        postId,
+        userId: data.userId,
+        content: data.content,
+        parentId: data.parentId || null
+      }
+    })
+  }
+
+  async removeComment(commentId: number) {
+    return this.prisma.comment.delete({
+      where: { id: commentId }
     })
   }
 }
