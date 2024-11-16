@@ -104,6 +104,23 @@ async function main() {
     }
   })
 
+  // 시드 데이터 - SquarePostComment
+  const squarePostComment1 = await prisma.squarePostComment.create({
+    data: {
+      userId: user2.id,
+      squarePostId: squarePost1.id,
+      content: 'This is an awesome square post!'
+    }
+  })
+
+  const squarePostComment2 = await prisma.squarePostComment.create({
+    data: {
+      userId: user1.id,
+      squarePostId: squarePost1.id,
+      content: 'Thank you for the feedback!'
+    }
+  })
+
   // 시드 데이터 - Post 및 Tag
   const post1 = await prisma.post.create({
     data: {
@@ -143,6 +160,8 @@ async function main() {
     mockApply2,
     square1,
     squarePost1,
+    squarePostComment1,
+    squarePostComment2,
     post1,
     comment1,
     comment2

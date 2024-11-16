@@ -28,14 +28,15 @@ model User {
   admitYear Int     @default(2024) @map("admit_year")
   real      Boolean @default(true)
 
-  UserMajor     UserMajor[]
-  Profile       Profile[]
-  Square        Square[]
-  UserSquare    UserSquare[]
-  SquareMessage SquarePost[]
-  Post          Post[]
-  Comment       Comment[]
-  MockApply     MockApply[]
+  UserMajor         UserMajor[]
+  Profile           Profile[]
+  Square            Square[]
+  UserSquare        UserSquare[]
+  SquareMessage     SquarePost[]
+  Post              Post[]
+  Comment           Comment[]
+  MockApply         MockApply[]
+  SquarePostComment SquarePostComment[]
 }
 
 model Major {
@@ -118,10 +119,24 @@ model SquarePost {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user   User   @relation(fields: [userId], references: [id])
-  square Square @relation(fields: [squareId], references: [id])
+  user              User                @relation(fields: [userId], references: [id])
+  square            Square              @relation(fields: [squareId], references: [id])
+  SquarePostComment SquarePostComment[]
 
   @@map("square_post")
+}
+
+model SquarePostComment {
+  id           Int    @id @default(autoincrement())
+  userId       Int /// 댓글 작성자
+  squarePostId Int
+  content      String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id])
+  squarePost SquarePost @relation(fields: [squarePostId], references: [id])
 }
 
 model Post {
@@ -140,6 +155,7 @@ model Post {
   user User @relation(fields: [userId], references: [id])
 }
 
+/// 게시판 글의 댓글
 model Comment {
   id       Int    @id @default(autoincrement())
   userId   Int    @map("user_id")
