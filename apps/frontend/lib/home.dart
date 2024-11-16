@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:frontend/bulletin_board.dart';
+import 'package:frontend/bulletin_board/bulletin_board.dart';
 import 'package:frontend/message.dart';
 import 'package:frontend/square/square.dart';
 import 'package:frontend/profile/profile.dart';

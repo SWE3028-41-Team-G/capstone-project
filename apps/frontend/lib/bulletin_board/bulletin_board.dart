@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/bulletin_board/write_article.dart';
 
 // import 'package:http/http.dart' as http; // will be used later for API connection
 
@@ -74,7 +75,12 @@ class BulletinBoardState extends State<BulletinBoard> {
                       ),
                     )),
                 ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => WriteArticle()));
+                    },
                     icon: Icon(Icons.edit),
                     label: Text(
                       '새 글 작성',

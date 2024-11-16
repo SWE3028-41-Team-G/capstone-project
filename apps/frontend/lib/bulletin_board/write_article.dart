@@ -1,25 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/register/register.dart';
+import 'package:frontend/bulletin_board/bulletin_board.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
-class WriteRecruit extends StatefulWidget {
-  const WriteRecruit({super.key});
+class WriteArticle extends StatefulWidget {
+  const WriteArticle({super.key});
 
   @override
-  State<WriteRecruit> createState() => _WriteRecruitState();
+  State<WriteArticle> createState() => _WriteArticleState();
 }
 
-class _WriteRecruitState extends State<WriteRecruit> {
+class _WriteArticleState extends State<WriteArticle> {
   final _formKey = GlobalKey<FormState>();
+  List<String> selectedTags = [];
 
   @override
   Widget build(BuildContext context) {
-    String? selectedMajor;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
         title: Text(
-          '새 모집글 작성',
+          '새 글 작성',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -65,46 +66,21 @@ class _WriteRecruitState extends State<WriteRecruit> {
                     SizedBox(
                       height: 15,
                     ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width / 2,
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              labelText: "모집대상 전공 선택",
-                              // labelStyle: TextStyle(color: Colors.grey[500]),
-                              border: OutlineInputBorder(),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-                            ),
-                            value: selectedMajor,
-                            items: [
-                              DropdownMenuItem(
-                                  value: '경제학과', child: Text('경제학과')),
-                              DropdownMenuItem(
-                                  value: '소프트웨어학과', child: Text('소프트웨어학과')),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                selectedMajor = value; // 선택된 값 업데이트
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null) {
-                                return '전공을 선택해 주세요.';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        Spacer(),
-                        NumberRangeDropdown(
-                          labelText: '인원 수 선택',
-                          width: MediaQuery.of(context).size.width / 2.7,
-                          start: 2,
-                          end: 10,
-                        )
-                      ],
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 2,
+                      child: MultiSelectChipField(
+                        items: [
+                          MultiSelectItem('#꿀팁', 'tag1'),
+                          MultiSelectItem('#수업추천', 'tag2'),
+                          MultiSelectItem('#졸업요건', 'tag3'),
+                          MultiSelectItem('#전공진입', 'tag4'),
+                          MultiSelectItem('#새내기', 'tag5'),
+                        ],
+                        title: Text('태그'),
+                        onTap: (values) {
+                          //selectedTags = values;
+                        },
+                      ),
                     ),
                     SizedBox(
                       height: 10,
