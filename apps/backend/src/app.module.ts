@@ -12,9 +12,9 @@ import { CacheConfigService } from './common/cache/cache-config.service'
 import { EmailModule } from './email/email.module'
 import { MailerConfigService } from './email/mailer-config.service'
 import { PrismaModule } from './prisma/prisma.module'
+import { SquareModule } from './square/square.module'
 import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
-import { SquareModule } from './square/square.module';
 
 @Module({
   imports: [

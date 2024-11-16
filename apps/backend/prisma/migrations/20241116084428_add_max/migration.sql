@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Square" ADD COLUMN     "max" INTEGER NOT NULL DEFAULT 2;
