@@ -34,7 +34,8 @@ export class UserService {
         'temp-profile'
       )
 
-      return { url: `https://cdn.skkudm.site/${result.src}` }
+      // Production 기준으로 작성
+      return { url: `https://cdn.skku-dm.site/${result.src}` }
     } catch (error) {
       if (error instanceof HttpException) throw error
 
