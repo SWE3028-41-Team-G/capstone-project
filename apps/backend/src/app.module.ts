@@ -15,6 +15,7 @@ import { PrismaModule } from './prisma/prisma.module'
 import { SquareModule } from './square/square.module'
 import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
+import { DmModule } from './dm/dm.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { UserModule } from './user/user.module'
     EmailModule,
     BoardModule,
     StorageModule,
-    SquareModule
+    SquareModule,
+    DmModule
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }]
