@@ -18,7 +18,9 @@ export class StorageService {
 
   constructor(private readonly configService: ConfigService) {
     if (this.configService.get('NODE_ENV') === 'production') {
-      this.s3 = new S3Client()
+      this.s3 = new S3Client({
+        region: this.configService.get('BUCKET_REGION')
+      })
     } else {
       this.s3 = new S3Client({
         region: this.configService.get('BUCKET_REGION'),
