@@ -38,6 +38,7 @@ export class UserService {
     } catch (error) {
       if (error instanceof HttpException) throw error
 
+      console.log(error)
       throw new InternalServerErrorException(error)
     }
   }

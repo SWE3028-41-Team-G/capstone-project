@@ -64,6 +64,7 @@ export class StorageService {
         }
       }
     } catch (error) {
+      console.log(error)
       throw new InternalServerErrorException(error)
     }
   }
@@ -79,6 +80,7 @@ export class StorageService {
 
       return { result: 'ok' }
     } catch (error) {
+      console.log(error)
       throw new InternalServerErrorException(error)
     }
   }
