@@ -9,13 +9,14 @@ import { AuthModule } from './auth/auth.module'
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard'
 import { BoardModule } from './board/board.module'
 import { CacheConfigService } from './common/cache/cache-config.service'
+import { DmModule } from './dm/dm.module'
 import { EmailModule } from './email/email.module'
 import { MailerConfigService } from './email/mailer-config.service'
+import { MajorModule } from './major/marjor.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { SquareModule } from './square/square.module'
 import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
-import { DmModule } from './dm/dm.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { DmModule } from './dm/dm.module';
     BoardModule,
     StorageModule,
     SquareModule,
-    DmModule
+    DmModule,
+    MajorModule
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }]

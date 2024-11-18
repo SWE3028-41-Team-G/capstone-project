@@ -71,8 +71,10 @@ export class StorageService {
     }
   }
 
-  async deleteObject(src: string): Promise<{ result: string }> {
+  async deleteObject(url: string): Promise<{ result: string }> {
     try {
+      const src = this.parsePathFromUrl(url)
+
       await this.s3.send(
         new DeleteObjectCommand({
           Bucket: this.configService.get('BUCKET_NAME'),
@@ -111,5 +113,11 @@ export class StorageService {
     }
 
     throw new BadRequestException('Unsupported file extension')
+  }
+
+  private parsePathFromUrl(url: string): string {
+    const urlObject = new URL(url)
+    const pathname = urlObject.pathname
+    return pathname.startsWith('/') ? pathname.slice(1) : pathname
   }
 }

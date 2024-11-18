@@ -17,6 +17,7 @@ import { Prisma, type User } from '@prisma/client'
 import { hash } from 'argon2'
 import { Cache } from 'cache-manager'
 import { CreateUserDTO } from './dto/create-user.dto'
+import type { UpdateProfileDTO } from './dto/update-profile.dto'
 
 @Injectable()
 export class UserService {
@@ -38,6 +39,174 @@ export class UserService {
       return { url: `https://cdn.skku-dm.site/${result.src}` }
     } catch (error) {
       if (error instanceof HttpException) throw error
+
+      console.log(error)
+      throw new InternalServerErrorException(error)
+    }
+  }
+
+  async updateProfileImage(
+    image: Express.Multer.File,
+    userId: number
+  ): Promise<{ url: string }> {
+    try {
+      const profile = await this.prisma.profile.findUniqueOrThrow({
+        where: {
+          userId
+        },
+        select: {
+          imageUrl: true
+        }
+      })
+
+      await this.storageService.deleteObject(profile.imageUrl)
+
+      const result = await this.storageService.uploadObject(
+        image,
+        `profile/${userId}`
+      )
+
+      // Production 기준으로 작성
+      return { url: `https://cdn.skku-dm.site/${result.src}` }
+    } catch (error) {
+      if (error instanceof HttpException) throw error
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new NotFoundException('존재하지 않는 계정입니다.')
+      }
+
+      console.log(error)
+      throw new InternalServerErrorException(error)
+    }
+  }
+
+  async getProfile(userId: number) {
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: userId
+        },
+        select: {
+          admitYear: true,
+          username: true,
+          nickname: true,
+          real: true
+        }
+      })
+
+      const profile = await this.prisma.profile.findUniqueOrThrow({
+        where: {
+          userId
+        },
+        select: {
+          public: true,
+          imageUrl: true,
+          intro: true,
+          interests: true
+        }
+      })
+
+      const majors = await this.prisma.userMajor.findMany({
+        where: {
+          userId
+        },
+        select: {
+          origin: true,
+          Major: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
+        }
+      })
+
+      return {
+        ...user,
+        ...profile,
+        majors,
+        userId
+      }
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new NotFoundException('존재하지 않는 계정입니다.')
+      }
+
+      console.log(error)
+      throw new InternalServerErrorException(error)
+    }
+  }
+
+  async updateProfile(userDTO: UpdateProfileDTO, userId: number) {
+    try {
+      await this.prisma.user.update({
+        where: {
+          id: userId
+        },
+        data: {
+          real: userDTO.real,
+          nickname: userDTO.nickname,
+          Profile: {
+            update: {
+              interests: userDTO.interests,
+              intro: userDTO.intro,
+              public: userDTO.public
+            }
+          }
+        }
+      })
+
+      if (!userDTO.majorId && !userDTO.dualMajorId) return
+
+      const majors = await this.prisma.userMajor.findMany({
+        where: {
+          userId
+        }
+      })
+
+      if (userDTO.majorId) {
+        const majorId = majors.filter((major) => major.origin)[0].majorId
+
+        await this.prisma.userMajor.update({
+          where: {
+            userId_majorId: {
+              userId,
+              majorId
+            }
+          },
+          data: {
+            majorId: userDTO.majorId
+          }
+        })
+      }
+
+      if (userDTO.dualMajorId) {
+        const majorId = majors.filter((major) => !major.origin)[0].majorId
+
+        await this.prisma.userMajor.upsert({
+          where: {
+            userId_majorId: {
+              userId,
+              majorId
+            }
+          },
+          update: {
+            majorId: userDTO.dualMajorId
+          },
+          create: {
+            origin: false,
+            userId,
+            majorId: userDTO.dualMajorId
+          }
+        })
+      }
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025')
+          throw new BadRequestException('존재하지 않는 계정입니다.')
+
+        if (error.code === 'P2002' || error.code === 'P2003')
+          throw new NotFoundException('존재하지 않는 전공입니다.')
+      }
 
       console.log(error)
       throw new InternalServerErrorException(error)
