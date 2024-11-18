@@ -9,6 +9,10 @@
       {
         "include": "email/templates/**/*",
         "outDir": "dist"
+      },
+      {
+        "include": "views/**/*",
+        "outDir": "dist"
       }
     ]
   }
