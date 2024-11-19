@@ -78,7 +78,7 @@ class _WriteArticleState extends State<WriteArticle> {
                         ],
                         title: Text('태그'),
                         onTap: (values) {
-                          //selectedTags = values;
+                          selectedTags = values;
                         },
                       ),
                     ),
