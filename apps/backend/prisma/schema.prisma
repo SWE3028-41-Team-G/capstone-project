@@ -187,7 +187,7 @@ model Tag {
 
 model MockApply {
   id      Int   @id @default(autoincrement())
-  userId  Int   @map("user_id")
+  userId  Int   @unique @map("user_id")
   majorId Int   @map("major_id")
   score   Float // 전체평점
 
