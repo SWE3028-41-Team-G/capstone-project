@@ -79,20 +79,8 @@ export class UserService {
     }
   }
 
-  async getProfile(userId: number) {
+  async getProfile(userId: number, requestUserId: number) {
     try {
-      const user = await this.prisma.user.findUniqueOrThrow({
-        where: {
-          id: userId
-        },
-        select: {
-          admitYear: true,
-          username: true,
-          nickname: true,
-          real: true
-        }
-      })
-
       const profile = await this.prisma.profile.findUniqueOrThrow({
         where: {
           userId
@@ -102,6 +90,23 @@ export class UserService {
           imageUrl: true,
           intro: true,
           interests: true
+        }
+      })
+
+      // 비공개 프로필을 다른 계정이 조회할 경우
+      if (requestUserId !== userId && !profile.public) {
+        return null
+      }
+
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: userId
+        },
+        select: {
+          admitYear: true,
+          username: true,
+          nickname: true,
+          real: true
         }
       })
 
@@ -127,7 +132,95 @@ export class UserService {
         userId
       }
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('존재하지 않는 계정입니다.')
+      }
+
+      console.log(error)
+      throw new InternalServerErrorException(error)
+    }
+  }
+
+  async getRelatedUserProfiles(userId: number) {
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: userId
+        },
+        select: {
+          Profile: {
+            select: {
+              public: true,
+              interests: true
+            }
+          },
+          UserMajor: {
+            select: {
+              majorId: true
+            }
+          }
+        }
+      })
+
+      return await this.prisma.user.findMany({
+        where: {
+          Profile: {
+            public: true
+          },
+          OR: [
+            {
+              UserMajor: {
+                some: {
+                  majorId: {
+                    in: user.UserMajor.map((item) => item.majorId)
+                  }
+                }
+              }
+            },
+            {
+              Profile: {
+                interests: {
+                  hasSome: user.Profile.interests
+                }
+              }
+            }
+          ]
+        },
+        select: {
+          id: true,
+          admitYear: true,
+          username: true,
+          nickname: true,
+          real: true,
+          Profile: {
+            select: {
+              public: true,
+              imageUrl: true,
+              intro: true,
+              interests: true
+            }
+          },
+          UserMajor: {
+            select: {
+              origin: true,
+              Major: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          }
+        },
+        take: 10
+      })
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('존재하지 않는 계정입니다.')
       }
 

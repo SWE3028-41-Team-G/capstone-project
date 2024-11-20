@@ -14,7 +14,7 @@ import { JwtAuthModule } from './jwt/jwt-auth.module'
         const options: JwtModuleOptions = {
           secret: config.get('JWT_SECRET'),
           signOptions: {
-            expiresIn: '10m',
+            expiresIn: '60m',
             issuer: 'skku-dm.site'
           }
         }

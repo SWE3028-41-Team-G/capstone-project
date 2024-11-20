@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -49,12 +51,30 @@ export class UserController {
     return await this.userService.updateProfileImage(image, req.user.id)
   }
 
-  @Get('profile')
-  async getCurrentUserProfile(
+  @Get('current/profile')
+  async getCurrentUserProfile(@Req() req: AuthenticatedRequest) {
+    return await this.userService.getProfile(req.user.id, req.user.id)
+  }
+
+  @Get('related/profile')
+  async getSimillarUserProfile(@Req() req: AuthenticatedRequest) {
+    return await this.userService.getRelatedUserProfiles(req.user.id)
+  }
+
+  @Put('profile')
+  async updateCurrentUserProfile(
     @Body() userDTO: UpdateProfileDTO,
     @Req() req: AuthenticatedRequest
   ) {
     return await this.userService.updateProfile(userDTO, req.user.id)
+  }
+
+  @Get(':userId/profile')
+  async getUserProfile(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: AuthenticatedRequest
+  ) {
+    return await this.userService.getProfile(userId, req.user.id)
   }
 
   @Public()
