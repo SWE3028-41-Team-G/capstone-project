@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABASE_URL: postgresql://postgres:1234@127.0.0.1:5433/skkudm?schema=public
+      DATABASE_URL: postgresql://postgres:1234@127.0.0.1:5432/skkudm?schema=public
 
     services:
       postgres:
