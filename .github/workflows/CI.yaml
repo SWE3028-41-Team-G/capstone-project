@@ -78,6 +78,9 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Install dependencies
+        run: pnpm install
+
       - name: Check Prisma Migration
         run: |
           pnpm --filter="backend" exec prisma migrate diff \
