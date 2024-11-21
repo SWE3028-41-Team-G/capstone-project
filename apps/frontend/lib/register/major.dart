@@ -32,20 +32,38 @@ Future<List<Major>> fetchMajor() async {
   }
 }
 
-class MajorProvider extends ChangeNotifier {
+class MajorProvider with ChangeNotifier {
+  // 전공 목록
   List<Major> _majors = [];
-  bool _isLoading = true; // 로딩 중 상태
+  // 로딩 상태
+  bool _isLoading = true;
+  // 에러 메시지
   String _errorMessage = '';
+  // 선택된 전공을 관리하는 Map
+  Map<String, Major?> _selectedMajors = {};
 
   List<Major> get majors => _majors;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
+  get selectedMajors => _selectedMajors;
+
+  // 각 MajorDropdown의 key에 해당하는 선택된 전공을 가져오는 함수
+  Major? getSelectedMajor(String key) {
+    return _selectedMajors[key];
+  }
+
+  // 선택된 Major를 설정하는 함수
+  void setSelectedMajor(String key, Major? major) {
+    _selectedMajors[key] = major;
+    notifyListeners(); // 상태 업데이트 후 리빌드
+  }
+
   // API 호출 함수
   Future<void> loadMajors() async {
     try {
       _isLoading = true;
-      notifyListeners(); // 로딩 시작 시 상태 갱신
+      notifyListeners(); // 로딩 상태 알리기
       final majors = await fetchMajor(); // 데이터 로드
       _majors = majors;
       _isLoading = false;
@@ -53,23 +71,53 @@ class MajorProvider extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Error loading majors: $e';
       _isLoading = false;
-      notifyListeners(); // 에러가 발생한 경우 상태 갱신
+      notifyListeners(); // 에러 발생 시 상태 갱신
     }
   }
 }
 
+// class MajorProvider extends ChangeNotifier {
+//   List<Major> _majors = [];
+//   bool _isLoading = true; // 로딩 중 상태
+//   String _errorMessage = '';
+
+//   List<Major> get majors => _majors;
+//   bool get isLoading => _isLoading;
+//   String get errorMessage => _errorMessage;
+
+//   // API 호출 함수
+//   Future<void> loadMajors() async {
+//     try {
+//       _isLoading = true;
+//       notifyListeners(); // 로딩 시작 시 상태 갱신
+//       final majors = await fetchMajor(); // 데이터 로드
+//       _majors = majors;
+//       _isLoading = false;
+//       notifyListeners(); // 데이터 로드 후 상태 갱신
+//     } catch (e) {
+//       _errorMessage = 'Error loading majors: $e';
+//       _isLoading = false;
+//       notifyListeners(); // 에러가 발생한 경우 상태 갱신
+//     }
+//   }
+// }
+
 class MajorDropdown extends StatefulWidget {
   final String labelText;
   final bool isStyled;
+  final String majorKey;
   const MajorDropdown(
-      {super.key, required this.labelText, required this.isStyled});
+      {super.key,
+      required this.labelText,
+      required this.isStyled,
+      required this.majorKey});
 
   @override
   _MajorDropdownState createState() => _MajorDropdownState();
 }
 
 class _MajorDropdownState extends State<MajorDropdown> {
-  Major? _selectedMajor; // 선택된 학과 id를 저장하는 변수
+  Major? _selectedMajor; // 선택된 학과를 저장하는 변수
 
   @override
   void initState() {
@@ -103,6 +151,9 @@ class _MajorDropdownState extends State<MajorDropdown> {
             ))
         .toList();
 
+    // 선택된 전공을 가져오기 (Provider에서 관리)
+    Major? selectedMajor = majorProvider.getSelectedMajor(widget.majorKey);
+
     // true면 내부 전공 dropdown false면 register 전공 dropdown
     if (widget.isStyled) {
       return Container(
@@ -114,7 +165,7 @@ class _MajorDropdownState extends State<MajorDropdown> {
           ),
         ),
         child: DropdownButton<int>(
-          value: _selectedMajor?.id,
+          value: selectedMajor?.id,
           isExpanded: true,
           hint: Text(
             widget.labelText,
@@ -122,8 +173,11 @@ class _MajorDropdownState extends State<MajorDropdown> {
           ),
           onChanged: (value) {
             setState(() {
-              _selectedMajor =
+              // 전공이 선택되면 해당 전공을 Provider에 업데이트
+              final major =
                   majorProvider.majors.firstWhere((major) => major.id == value);
+              majorProvider.setSelectedMajor(
+                  widget.majorKey, major); // 선택된 전공 업데이트
             });
           },
           items: items,
@@ -135,11 +189,13 @@ class _MajorDropdownState extends State<MajorDropdown> {
         margin: EdgeInsets.symmetric(vertical: 7),
         child: DropdownButtonFormField<int>(
           items: items,
-          value: _selectedMajor?.id,
+          value: selectedMajor?.id,
           onChanged: (value) {
             setState(() {
-              _selectedMajor =
+              // 전공이 선택되면 해당 전공을 Provider에 업데이트
+              final major =
                   majorProvider.majors.firstWhere((major) => major.id == value);
+              majorProvider.setSelectedMajor(widget.majorKey, major);
             });
           },
           validator: (value) {

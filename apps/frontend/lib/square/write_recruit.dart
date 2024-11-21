@@ -12,6 +12,8 @@ class WriteRecruit extends StatefulWidget {
 class _WriteRecruitState extends State<WriteRecruit> {
   final _formKey = GlobalKey<FormState>();
 
+  int? _selectedStudentNumber;
+
   @override
   Widget build(BuildContext context) {
     String? selectedMajor;
@@ -102,6 +104,11 @@ class _WriteRecruitState extends State<WriteRecruit> {
                           width: MediaQuery.of(context).size.width / 2.7,
                           start: 2,
                           end: 10,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedStudentNumber = value;
+                            });
+                          },
                         )
                       ],
                     ),

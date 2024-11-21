@@ -7,7 +7,10 @@ import 'package:frontend/register/register.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterProfile extends StatefulWidget {
-  const RegisterProfile({super.key});
+  final Map<String, dynamic> registerData;
+  final String? pin;
+  const RegisterProfile(
+      {super.key, required this.registerData, required this.pin});
 
   @override
   State<RegisterProfile> createState() => _RegisterProfileState();
