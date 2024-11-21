@@ -1,6 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/register/register_profile.dart';
+import 'package:frontend/register/major.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:frontend/utils/api_helper.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -14,7 +19,7 @@ class _RegisterState extends State<Register> {
 
   final _emailController = TextEditingController();
   String? _selectedDomain;
-  String? selectedDoubleMajor;
+  bool? selectedDoubleMajor;
 
   void _onVerifyPressed() {
     final email = '${_emailController.text}${_selectedDomain ?? ''}';
@@ -30,7 +35,6 @@ class _RegisterState extends State<Register> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        backgroundColor: Colors.white,
         elevation: 0.5,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(2.0), // 선의 높이 설정
@@ -91,7 +95,7 @@ class _RegisterState extends State<Register> {
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '비밀번호를 입력해 주세요.';
+                    return '';
                   }
                   return null;
                 },
@@ -104,7 +108,7 @@ class _RegisterState extends State<Register> {
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '비밀번호를 재입력해 주세요.';
+                    return '';
                   }
                   return null;
                 },
@@ -112,14 +116,9 @@ class _RegisterState extends State<Register> {
                   _pwValue = value!;
                 },
               ),
-              CustomTextFormField(
-                labelText: "원전공을 입력해 주세요",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '원전공을 입력해 주세요.';
-                  }
-                  return null;
-                },
+              MajorDropdown(
+                isStyled: false,
+                labelText: "원전공을 선택해 주세요",
               ),
               Row(
                 children: [
@@ -135,24 +134,24 @@ class _RegisterState extends State<Register> {
                   Expanded(
                     // width: MediaQuery.of(context).size.width / 2,
                     // margin: EdgeInsets.symmetric(vertical: 10),
-                    child: DropdownButtonFormField<String>(
+                    child: DropdownButtonFormField<bool?>(
                       decoration: InputDecoration(
                         labelText: "복수전공 여부",
                         border: OutlineInputBorder(),
                       ),
                       value: selectedDoubleMajor,
                       items: [
-                        DropdownMenuItem(value: '해당없음', child: Text('해당없음')),
-                        DropdownMenuItem(value: '복수전공생', child: Text('복수전공생')),
+                        DropdownMenuItem(value: false, child: Text('해당없음')),
+                        DropdownMenuItem(value: true, child: Text('복수전공생')),
                       ],
                       onChanged: (value) {
                         setState(() {
-                          selectedDoubleMajor = value; // 선택된 값 업데이트
+                          selectedDoubleMajor = value!; // 선택된 값 업데이트
                         });
                       },
                       validator: (value) {
                         if (value == null) {
-                          return '전공을 선택해 주세요.';
+                          return '';
                         }
                         return null;
                       },
@@ -160,26 +159,13 @@ class _RegisterState extends State<Register> {
                   ),
                 ],
               ),
-              CustomTextFormField(
-                labelText: "복수전공을 입력해 주세요",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '복수전공을 입력해 주세요.';
-                  }
-                  return null;
-                },
+              Visibility(
+                visible: selectedDoubleMajor == true,
+                child: MajorDropdown(
+                  isStyled: false,
+                  labelText: "복수전공을 선택해 주세요",
+                ),
               ),
-              // CustomTextFormField(
-              //   labelText: "원전공에 관한 정보를 입력해 주세요",
-              //   minLines: 5,
-              //   maxLines: 10,
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return '원전공에 관한 정보를 입력해 주세요.';
-              //     }
-              //     return null;
-              //   },
-              // ),
               CustomButton(
                 backgroundColor: const Color.fromARGB(255, 30, 85, 33),
                 text: "다음",
@@ -236,7 +222,7 @@ class EmailInputRow extends StatelessWidget {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return '아이디를 입력해 주세요.';
+                  return '';
                 }
                 return null;
               },
@@ -266,7 +252,7 @@ class EmailInputRow extends StatelessWidget {
               onChanged: onDomainChanged,
               validator: (value) {
                 if (value == null) {
-                  return '도메인을 선택해 주세요.';
+                  return '';
                 }
                 return null;
               },

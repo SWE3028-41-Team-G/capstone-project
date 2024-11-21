@@ -19,11 +19,10 @@ class _WriteRecruitState extends State<WriteRecruit> {
       appBar: AppBar(
         toolbarHeight: 50,
         title: Text(
-          '새 모집글 작성',
+          '모집글 작성',
           style: TextStyle(
             color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
+            fontSize: 18,
           ),
         ),
         actions: [

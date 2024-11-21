@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/chatting_room.dart';
+import 'package:frontend/register/major.dart';
 import 'package:frontend/square/recruitment.dart';
 import 'package:frontend/square/write_recruit.dart';
 
@@ -196,14 +197,20 @@ class _DMPageState extends State<DMPage> {
             margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             child: Row(
               children: [
-                MajorDropdown(
-                  hintText: '원전공', items: ['경제학과', '소프트웨어학과'], // 필요한 전공 목록을 추가
+                Expanded(
+                  child: MajorDropdown(
+                    isStyled: true,
+                    labelText: "원전공",
+                  ),
                 ),
                 SizedBox(
                   width: 15,
                 ),
-                MajorDropdown(
-                  hintText: '복수전공', items: ['경제학과', '소프트웨어학과'], // 필요한 전공 목록을 추가
+                Expanded(
+                  child: MajorDropdown(
+                    isStyled: true,
+                    labelText: "복수전공",
+                  ),
                 ),
               ],
             ),
@@ -431,43 +438,50 @@ class _SquarePageState extends State<SquarePage> {
                 margin: EdgeInsets.symmetric(vertical: 10),
                 child: Row(
                   children: [
-                    MajorDropdown(
-                      hintText: '모집대상 전공',
-                      items: ['경제학과', '소프트웨어학과'], // 필요한 전공 목록을 추가
+                    Flexible(
+                      flex: 3,
+                      child: MajorDropdown(
+                        isStyled: true,
+                        labelText: "모집대상 전공",
+                      ),
                     ),
                     Spacer(),
-                    ElevatedButton(
-                      // 모집글 작성 버튼 -----------------------------------------------
-                      style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          backgroundColor: Colors.grey[400],
-                          side: BorderSide.none,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10))),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => WriteRecruit()));
-                      },
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                          ),
-                          SizedBox(
-                            width: 7,
-                          ),
-                          Text(
-                            '모집글 작성',
-                            style: TextStyle(
+                    Flexible(
+                      flex: 2,
+                      child: ElevatedButton(
+                        // 모집글 작성 버튼 -----------------------------------------------
+                        style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 15),
+                            backgroundColor: Colors.grey[400],
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10))),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WriteRecruit()));
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.edit,
                               color: Colors.white,
                             ),
-                          ),
-                        ],
+                            SizedBox(
+                              width: 7,
+                            ),
+                            Text(
+                              '모집글 작성',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -553,48 +567,48 @@ class _SquarePageState extends State<SquarePage> {
 }
 
 // 전공 드롭다운
-class MajorDropdown extends StatefulWidget {
-  final String hintText;
-  final List<String> items; // 드롭다운 목록을 받아오는 리스트
+// class MajorDropdown extends StatefulWidget {
+//   final String hintText;
+//   final List<String> items; // 드롭다운 목록을 받아오는 리스트
 
-  const MajorDropdown({required this.hintText, required this.items, super.key});
+//   const MajorDropdown({required this.hintText, required this.items, super.key});
 
-  @override
-  _MajorDropdownState createState() => _MajorDropdownState();
-}
+//   @override
+//   _MajorDropdownState createState() => _MajorDropdownState();
+// }
 
-class _MajorDropdownState extends State<MajorDropdown> {
-  String? selectedMajor;
+// class _MajorDropdownState extends State<MajorDropdown> {
+//   String? selectedMajor;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.all(
-          Radius.circular(8),
-        ),
-      ),
-      child: DropdownButton<String>(
-        value: selectedMajor,
-        hint: Text(
-          widget.hintText,
-          style: TextStyle(color: Colors.grey[500]),
-        ), // 전달받은 힌트 텍스트를 표시
-        onChanged: (String? newValue) {
-          setState(() {
-            selectedMajor = newValue;
-          });
-        },
-        items: widget.items.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        underline: Container(), // 밑줄 제거
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+//       decoration: BoxDecoration(
+//         color: Colors.grey[200],
+//         borderRadius: BorderRadius.all(
+//           Radius.circular(8),
+//         ),
+//       ),
+//       child: DropdownButton<String>(
+//         value: selectedMajor,
+//         hint: Text(
+//           widget.hintText,
+//           style: TextStyle(color: Colors.grey[500]),
+//         ), // 전달받은 힌트 텍스트를 표시
+//         onChanged: (String? newValue) {
+//           setState(() {
+//             selectedMajor = newValue;
+//           });
+//         },
+//         items: widget.items.map<DropdownMenuItem<String>>((String value) {
+//           return DropdownMenuItem<String>(
+//             value: value,
+//             child: Text(value),
+//           );
+//         }).toList(),
+//         underline: Container(), // 밑줄 제거
+//       ),
+//     );
+//   }
+// }

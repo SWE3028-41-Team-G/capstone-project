@@ -35,7 +35,6 @@ class _RegisterProfileState extends State<RegisterProfile> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        backgroundColor: Colors.white,
         elevation: 0.5,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(2.0), // 선의 높이 설정

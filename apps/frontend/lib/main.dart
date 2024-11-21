@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/initial_page.dart';
+import 'package:frontend/register/major.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => MajorProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
