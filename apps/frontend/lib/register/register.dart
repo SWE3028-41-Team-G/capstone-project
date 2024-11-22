@@ -456,10 +456,10 @@ class _EmailInputRowState extends State<EmailInputRow> {
             flex: 2,
             child: TextFormField(
               decoration: InputDecoration(
-                labelText: "아이디",
-                contentPadding: EdgeInsets.all(10),
-                border: OutlineInputBorder(),
-              ),
+                  labelText: "아이디",
+                  contentPadding: EdgeInsets.all(10),
+                  border: OutlineInputBorder(),
+                  floatingLabelBehavior: FloatingLabelBehavior.never),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return '';
@@ -481,10 +481,10 @@ class _EmailInputRowState extends State<EmailInputRow> {
             flex: 3,
             child: DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: "도메인 선택",
-                contentPadding: EdgeInsets.all(10),
-                border: OutlineInputBorder(),
-              ),
+                  labelText: "도메인 선택",
+                  contentPadding: EdgeInsets.all(10),
+                  border: OutlineInputBorder(),
+                  floatingLabelBehavior: FloatingLabelBehavior.never),
               value: widget.selectedDomain,
               items: [
                 DropdownMenuItem(
@@ -531,7 +531,8 @@ class _EmailInputRowState extends State<EmailInputRow> {
 
 // TextFormField 위젯 커스텀
 class CustomTextFormField extends StatelessWidget {
-  final String labelText;
+  final String? labelText;
+  final String? hintText;
   final String? Function(String?)? validator;
   final void Function(String?)? onSaved;
   final void Function(String?)? onChanged;
@@ -539,7 +540,8 @@ class CustomTextFormField extends StatelessWidget {
 
   const CustomTextFormField(
       {super.key,
-      required this.labelText,
+      this.labelText,
+      this.hintText,
       this.validator,
       this.onSaved,
       this.obscureText = false,
@@ -553,6 +555,8 @@ class CustomTextFormField extends StatelessWidget {
         obscureText: obscureText,
         decoration: InputDecoration(
           labelText: labelText,
+          hintText: hintText,
+          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           contentPadding: EdgeInsets.all(17),
           border: OutlineInputBorder(),

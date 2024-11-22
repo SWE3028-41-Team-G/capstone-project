@@ -76,32 +76,6 @@ class MajorProvider with ChangeNotifier {
   }
 }
 
-// class MajorProvider extends ChangeNotifier {
-//   List<Major> _majors = [];
-//   bool _isLoading = true; // 로딩 중 상태
-//   String _errorMessage = '';
-
-//   List<Major> get majors => _majors;
-//   bool get isLoading => _isLoading;
-//   String get errorMessage => _errorMessage;
-
-//   // API 호출 함수
-//   Future<void> loadMajors() async {
-//     try {
-//       _isLoading = true;
-//       notifyListeners(); // 로딩 시작 시 상태 갱신
-//       final majors = await fetchMajor(); // 데이터 로드
-//       _majors = majors;
-//       _isLoading = false;
-//       notifyListeners(); // 데이터 로드 후 상태 갱신
-//     } catch (e) {
-//       _errorMessage = 'Error loading majors: $e';
-//       _isLoading = false;
-//       notifyListeners(); // 에러가 발생한 경우 상태 갱신
-//     }
-//   }
-// }
-
 class MajorDropdown extends StatefulWidget {
   final String labelText;
   final bool isStyled;

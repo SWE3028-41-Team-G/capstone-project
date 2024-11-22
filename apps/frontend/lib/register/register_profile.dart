@@ -4,6 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
 import 'package:frontend/register/register.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:frontend/utils/api_helper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterProfile extends StatefulWidget {
@@ -19,6 +23,7 @@ class RegisterProfile extends StatefulWidget {
 class _RegisterProfileState extends State<RegisterProfile> {
   final _formKey = GlobalKey<FormState>(); // GlobalKey for Form
   XFile? _image; //이미지를 담을 변수 선언
+  String? imgUrl;
   final ImagePicker picker = ImagePicker(); //ImagePicker 초기화
   String _selectedOption = '공개';
 
@@ -83,13 +88,52 @@ class _RegisterProfileState extends State<RegisterProfile> {
                   SizedBox(
                     height: 30,
                   ),
-                  CustomTextFormField(labelText: "닉네임을 설정해 주세요"),
+                  CustomTextFormField(
+                    labelText: "닉네임을 설정해 주세요",
+                    hintText: "10글자 이내로 작성해 주세요",
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '닉네임을 입력해 주세요';
+                      }
+                      if (value.length > 10) {
+                        debugPrint("글자수?? ${value.length}");
+                        return '10글자 이내로 작성해 주세요';
+                      }
+                      return null;
+                    },
+                  ),
                   _openProfile(),
                   SizedBox(
                     height: 10,
                   ),
-                  CustomTextFormField(labelText: "첫번째 관심사 키워드를 입력해 주세요"),
-                  CustomTextFormField(labelText: "두번째 관심사 키워드를 입력해 주세요"),
+                  CustomTextFormField(
+                    labelText: "첫번째 관심사 키워드를 입력해 주세요",
+                    hintText: "10글자 이내로 작성해 주세요",
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '키워드를 입력해 주세요';
+                      }
+                      if (value.length > 10) {
+                        debugPrint("글자수?? ${value.length}");
+                        return '10글자 이내로 작성해 주세요';
+                      }
+                      return null;
+                    },
+                  ),
+                  CustomTextFormField(
+                    labelText: "두번째 관심사 키워드를 입력해 주세요",
+                    hintText: "10글자 이내로 작성해 주세요",
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '키워드를 입력해 주세요';
+                      }
+                      if (value.length > 10) {
+                        debugPrint("글자수?? ${value.length}");
+                        return '10글자 이내로 작성해 주세요';
+                      }
+                      return null;
+                    },
+                  ),
                   CustomButton(
                     backgroundColor: Colors.grey[400]!,
                     text: "이전",
@@ -107,11 +151,55 @@ class _RegisterProfileState extends State<RegisterProfile> {
                   CustomButton(
                     backgroundColor: const Color.fromARGB(255, 30, 85, 33),
                     text: "회원가입 완료",
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
 
-                        // 프로필 등록으로 이동
+                        // 이미지 임시 업로드 POST ----------------------------------------------------
+                        final Uri imgRequest = ApiHelper.buildRequest(
+                            'users/profile/image'); // API endpoint
+                        // XFile을 멀티파트 파일로 변환
+                        final imgPost =
+                            http.MultipartRequest('POST', imgRequest);
+                        final file = await http.MultipartFile.fromPath(
+                          'image',
+                          _image!.path,
+                        );
+                        imgPost.files.add(file);
+                        try {
+                          final imgResponse = await imgPost.send();
+                          final response =
+                              await http.Response.fromStream(imgResponse);
+
+                          if (imgResponse.statusCode == 201) {
+                            // 요청 성공
+                            final responseData = jsonDecode(response.body);
+                            setState(() {
+                              imgUrl = responseData['url']
+                                  as String; // URL 값 추출 및 저장
+                            });
+                            debugPrint("이미지 임시 업로드 성공! ^___^");
+                            debugPrint(
+                                "2번째!!! responseBody 디버깅주우우웅 : $imgUrl"); // 응답 JSON 파싱
+                          } else {
+                            // 요청 실패
+                            debugPrint("요청 실패: ${response.body}");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text("서버 오류가 발생했습니다. 다시 시도해주세요.")),
+                            );
+                          }
+                        } catch (e) {
+                          // 네트워크 또는 기타 오류 처리
+                          debugPrint("오류 발생: $e");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("오류가 발생했습니다. 인터넷 연결을 확인해주세요.")),
+                          );
+                        }
+
+                        // 회원가입 POST -----------------------------------------------------------------------------------
+                        // 회원가입 status code == 201일 때 이동하기
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const Home()),
