@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/register/register_profile.dart';
@@ -6,6 +8,7 @@ import 'package:frontend/register/major.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:frontend/utils/api_helper.dart';
+import 'package:provider/provider.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -19,19 +22,139 @@ class _RegisterState extends State<Register> {
 
   final _emailController = TextEditingController();
   String? _selectedDomain;
-  bool? selectedDoubleMajor;
+  String? _email;
+  String? _pin;
+  bool isVerified = false;
 
-  void _onVerifyPressed() {
-    final email = '${_emailController.text}${_selectedDomain ?? ''}';
-    // 이메일 인증 로직 추가
-    print('인증할 이메일: $email');
+  String? _pwValue;
+  String? _checkPwValue;
+
+  int? _selectedStudentNumber;
+  bool selectedDoubleMajor = false;
+
+  late MajorProvider majorProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    // initState에서 listen: false 사용
+    majorProvider = Provider.of<MajorProvider>(context, listen: false);
   }
 
-  //String _idValue = "";
-  String _pwValue = "";
+  Future<void> _onVerifyPressed() async {
+    setState(() {
+      _email = '${_emailController.text}${_selectedDomain!}';
+      debugPrint('인증할 이메일 확인중!!!: $_email');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("이메일이 확인중")),
+      );
+    });
+    // 이메일 인증 로직 추가
+    final Uri request =
+        ApiHelper.buildRequest('users/verify-email/request'); // API endpoint
+    final emailBody = {"email": _email};
+    debugPrint("emailBody 디버깅주우우웅 : $emailBody");
+
+    try {
+      // 이메일 인증 요청 HTTP POST 요청 보내기
+      final response = await http.post(
+        request,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(emailBody), // JSON 형식으로 변환
+      );
+      debugPrint("API 요청 URL: $request");
+      debugPrint("응답 상태 코드: ${response.statusCode}");
+      debugPrint("responseBody 디버깅주우우웅 : ${response.body}");
+      debugPrint("요청 헤더: ${{"Content-Type": "application/json"}}");
+      debugPrint("요청 본문: ${jsonEncode(emailBody)}");
+
+      if (response.statusCode == 201) {
+        // 요청 성공
+        debugPrint("인증 이메일 전송 성공!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("인증 이메일이 전송되었습니다.")),
+        );
+      } else {
+        // 요청 실패
+        debugPrint("인증 이메일 전송 실패: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("인증 이메일 전송에 실패했습니다. 다시 시도해주세요.")),
+        );
+      }
+    } catch (e) {
+      // 네트워크 또는 기타 오류 처리
+      debugPrint("오류 발생: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("오류가 발생했습니다. 인터넷 연결을 확인해주세요.")),
+      );
+    }
+  }
+
+  Future<void> _onCheckPressed() async {
+    debugPrint("PIN번호 확인중: $_pin");
+
+    final Uri request =
+        ApiHelper.buildRequest('users/verify-email'); // API endpoint
+    final verifyBody = {"email": _email, "pin": _pin};
+
+    try {
+      // 이메일 인증 확인 HTTP POST 요청 보내기
+      final response = await http.post(
+        request,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(verifyBody), // JSON 형식으로 변환
+      );
+
+      debugPrint("API 요청 URL: $request");
+      debugPrint("응답 상태 코드: ${response.statusCode}");
+      debugPrint("responseBody 디버깅주우우웅 : ${response.body}");
+      debugPrint("요청 헤더: ${{"Content-Type": "application/json"}}");
+      debugPrint("요청 본문: ${jsonEncode(verifyBody)}");
+
+      if (response.statusCode == 201) {
+        // 요청 성공
+        final responseData = jsonDecode(response.body); // 응답 JSON 파싱
+        setState(() {
+          isVerified = responseData['verify'] as bool; // verify 값 확인
+        });
+
+        debugPrint("2번째!!! responseBody 디버깅주우우웅 : $isVerified");
+        if (isVerified) {
+          debugPrint("인증 성공! ^___^");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("인증에 성공했습니다!")),
+          );
+        } else {
+          debugPrint("인증 실패: PIN 번호가 유효하지 않습니다.");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("인증번호가 유효하지 않습니다. 다시 시도해주세요.")),
+          );
+        }
+      } else {
+        // 요청 실패
+        debugPrint("요청 실패: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("서버 오류가 발생했습니다. 다시 시도해주세요.")),
+        );
+      }
+    } catch (e) {
+      // 네트워크 또는 기타 오류 처리
+      debugPrint("오류 발생: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("오류가 발생했습니다. 인터넷 연결을 확인해주세요.")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // provider 이용해서 majorID 관리하기
+    final selectedMajors = majorProvider.selectedMajors;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
@@ -90,6 +213,76 @@ class _RegisterState extends State<Register> {
                 },
                 onVerifyPressed: _onVerifyPressed,
               ),
+              //PIN 번호 입력
+              Visibility(
+                visible: _email != null,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      flex: 4,
+                      child: CustomTextFormField(
+                        labelText: "인증번호를 입력해 주세요",
+                        // obscureText: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            _pin = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Flexible(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            backgroundColor:
+                                const Color.fromARGB(255, 30, 85, 33),
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10))),
+                        onPressed: _onCheckPressed,
+                        child: Text(
+                          '확인',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Visibility(
+                visible: isVerified,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline_outlined,
+                      size: 18,
+                      color: Colors.green,
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      "이메일이 인증되었습니다",
+                      style: TextStyle(color: Colors.green),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 5,
+              ),
               CustomTextFormField(
                 labelText: "비밀번호를 입력해 주세요",
                 obscureText: true,
@@ -99,8 +292,9 @@ class _RegisterState extends State<Register> {
                   }
                   return null;
                 },
-                onSaved: (value) {
+                onChanged: (value) {
                   _pwValue = value!;
+                  debugPrint("비번 확인 중 : $_pwValue");
                 },
               ),
               CustomTextFormField(
@@ -110,16 +304,22 @@ class _RegisterState extends State<Register> {
                   if (value == null || value.isEmpty) {
                     return '';
                   }
+                  if (value != _pwValue) {
+                    return '비밀번호가 일치하지 않습니다.';
+                  }
                   return null;
                 },
-                onSaved: (value) {
-                  _pwValue = value!;
+                onChanged: (value) {
+                  _checkPwValue = value!;
+                  debugPrint("재입력 비번 확인 중 : $_checkPwValue");
                 },
               ),
               MajorDropdown(
                 isStyled: false,
+                majorKey: 'primaryMajor',
                 labelText: "원전공을 선택해 주세요",
               ),
+
               Row(
                 children: [
                   NumberRangeDropdown(
@@ -127,6 +327,12 @@ class _RegisterState extends State<Register> {
                     start: 10,
                     end: 24,
                     width: null,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedStudentNumber = value;
+                        debugPrint("학번 확인중 : $_selectedStudentNumber");
+                      });
+                    },
                   ),
                   SizedBox(
                     width: 10,
@@ -163,6 +369,7 @@ class _RegisterState extends State<Register> {
                 visible: selectedDoubleMajor == true,
                 child: MajorDropdown(
                   isStyled: false,
+                  majorKey: 'secondMajor',
                   labelText: "복수전공을 선택해 주세요",
                 ),
               ),
@@ -170,14 +377,42 @@ class _RegisterState extends State<Register> {
                 backgroundColor: const Color.fromARGB(255, 30, 85, 33),
                 text: "다음",
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
+                  if (_formKey.currentState!.validate() && isVerified == true) {
                     _formKey.currentState!.save();
+
+                    final primaryMajor =
+                        majorProvider.getSelectedMajor('primaryMajor'); // 원전공
+                    final secondMajor =
+                        majorProvider.getSelectedMajor('secondMajor'); // 복수전공
+
+                    debugPrint(
+                        'selectedMajors 전체 확인!!! : ${majorProvider.selectedMajors}');
+
+                    debugPrint(
+                        '선택한 원전공 확인하고 싶음ㅁㅁㅁ: ${primaryMajor!.id} : ${primaryMajor.name}');
+                    // debugPrint(
+                    //     '선택한 부전공 확인하고 싶음ㅁㅁㅁ: ${secondMajor!.id} : ${secondMajor.name}');
+
+                    final registerData = {
+                      "username": _emailController.text,
+                      "password": _pwValue,
+                      "email": _email,
+                      "admitYear": _selectedStudentNumber,
+                      "majorId": primaryMajor.id,
+                      "real": selectedDoubleMajor,
+                      "dualMajorId":
+                          selectedDoubleMajor ? secondMajor?.id : null,
+                    };
+                    debugPrint('$registerData');
 
                     // 프로필 등록으로 이동
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const RegisterProfile()),
+                          builder: (context) => RegisterProfile(
+                                pin: _pin,
+                                registerData: registerData,
+                              )),
                     );
                   }
                 },
@@ -191,7 +426,7 @@ class _RegisterState extends State<Register> {
 }
 
 // 이메일 입력 및 인증
-class EmailInputRow extends StatelessWidget {
+class EmailInputRow extends StatefulWidget {
   final TextEditingController emailController;
   final String? selectedDomain;
   final Function(String?) onDomainChanged;
@@ -206,6 +441,11 @@ class EmailInputRow extends StatelessWidget {
   });
 
   @override
+  State<EmailInputRow> createState() => _EmailInputRowState();
+}
+
+class _EmailInputRowState extends State<EmailInputRow> {
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
@@ -216,18 +456,20 @@ class EmailInputRow extends StatelessWidget {
             flex: 2,
             child: TextFormField(
               decoration: InputDecoration(
-                labelText: "아이디",
-                contentPadding: EdgeInsets.all(10),
-                border: OutlineInputBorder(),
-              ),
+                  labelText: "아이디",
+                  contentPadding: EdgeInsets.all(10),
+                  border: OutlineInputBorder(),
+                  floatingLabelBehavior: FloatingLabelBehavior.never),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return '';
                 }
                 return null;
               },
-              onSaved: (value) {
-                emailController.text = value!;
+              onChanged: (value) {
+                setState(() {
+                  widget.emailController.text = value;
+                });
               },
             ),
           ),
@@ -239,17 +481,17 @@ class EmailInputRow extends StatelessWidget {
             flex: 3,
             child: DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: "도메인 선택",
-                contentPadding: EdgeInsets.all(10),
-                border: OutlineInputBorder(),
-              ),
-              value: selectedDomain,
+                  labelText: "도메인 선택",
+                  contentPadding: EdgeInsets.all(10),
+                  border: OutlineInputBorder(),
+                  floatingLabelBehavior: FloatingLabelBehavior.never),
+              value: widget.selectedDomain,
               items: [
                 DropdownMenuItem(
                     value: '@g.skku.edu', child: Text('@g.skku.edu')),
                 DropdownMenuItem(value: '@skku.edu', child: Text('@skku.edu')),
               ],
-              onChanged: onDomainChanged,
+              onChanged: widget.onDomainChanged,
               validator: (value) {
                 if (value == null) {
                   return '';
@@ -272,7 +514,7 @@ class EmailInputRow extends StatelessWidget {
                   side: BorderSide.none,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10))),
-              onPressed: onVerifyPressed,
+              onPressed: widget.onVerifyPressed,
               child: Text(
                 '인증',
                 style: TextStyle(
@@ -289,18 +531,21 @@ class EmailInputRow extends StatelessWidget {
 
 // TextFormField 위젯 커스텀
 class CustomTextFormField extends StatelessWidget {
-  final String labelText;
+  final String? labelText;
+  final String? hintText;
   final String? Function(String?)? validator;
   final void Function(String?)? onSaved;
+  final void Function(String?)? onChanged;
   final bool obscureText;
 
-  const CustomTextFormField({
-    super.key,
-    required this.labelText,
-    this.validator,
-    this.onSaved,
-    this.obscureText = false,
-  });
+  const CustomTextFormField(
+      {super.key,
+      this.labelText,
+      this.hintText,
+      this.validator,
+      this.onSaved,
+      this.obscureText = false,
+      this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -310,12 +555,15 @@ class CustomTextFormField extends StatelessWidget {
         obscureText: obscureText,
         decoration: InputDecoration(
           labelText: labelText,
+          hintText: hintText,
+          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           contentPadding: EdgeInsets.all(17),
           border: OutlineInputBorder(),
         ),
         validator: validator,
         onSaved: onSaved,
+        onChanged: onChanged,
       ),
     );
   }
@@ -327,6 +575,7 @@ class NumberRangeDropdown extends StatefulWidget {
   final int start;
   final int end;
   final double? width;
+  final ValueChanged<int?> onChanged;
 
   const NumberRangeDropdown({
     super.key,
@@ -334,6 +583,7 @@ class NumberRangeDropdown extends StatefulWidget {
     required this.start,
     required this.end,
     required this.width,
+    required this.onChanged,
   });
 
   @override
@@ -369,6 +619,13 @@ class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
           setState(() {
             _selectedValue = newValue;
           });
+          widget.onChanged(newValue);
+        },
+        validator: (value) {
+          if (value == null) {
+            return '';
+          }
+          return null;
         },
       ),
     );

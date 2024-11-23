@@ -200,6 +200,7 @@ class _DMPageState extends State<DMPage> {
                 Expanded(
                   child: MajorDropdown(
                     isStyled: true,
+                    majorKey: 'dm_primaryMajor',
                     labelText: "원전공",
                   ),
                 ),
@@ -209,6 +210,7 @@ class _DMPageState extends State<DMPage> {
                 Expanded(
                   child: MajorDropdown(
                     isStyled: true,
+                    majorKey: 'dm_doubleMajor',
                     labelText: "복수전공",
                   ),
                 ),
@@ -442,6 +444,7 @@ class _SquarePageState extends State<SquarePage> {
                       flex: 3,
                       child: MajorDropdown(
                         isStyled: true,
+                        majorKey: 'square_Major',
                         labelText: "모집대상 전공",
                       ),
                     ),
@@ -565,50 +568,3 @@ class _SquarePageState extends State<SquarePage> {
     );
   }
 }
-
-// 전공 드롭다운
-// class MajorDropdown extends StatefulWidget {
-//   final String hintText;
-//   final List<String> items; // 드롭다운 목록을 받아오는 리스트
-
-//   const MajorDropdown({required this.hintText, required this.items, super.key});
-
-//   @override
-//   _MajorDropdownState createState() => _MajorDropdownState();
-// }
-
-// class _MajorDropdownState extends State<MajorDropdown> {
-//   String? selectedMajor;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//       decoration: BoxDecoration(
-//         color: Colors.grey[200],
-//         borderRadius: BorderRadius.all(
-//           Radius.circular(8),
-//         ),
-//       ),
-//       child: DropdownButton<String>(
-//         value: selectedMajor,
-//         hint: Text(
-//           widget.hintText,
-//           style: TextStyle(color: Colors.grey[500]),
-//         ), // 전달받은 힌트 텍스트를 표시
-//         onChanged: (String? newValue) {
-//           setState(() {
-//             selectedMajor = newValue;
-//           });
-//         },
-//         items: widget.items.map<DropdownMenuItem<String>>((String value) {
-//           return DropdownMenuItem<String>(
-//             value: value,
-//             child: Text(value),
-//           );
-//         }).toList(),
-//         underline: Container(), // 밑줄 제거
-//       ),
-//     );
-//   }
-// }

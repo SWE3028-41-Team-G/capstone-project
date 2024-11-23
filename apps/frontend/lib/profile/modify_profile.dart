@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
+import 'package:frontend/register/major.dart';
 import 'package:frontend/register/register.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -35,7 +36,6 @@ class _ModifyProfileState extends State<ModifyProfile> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        backgroundColor: Colors.white,
         elevation: 0.5,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(2.0), // 선의 높이 설정
@@ -83,6 +83,17 @@ class _ModifyProfileState extends State<ModifyProfile> {
                   ),
                   CustomTextFormField(labelText: "닉네임을 설정해 주세요"),
                   _openProfile(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  // MajorDropdown(
+                  //   isStyled: false,
+                  //   labelText: "원전공을 선택해 주세요",
+                  // ),
+                  // MajorDropdown(
+                  //   isStyled: false,
+                  //   labelText: "복수전공을 선택해 주세요",
+                  // ),
                   SizedBox(
                     height: 10,
                   ),
