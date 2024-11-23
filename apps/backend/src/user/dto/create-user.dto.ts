@@ -31,10 +31,6 @@ export class CreateUserDTO {
   @IsNotEmpty()
   public: boolean
 
-  @IsString()
-  @IsNotEmpty()
-  intro: string
-
   @Min(1957)
   @Max(new Date().getFullYear())
   @IsNumber()

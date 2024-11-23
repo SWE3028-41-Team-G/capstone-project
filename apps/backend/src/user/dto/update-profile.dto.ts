@@ -11,10 +11,6 @@ export class UpdateProfileDTO {
   @IsOptional()
   public?: boolean
 
-  @IsString()
-  @IsOptional()
-  intro?: string
-
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
