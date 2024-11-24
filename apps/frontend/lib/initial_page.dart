@@ -13,17 +13,10 @@ class InitialPage extends StatefulWidget {
 
 class _InitialPageState extends State<InitialPage> {
   final _formKey = GlobalKey<FormState>(); // GlobalKey for Form
-  final _emailController = TextEditingController(); //email 유효성 검사
   String? _selectedDomain;
 
-  void _onVerifyPressed() {
-    final email = '${_emailController.text}${_selectedDomain ?? ''}';
-    // 이메일
-    print('인증할 이메일: $email');
-  }
-
-  String _idValue = "";
-  String _pwValue = "";
+  var username = TextEditingController(); // id 입력 저장
+  var password = TextEditingController(); // pw 입력 저장
 
   @override
   Widget build(BuildContext context) {
@@ -71,20 +64,20 @@ class _InitialPageState extends State<InitialPage> {
                     child: Column(
                       children: [
                         EmailInputRow(
-                          emailController: _emailController,
+                          textController: username,
                           selectedDomain: _selectedDomain,
                           onDomainChanged: (newDomain) {
                             setState(() {
                               _selectedDomain = newDomain;
                             });
                           },
-                          onVerifyPressed: _onVerifyPressed,
                         ),
                         Container(
                           margin: EdgeInsets.symmetric(vertical: 5),
                           child: TextFormField(
                             // 비밀번호 입력 TextFormField------------------------------
                             obscureText: true,
+                            controller: password,
                             decoration: InputDecoration(
                               labelText: "비밀번호를 입력해 주세요",
                               floatingLabelBehavior: FloatingLabelBehavior
@@ -101,9 +94,6 @@ class _InitialPageState extends State<InitialPage> {
                                 return '비밀번호를 입력해 주세요.';
                               }
                               return null;
-                            },
-                            onSaved: (value) {
-                              _pwValue = value!;
                             },
                           ),
                         ),
@@ -172,17 +162,15 @@ class _InitialPageState extends State<InitialPage> {
 
 // 이메일 입력
 class EmailInputRow extends StatelessWidget {
-  final TextEditingController emailController;
+  final TextEditingController textController;
   final String? selectedDomain;
   final Function(String?) onDomainChanged;
-  final VoidCallback onVerifyPressed;
 
   const EmailInputRow({
     super.key,
-    required this.emailController,
+    required this.textController,
     required this.selectedDomain,
     required this.onDomainChanged,
-    required this.onVerifyPressed,
   });
 
   @override
@@ -193,6 +181,7 @@ class EmailInputRow extends StatelessWidget {
         Expanded(
           flex: 2,
           child: TextFormField(
+            controller: textController,
             decoration: InputDecoration(
               labelText: "아이디",
               floatingLabelBehavior:
@@ -209,9 +198,6 @@ class EmailInputRow extends StatelessWidget {
                 return '아이디를 입력해 주세요.';
               }
               return null;
-            },
-            onSaved: (value) {
-              emailController.text = value!;
             },
           ),
         ),

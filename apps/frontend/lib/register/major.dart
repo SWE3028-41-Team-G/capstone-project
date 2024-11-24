@@ -93,6 +93,9 @@ class MajorDropdown extends StatefulWidget {
 class _MajorDropdownState extends State<MajorDropdown> {
   Major? _selectedMajor; // 선택된 학과를 저장하는 변수
 
+  // FocusNode를 클래스 내에서 선언
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -100,6 +103,16 @@ class _MajorDropdownState extends State<MajorDropdown> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MajorProvider>(context, listen: false).loadMajors();
     });
+    // FocusNode에 리스너 추가하여 포커스 상태 추적
+    _focusNode.addListener(() {
+      setState(() {}); // 포커스 상태가 변경되면 UI 업데이트
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose(); // FocusNode 해제
+    super.dispose();
   }
 
   @override
@@ -164,6 +177,7 @@ class _MajorDropdownState extends State<MajorDropdown> {
         child: DropdownButtonFormField<int>(
           items: items,
           value: selectedMajor?.id,
+          focusNode: _focusNode,
           onChanged: (value) {
             setState(() {
               // 전공이 선택되면 해당 전공을 Provider에 업데이트
@@ -180,7 +194,13 @@ class _MajorDropdownState extends State<MajorDropdown> {
           },
           decoration: InputDecoration(
             labelText: widget.labelText,
+            labelStyle: TextStyle(
+              color: _focusNode.hasFocus ? Colors.green[700] : Colors.grey[600],
+            ),
             border: OutlineInputBorder(),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.green[700]!, width: 1.5),
+            ),
             contentPadding: EdgeInsets.symmetric(vertical: 23, horizontal: 13),
           ),
         ),

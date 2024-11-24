@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/initial_page.dart';
 import 'package:frontend/register/register_profile.dart';
 import 'package:frontend/register/major.dart';
 
@@ -34,11 +35,24 @@ class _RegisterState extends State<Register> {
 
   late MajorProvider majorProvider;
 
+  // FocusNode를 클래스 내에서 선언
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
     // initState에서 listen: false 사용
     majorProvider = Provider.of<MajorProvider>(context, listen: false);
+    // FocusNode에 리스너 추가하여 포커스 상태 추적
+    _focusNode.addListener(() {
+      setState(() {}); // 포커스 상태가 변경되면 UI 업데이트
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose(); // FocusNode 해제
+    super.dispose();
   }
 
   Future<void> _onVerifyPressed() async {
@@ -125,9 +139,6 @@ class _RegisterState extends State<Register> {
         debugPrint("2번째!!! responseBody 디버깅주우우웅 : $isVerified");
         if (isVerified) {
           debugPrint("인증 성공! ^___^");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("인증에 성공했습니다!")),
-          );
         } else {
           debugPrint("인증 실패: PIN 번호가 유효하지 않습니다.");
           ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +194,11 @@ class _RegisterState extends State<Register> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const InitialPage()),
+                (Route<dynamic> route) => false, // 모든 기존 라우트를 제거하고 새 페이지로 이동
+              );
             },
             icon: Icon(CupertinoIcons.xmark, color: Colors.black),
           ),
@@ -323,9 +338,9 @@ class _RegisterState extends State<Register> {
               Row(
                 children: [
                   NumberRangeDropdown(
-                    labelText: '학번을 선택해 주세요',
-                    start: 10,
-                    end: 24,
+                    labelText: '입학년도 선택',
+                    start: 2010,
+                    end: DateTime.now().year.toInt(),
                     width: null,
                     onChanged: (value) {
                       setState(() {
@@ -341,9 +356,19 @@ class _RegisterState extends State<Register> {
                     // width: MediaQuery.of(context).size.width / 2,
                     // margin: EdgeInsets.symmetric(vertical: 10),
                     child: DropdownButtonFormField<bool?>(
+                      focusNode: _focusNode,
                       decoration: InputDecoration(
                         labelText: "복수전공 여부",
+                        labelStyle: TextStyle(
+                          color: _focusNode.hasFocus
+                              ? Colors.green[700]
+                              : Colors.grey[600],
+                        ),
                         border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.green[700]!, width: 1.5),
+                        ),
                       ),
                       value: selectedDoubleMajor,
                       items: [
@@ -459,6 +484,10 @@ class _EmailInputRowState extends State<EmailInputRow> {
                   labelText: "아이디",
                   contentPadding: EdgeInsets.all(10),
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Colors.green[700]!, width: 1.5),
+                  ),
                   floatingLabelBehavior: FloatingLabelBehavior.never),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -484,6 +513,10 @@ class _EmailInputRowState extends State<EmailInputRow> {
                   labelText: "도메인 선택",
                   contentPadding: EdgeInsets.all(10),
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Colors.green[700]!, width: 1.5),
+                  ),
                   floatingLabelBehavior: FloatingLabelBehavior.never),
               value: widget.selectedDomain,
               items: [
@@ -530,7 +563,7 @@ class _EmailInputRowState extends State<EmailInputRow> {
 }
 
 // TextFormField 위젯 커스텀
-class CustomTextFormField extends StatelessWidget {
+class CustomTextFormField extends StatefulWidget {
   final String? labelText;
   final String? hintText;
   final String? Function(String?)? validator;
@@ -548,22 +581,52 @@ class CustomTextFormField extends StatelessWidget {
       this.onChanged});
 
   @override
+  State<CustomTextFormField> createState() => _CustomTextFormFieldState();
+}
+
+class _CustomTextFormFieldState extends State<CustomTextFormField> {
+  // FocusNode를 클래스 내에서 선언
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // FocusNode에 리스너 추가하여 포커스 상태 추적
+    _focusNode.addListener(() {
+      setState(() {}); // 포커스 상태가 변경되면 UI 업데이트
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose(); // FocusNode 해제
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 12),
       child: TextFormField(
-        obscureText: obscureText,
+        focusNode: _focusNode,
+        obscureText: widget.obscureText,
         decoration: InputDecoration(
-          labelText: labelText,
-          hintText: hintText,
+          labelText: widget.labelText,
+          labelStyle: TextStyle(
+            color: _focusNode.hasFocus ? Colors.green[700] : Colors.grey[600],
+          ),
+          hintText: widget.hintText,
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           contentPadding: EdgeInsets.all(17),
           border: OutlineInputBorder(),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.green[700]!, width: 1.5),
+          ),
         ),
-        validator: validator,
-        onSaved: onSaved,
-        onChanged: onChanged,
+        validator: widget.validator,
+        onSaved: widget.onSaved,
+        onChanged: widget.onChanged,
       ),
     );
   }
@@ -604,6 +667,9 @@ class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
         decoration: InputDecoration(
           labelText: widget.labelText,
           border: OutlineInputBorder(),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.green[700]!, width: 1.5),
+          ),
           floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
         value: _selectedValue,
