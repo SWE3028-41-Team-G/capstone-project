@@ -241,7 +241,6 @@ export class UserService {
           Profile: {
             update: {
               interests: userDTO.interests,
-              intro: userDTO.intro,
               public: userDTO.public
             }
           }
@@ -382,7 +381,7 @@ export class UserService {
             create: {
               public: userDTO.public,
               imageUrl: userDTO.profileImageUrl,
-              intro: userDTO.intro,
+              intro: '',
               interests: userDTO.interests
             }
           }
