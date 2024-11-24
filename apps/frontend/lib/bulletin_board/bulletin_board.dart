@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/bulletin_board/write_article.dart';
+import 'package:frontend/bulletin_board/article.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -225,7 +226,15 @@ class BulletinBoardState extends State<BulletinBoard> {
             child: ListView.builder(
               itemCount: articles.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                Article(title: "${articles[index]["title"]}")));
+                  },
+                  child: Container(
                     decoration: BoxDecoration(
                         border: Border(
                             bottom: BorderSide(color: Colors.grey, width: 2))),
@@ -323,31 +332,12 @@ class BulletinBoardState extends State<BulletinBoard> {
                                 }),
                               ),
                             ),
-                            // children: List.generate(
-                            //     articles[index]["tags"].length, (index) {
-                            //   return Row(
-                            //     children: [
-                            //       if (index <
-                            //           articles[index]["tags"].length)
-                            //         SizedBox(width: 15),
-                            //       Row(
-                            //         mainAxisSize: MainAxisSize.min,
-                            //         children: <Widget>[
-                            //           Text(articles[index]["tags"],
-                            //               style: TextStyle(
-                            //                   fontSize: 15,
-                            //                   color: Colors.lightBlue))
-                            //         ],
-                            //       ),
-                            //     ],
-                            //   );
-                            // }),
-                            // ),
-                            // ),
                           ],
                         )
                       ],
-                    ));
+                    ),
+                  ),
+                );
               },
             ),
           ),
