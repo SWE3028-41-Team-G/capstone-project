@@ -5,12 +5,16 @@ import { PrismaService } from '../prisma/prisma.service'
 export class BoardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(tag?: string) {
-    const whereCondition = tag
+  async findAll(tags?: string) {
+    const tagArray = tags ? tags.split(',') : []
+
+    const whereCondition = tags
       ? {
           tags: {
             some: {
-              name: tag // 태그 이름과 일치하는 조건
+              name: {
+                in: tagArray
+              }
             }
           }
         }

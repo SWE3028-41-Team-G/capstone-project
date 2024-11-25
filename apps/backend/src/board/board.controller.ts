@@ -16,8 +16,8 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Get()
-  async findAll(@Query('tag') tag?: string) {
-    return this.boardService.findAll(tag)
+  async findAll(@Query('tags') tags?: string) {
+    return this.boardService.findAll(tags)
   }
 
   @Get(':id')

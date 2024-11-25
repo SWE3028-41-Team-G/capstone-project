@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { ApplyModule } from './apply/apply.module'
 import { AuthModule } from './auth/auth.module'
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard'
 import { BoardModule } from './board/board.module'
@@ -17,7 +18,6 @@ import { PrismaModule } from './prisma/prisma.module'
 import { SquareModule } from './square/square.module'
 import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
-import { ApplyModule } from './apply/apply.module';
 
 @Module({
   imports: [
