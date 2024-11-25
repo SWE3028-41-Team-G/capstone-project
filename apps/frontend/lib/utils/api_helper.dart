@@ -39,7 +39,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   // 로그인 요청
-  Future<void> login(String username, String password) async {
+  Future<void> login(String username, String password, context) async {
     try {
       await init();
       final loginUri = ApiHelper.buildRequest("auth/login");
@@ -74,7 +74,10 @@ class AuthProvider with ChangeNotifier {
         _isLoggedIn = true; // 로그인 성공 시 로그인 상태로 설정
         notifyListeners(); // 상태 변경 알림
       } else {
-        throw Exception('로그인 실패');
+        var msg = jsonDecode(response.body)['message'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
       }
     } catch (e) {
       rethrow;
@@ -124,6 +127,13 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     try {
       await init();
+      final logoutUri = ApiHelper.buildRequest("auth/logout");
+      final response =
+          await http.post(logoutUri, headers: {"authorization": accessToken!});
+
+      debugPrint("logout POST 잘 되었는지 확인 중 : ${response.statusCode}");
+      debugPrint("logout POST response.body 확인 중 : ${response.body}");
+
       // secureStorage에서 Access Token 삭제
       await secureStorage.delete(key: 'access_token');
       _isLoggedIn = false; // 로그아웃 처리

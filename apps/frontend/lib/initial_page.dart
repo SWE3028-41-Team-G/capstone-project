@@ -117,9 +117,7 @@ class _InitialPageState extends State<InitialPage> {
                                 _formKey.currentState!.save();
                                 // 로그인 요청
                                 await context.read<AuthProvider>().login(
-                                      username.text,
-                                      password.text,
-                                    );
+                                    username.text, password.text, context);
 
                                 // 로그인 성공 후, 홈 화면으로 이동
                                 if (context.read<AuthProvider>().isLoggedIn) {

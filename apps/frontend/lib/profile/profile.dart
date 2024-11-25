@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/initial_page.dart';
 import 'package:frontend/profile/modify_profile.dart';
 import 'package:frontend/utils/api_helper.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 // import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:http/http.dart' as http;
 // import 'dart:convert';
 
 class Profile extends StatefulWidget {
@@ -16,6 +18,9 @@ class Profile extends StatefulWidget {
 }
 
 class ProfileState extends State<Profile> {
+  late userReturnType? _userData; // 데이터 저장용 변수
+  bool _isLoading = true; // 로딩 상태 변수
+
   Map<String, dynamic>? userProfile = {
     'imageUrl':
         'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
@@ -29,82 +34,31 @@ class ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    // fetchUserProfile(); // 사용자 정보를 불러오는 함수 호출
-    // fetchUserSchedules(); // 사용자 스케줄 정보를 불러오는 함수 호출
+    _fetchProfileData();
   }
 
-  // // 사용자 정보를 서버에서 불러오는 함수
-  // Future<void> fetchUserProfile() async {
-  //   var url = 'http://3.38.255.82/profiles/user'; // 서버 주소
-  //   var headers = {
-  //     'Content-Type': 'application/json',
-  //     'Authorization': 'Bearer $token', // JWT 토큰
-  //   };
-  //   var body = jsonEncode({});
+  // 프로필 데이터를 가져오는 함수
+  Future<void> _fetchProfileData() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final response = await authProvider.get('users/current/profile');
 
-  //   try {
-  //     var response = await http.get(
-  //       Uri.parse(url),
-  //       headers: headers,
-  //     );
+    debugPrint("fetchProfile 중 statusCode 확인 중 : ${response.statusCode}");
 
-  //     if (response.statusCode == 200) {
-  //       setState(() {
-  //         userProfile = jsonDecode(response.body); // 응답 데이터 저장
-  //         print("User Data: $userProfile"); // 콘솔에 사용자 데이터 출력
-  //       });
-  //     } else {
-  //       Fluttertoast.showToast(
-  //         msg: "Failed to load user data: ${response.statusCode}",
-  //         toastLength: Toast.LENGTH_LONG,
-  //         gravity: ToastGravity.BOTTOM,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     Fluttertoast.showToast(
-  //       msg: "An error occurred: $e",
-  //       toastLength: Toast.LENGTH_LONG,
-  //       gravity: ToastGravity.BOTTOM,
-  //     );
-  //   }
-  // }
-
-  // // 사용자 스케줄 정보를 서버에서 불러오는 함수
-  // Future<void> fetchUserSchedules() async {
-  //   var url = 'http://3.38.255.82/profiles/schedules'; // 서버 주소
-  //   var headers = {
-  //     'Content-Type': 'application/json',
-  //     'Authorization': 'Bearer $token', // JWT 토큰
-  //   };
-  //   var body = jsonEncode({});
-
-  //   try {
-  //     var response = await http.post(
-  //       Uri.parse(url),
-  //       headers: headers,
-  //       body: body,
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       setState(() {
-  //         schedules = List<Map<String, dynamic>>.from(jsonDecode(response.body)['schedules']); // 응답 데이터 저장
-  //         print("Schedules Data: $schedules"); // 콘솔에 스케줄 데이터 출력
-  //       });
-  //     } else {
-  //       Fluttertoast.showToast(
-  //         msg: "Failed to load schedules: ${response.statusCode}",
-  //         toastLength: Toast.LENGTH_LONG,
-  //         gravity: ToastGravity.BOTTOM,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     Fluttertoast.showToast(
-  //       msg: "An error occurred: $e",
-  //       toastLength: Toast.LENGTH_LONG,
-  //       gravity: ToastGravity.BOTTOM,
-  //     );
-  //   }
-  // }
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonData = jsonDecode(response.body);
+      setState(() {
+        _userData = userReturnType.fromJson(jsonData);
+        debugPrint("fetchProfile 중 userData 확인 중 : $_userData");
+        _isLoading = false; // 데이터 로딩 완료
+      });
+    } else {
+      setState(() {
+        _isLoading = false; // 에러 발생 시에도 로딩 종료
+      });
+      // 에러 처리
+      throw Exception('Failed to load profile data');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,16 +138,19 @@ class ProfileState extends State<Profile> {
                   ),
                   child: Row(
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          topRight: Radius.circular(8),
-                        ),
-                        child: Image.network(
-                          userProfile?['imageUrl'],
-                          width: 150,
-                          height: 150,
-                          fit: BoxFit.cover,
+                      Container(
+                        width: 150,
+                        height: 150,
+                        padding: EdgeInsets.all(10),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                          child: Image.network(
+                            _userData?.imageUrl ??
+                                'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       Column(
@@ -201,70 +158,81 @@ class ProfileState extends State<Profile> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${userProfile?['nickname']}",
+                            '${_userData?.nickname}',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,
                             ),
                           ),
                           Text(
-                            "❶ ${userProfile?['primaryMajor']}",
+                            "❶ ${_userData?.majors[0].major.name}",
                             style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
+                              color: Colors.grey[800],
+                              fontSize: 18,
                             ),
                           ),
                           Text(
-                            "❷ ${userProfile?['secondMajor']}",
+                            _userData!.real
+                                ? "❷ ${_userData!.majors[1].major.name}" // real이 true일 경우
+                                : "❷ 해당없음", // real이 false일 경우
                             style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
+                              color: Colors.grey[800],
+                              fontSize: 18,
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 6, horizontal: 12),
-                                margin: EdgeInsets.symmetric(horizontal: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.lightBlue[200],
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 6, horizontal: 12),
+                                  margin: EdgeInsets.symmetric(horizontal: 5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.lightBlue[200],
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '${_userData?.interests[0]}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow
+                                        .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
                                   ),
                                 ),
-                                child: Text(
-                                  '${userProfile?['keyword1']}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                  overflow: TextOverflow
-                                      .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                                SizedBox(
+                                  width: 3,
                                 ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 6, horizontal: 12),
-                                // margin: EdgeInsets.symmetric(horizontal: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.lightGreen[200],
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 6, horizontal: 12),
+                                  // margin: EdgeInsets.symmetric(horizontal: 5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.lightGreen[200],
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '${_userData?.interests[1]}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow
+                                        .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
                                   ),
                                 ),
-                                child: Text(
-                                  '${userProfile?['keyword2']}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                  overflow: TextOverflow
-                                      .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           )
                         ],
                       )
@@ -273,7 +241,9 @@ class ProfileState extends State<Profile> {
               Divider(),
               // mock apply
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  debugPrint("모의지원에서 테스트 중 : ${_userData!.nickname}");
+                },
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
@@ -519,5 +489,108 @@ class ProfileState extends State<Profile> {
         );
       },
     );
+  }
+}
+
+// User정보
+class UserMajor {
+  final bool origin; // 원전공 여부
+  final MajorDetails major; // 전공 정보
+
+  UserMajor({required this.origin, required this.major});
+
+  factory UserMajor.fromJson(Map<String, dynamic> json) {
+    return UserMajor(
+      origin: json['origin'],
+      major: MajorDetails.fromJson(json['Major']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'origin': origin,
+      'Major': major.toJson(),
+    };
+  }
+}
+
+class MajorDetails {
+  final int id; // 전공 ID
+  final String name; // 전공 이름
+
+  MajorDetails({required this.id, required this.name});
+
+  factory MajorDetails.fromJson(Map<String, dynamic> json) {
+    return MajorDetails(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+}
+
+class userReturnType {
+  final List<UserMajor> majors; // 전공 목록
+  final int userId; // 사용자 ID
+  final String imageUrl; // 프로필 이미지 주소
+  final String intro; // 한줄소개 (Deprecated)
+  final List<String> interests; // 관심사 목록
+  final bool public; // 프로필 공개 여부
+  final String username; // 아이디
+  final String nickname; // 별명
+  final int admitYear; // 입학년도(yyyy)
+  final bool real; // 실제 복수전공 여부
+
+  userReturnType({
+    required this.majors,
+    required this.userId,
+    required this.imageUrl,
+    required this.intro,
+    required this.interests,
+    required this.public,
+    required this.username,
+    required this.nickname,
+    required this.admitYear,
+    required this.real,
+  });
+
+  factory userReturnType.fromJson(Map<String, dynamic> json) {
+    var majorsList = (json['majors'] as List)
+        .map((major) => UserMajor.fromJson(major))
+        .toList();
+
+    return userReturnType(
+      majors: majorsList,
+      userId: json['userId'],
+      imageUrl: json['imageUrl'],
+      intro: json['intro'],
+      interests: List<String>.from(json['interests']),
+      public: json['public'],
+      username: json['username'],
+      nickname: json['nickname'],
+      admitYear: json['admitYear'],
+      real: json['real'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'majors': majors.map((major) => major.toJson()).toList(),
+      'userId': userId,
+      'imageUrl': imageUrl,
+      'intro': intro,
+      'interests': interests,
+      'public': public,
+      'username': username,
+      'nickname': nickname,
+      'admitYear': admitYear,
+      'real': real,
+    };
   }
 }
