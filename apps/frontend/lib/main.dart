@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/initial_page.dart';
 import 'package:frontend/register/major.dart';
+import 'package:frontend/utils/api_helper.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => MajorProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MajorProvider()),
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+      ],
       child: MyApp(),
     ),
   );

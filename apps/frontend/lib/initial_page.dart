@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
 import 'package:frontend/register/register.dart';
+import 'package:frontend/utils/api_helper.dart';
+import 'package:provider/provider.dart';
 
 class InitialPage extends StatefulWidget {
   const InitialPage({
@@ -110,15 +112,27 @@ class _InitialPageState extends State<InitialPage> {
                                 side: BorderSide.none,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10))),
-                            onPressed: () {
+                            onPressed: () async {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
+                                // 로그인 요청
+                                await context.read<AuthProvider>().login(
+                                      username.text,
+                                      password.text,
+                                    );
 
-                                // 화면 전환
-                                Navigator.push(
+                                // 로그인 성공 후, 홈 화면으로 이동
+                                if (context.read<AuthProvider>().isLoggedIn) {
+                                  Navigator.pushReplacement(
                                     context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const Home()));
+                                    MaterialPageRoute(builder: (_) => Home()),
+                                  );
+                                } else {
+                                  // 로그인 실패 시 처리 (예: 오류 메시지)
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('로그인 실패')),
+                                  );
+                                }
                               }
                             },
                             child: Text(

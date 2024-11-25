@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/initial_page.dart';
 import 'package:frontend/profile/modify_profile.dart';
+import 'package:frontend/utils/api_helper.dart';
+import 'package:provider/provider.dart';
 
 // import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:http/http.dart' as http;
@@ -434,7 +437,16 @@ class ProfileState extends State<Profile> {
               ),
               // 탈퇴하기 버튼
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  // 로그아웃 처리
+                  await context.read<AuthProvider>().logout();
+                  // 로그아웃 후 로그인 화면으로 이동
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => InitialPage()),
+                    (Route<dynamic> route) => false,
+                  );
+                },
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
@@ -447,7 +459,7 @@ class ProfileState extends State<Profile> {
                     ),
                   ),
                   child: Text(
-                    "회원탈퇴",
+                    "로그아웃",
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
