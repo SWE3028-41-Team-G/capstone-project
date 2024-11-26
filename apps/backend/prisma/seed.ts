@@ -40,7 +40,8 @@ async function main() {
         create: {
           imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
           intro: '',
-          public: true
+          public: true,
+          interests: ['관심사 1', '관심사 2']
         }
       }
     }
@@ -61,7 +62,8 @@ async function main() {
         create: {
           imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
           intro: '',
-          public: false
+          public: false,
+          interests: ['관심사 1', '관심사 2']
         }
       }
     }
@@ -83,7 +85,8 @@ async function main() {
         create: {
           imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
           intro: '',
-          public: true
+          public: true,
+          interests: ['관심사 1', '관심사 2']
         }
       }
     }
@@ -105,7 +108,8 @@ async function main() {
         create: {
           imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
           intro: '',
-          public: true
+          public: true,
+          interests: ['관심사 1', '관심사 2']
         }
       }
     }
@@ -127,7 +131,8 @@ async function main() {
         create: {
           imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
           intro: '',
-          public: true
+          public: true,
+          interests: ['관심사 1', '관심사 2']
         }
       }
     }
@@ -149,7 +154,8 @@ async function main() {
         create: {
           imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
           intro: '',
-          public: false
+          public: false,
+          interests: ['관심사 1', '관심사 2']
         }
       }
     }
@@ -171,7 +177,8 @@ async function main() {
         create: {
           imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
           intro: '',
-          public: false
+          public: false,
+          interests: ['관심사 1', '관심사 2']
         }
       }
     }
