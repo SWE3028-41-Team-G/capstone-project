@@ -12,7 +12,19 @@ class WriteArticle extends StatefulWidget {
 
 class _WriteArticleState extends State<WriteArticle> {
   final _formKey = GlobalKey<FormState>();
-  List<String> selectedTags = [];
+  // Temporal infos, soon be linked with API
+  List<dynamic> tags = [
+    "#수학",
+    "#전공진입",
+    "#꿀팁",
+    "#소프트웨어",
+    "#졸업요건",
+    "#CL과목",
+    "#수업추천",
+    "#명강의"
+  ];
+
+  List<dynamic> selectedTags = [];
 
   @override
   Widget build(BuildContext context) {
@@ -66,21 +78,14 @@ class _WriteArticleState extends State<WriteArticle> {
                     SizedBox(
                       height: 15,
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 2,
-                      child: MultiSelectChipField(
-                        items: [
-                          MultiSelectItem('#꿀팁', 'tag1'),
-                          MultiSelectItem('#수업추천', 'tag2'),
-                          MultiSelectItem('#졸업요건', 'tag3'),
-                          MultiSelectItem('#전공진입', 'tag4'),
-                          MultiSelectItem('#새내기', 'tag5'),
-                        ],
-                        title: Text('태그'),
-                        onTap: (values) {
+                    MultiSelectChipField(
+                      items: tags.map((e) => MultiSelectItem(e, e)).toList(),
+                      title: Text('태그'),
+                      onTap: (values) {
+                        setState(() {
                           selectedTags = values;
-                        },
-                      ),
+                        });
+                      },
                     ),
                     SizedBox(
                       height: 10,
