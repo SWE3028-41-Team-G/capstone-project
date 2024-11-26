@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/initial_page.dart';
 import 'package:frontend/profile/modify_profile.dart';
 import 'package:frontend/utils/api_helper.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 // import 'package:fluttertoast/fluttertoast.dart';
@@ -18,50 +15,17 @@ class Profile extends StatefulWidget {
 }
 
 class ProfileState extends State<Profile> {
-  late userReturnType? _userData; // 데이터 저장용 변수
-  bool _isLoading = true; // 로딩 상태 변수
-
-  Map<String, dynamic>? userProfile = {
-    'imageUrl':
-        'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-    'nickname': '명륜이',
-    'primaryMajor': '경제학과',
-    'secondMajor': '소프트웨어학과',
-    'keyword1': '산책',
-    'keyword2': '헬스'
-  }; // 사용자 프로필 정보를 저장할 변수
-
   @override
   void initState() {
     super.initState();
-    _fetchProfileData();
-  }
-
-  // 프로필 데이터를 가져오는 함수
-  Future<void> _fetchProfileData() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final response = await authProvider.get('users/current/profile');
-
-    debugPrint("fetchProfile 중 statusCode 확인 중 : ${response.statusCode}");
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonData = jsonDecode(response.body);
-      setState(() {
-        _userData = userReturnType.fromJson(jsonData);
-        debugPrint("fetchProfile 중 userData 확인 중 : $_userData");
-        _isLoading = false; // 데이터 로딩 완료
-      });
-    } else {
-      setState(() {
-        _isLoading = false; // 에러 발생 시에도 로딩 종료
-      });
-      // 에러 처리
-      throw Exception('Failed to load profile data');
-    }
+    authProvider.fetchProfileData();
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    var userData = authProvider.user!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -147,8 +111,7 @@ class ProfileState extends State<Profile> {
                             Radius.circular(8),
                           ),
                           child: Image.network(
-                            _userData?.imageUrl ??
-                                'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+                            userData.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -158,22 +121,22 @@ class ProfileState extends State<Profile> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${_userData?.nickname}',
+                            userData.nickname,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,
                             ),
                           ),
                           Text(
-                            "❶ ${_userData?.majors[0].major.name}",
+                            "❶ ${userData.majors[0].major.name}",
                             style: TextStyle(
                               color: Colors.grey[800],
                               fontSize: 18,
                             ),
                           ),
                           Text(
-                            _userData!.real
-                                ? "❷ ${_userData!.majors[1].major.name}" // real이 true일 경우
+                            userData.real
+                                ? "❷ ${userData.majors[1].major.name}" // real이 true일 경우
                                 : "❷ 해당없음", // real이 false일 경우
                             style: TextStyle(
                               color: Colors.grey[800],
@@ -199,7 +162,7 @@ class ProfileState extends State<Profile> {
                                     ),
                                   ),
                                   child: Text(
-                                    '${_userData?.interests[0]}',
+                                    userData.interests[0],
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.white,
@@ -222,7 +185,7 @@ class ProfileState extends State<Profile> {
                                     ),
                                   ),
                                   child: Text(
-                                    '${_userData?.interests[1]}',
+                                    userData.interests[1],
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.white,
@@ -242,7 +205,7 @@ class ProfileState extends State<Profile> {
               // mock apply
               GestureDetector(
                 onTap: () {
-                  debugPrint("모의지원에서 테스트 중 : ${_userData!.nickname}");
+                  debugPrint("모의지원에서 테스트 중 : ${userData!.nickname}");
                 },
                 child: Container(
                   width: double.infinity,
@@ -326,7 +289,7 @@ class ProfileState extends State<Profile> {
                                 style: TextStyle(
                                     color: Colors.black, fontSize: 18)),
                           ),
-                          Text('${userProfile?['primaryMajor']}',
+                          Text(' ${userData.majors[0].major.name}',
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 18))
                         ],
@@ -341,7 +304,11 @@ class ProfileState extends State<Profile> {
                                 style: TextStyle(
                                     color: Colors.black, fontSize: 18)),
                           ),
-                          Text('${userProfile?['secondMajor']}',
+                          Text(
+                              userData.real
+                                  ? userData
+                                      .majors[1].major.name // real이 true일 경우
+                                  : "해당없음", // real이 false일 경우,
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 18))
                         ],
@@ -477,7 +444,7 @@ class ProfileState extends State<Profile> {
             TextButton(
               onPressed: () {
                 String userInput = controller.text;
-                print('사용자가 입력한 내용: $userInput');
+                debugPrint('사용자가 입력한 내용: $userInput');
                 Navigator.of(context).pop(); // 다이얼로그 닫기
               },
               child: Text(
@@ -489,108 +456,5 @@ class ProfileState extends State<Profile> {
         );
       },
     );
-  }
-}
-
-// User정보
-class UserMajor {
-  final bool origin; // 원전공 여부
-  final MajorDetails major; // 전공 정보
-
-  UserMajor({required this.origin, required this.major});
-
-  factory UserMajor.fromJson(Map<String, dynamic> json) {
-    return UserMajor(
-      origin: json['origin'],
-      major: MajorDetails.fromJson(json['Major']),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'origin': origin,
-      'Major': major.toJson(),
-    };
-  }
-}
-
-class MajorDetails {
-  final int id; // 전공 ID
-  final String name; // 전공 이름
-
-  MajorDetails({required this.id, required this.name});
-
-  factory MajorDetails.fromJson(Map<String, dynamic> json) {
-    return MajorDetails(
-      id: json['id'],
-      name: json['name'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
-  }
-}
-
-class userReturnType {
-  final List<UserMajor> majors; // 전공 목록
-  final int userId; // 사용자 ID
-  final String imageUrl; // 프로필 이미지 주소
-  final String intro; // 한줄소개 (Deprecated)
-  final List<String> interests; // 관심사 목록
-  final bool public; // 프로필 공개 여부
-  final String username; // 아이디
-  final String nickname; // 별명
-  final int admitYear; // 입학년도(yyyy)
-  final bool real; // 실제 복수전공 여부
-
-  userReturnType({
-    required this.majors,
-    required this.userId,
-    required this.imageUrl,
-    required this.intro,
-    required this.interests,
-    required this.public,
-    required this.username,
-    required this.nickname,
-    required this.admitYear,
-    required this.real,
-  });
-
-  factory userReturnType.fromJson(Map<String, dynamic> json) {
-    var majorsList = (json['majors'] as List)
-        .map((major) => UserMajor.fromJson(major))
-        .toList();
-
-    return userReturnType(
-      majors: majorsList,
-      userId: json['userId'],
-      imageUrl: json['imageUrl'],
-      intro: json['intro'],
-      interests: List<String>.from(json['interests']),
-      public: json['public'],
-      username: json['username'],
-      nickname: json['nickname'],
-      admitYear: json['admitYear'],
-      real: json['real'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'majors': majors.map((major) => major.toJson()).toList(),
-      'userId': userId,
-      'imageUrl': imageUrl,
-      'intro': intro,
-      'interests': interests,
-      'public': public,
-      'username': username,
-      'nickname': nickname,
-      'admitYear': admitYear,
-      'real': real,
-    };
   }
 }

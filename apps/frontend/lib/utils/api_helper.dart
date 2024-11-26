@@ -30,6 +30,9 @@ class AuthProvider with ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   String? get accessToken => _accessToken;
 
+  UserReturnType? _user; // 프로필 데이터를 저장할 변수
+  UserReturnType? get user => _user;
+
   // CookieJar 초기화
   static Future<void> init() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -188,6 +191,139 @@ class AuthProvider with ChangeNotifier {
 
     return {
       'Authorization': _accessToken!,
+    };
+  }
+
+  // 프로필 데이터 가져오기
+  Future<void> fetchProfileData() async {
+    try {
+      // API 요청 경로 생성
+      final profileUri = ApiHelper.buildRequest("users/current/profile");
+
+      // GET 요청 전송
+      final response = await http.get(
+        profileUri,
+        headers: await _getAuthHeaders(), // 인증 헤더 포함
+      );
+
+      debugPrint("프로필 데이터 GET statusCode: ${response.statusCode}");
+      debugPrint("프로필 데이터 response.body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        // JSON 데이터 파싱 및 UserReturnType 객체 생성
+        final data = jsonDecode(response.body);
+        _user = UserReturnType.fromJson(data);
+
+        notifyListeners(); // 상태 변경 알림
+      } else {
+        throw Exception('프로필 데이터를 가져오지 못했습니다.');
+      }
+    } catch (e) {
+      debugPrint('프로필 데이터를 가져오는 중 오류 발생: $e');
+      rethrow;
+    }
+  }
+}
+
+// User정보
+class UserMajor {
+  final bool origin; // 원전공 여부
+  final MajorDetails major; // 전공 정보
+
+  UserMajor({required this.origin, required this.major});
+
+  factory UserMajor.fromJson(Map<String, dynamic> json) {
+    return UserMajor(
+      origin: json['origin'],
+      major: MajorDetails.fromJson(json['Major']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'origin': origin,
+      'Major': major.toJson(),
+    };
+  }
+}
+
+class MajorDetails {
+  final int id; // 전공 ID
+  final String name; // 전공 이름
+
+  MajorDetails({required this.id, required this.name});
+
+  factory MajorDetails.fromJson(Map<String, dynamic> json) {
+    return MajorDetails(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+}
+
+class UserReturnType {
+  final List<UserMajor> majors; // 전공 목록
+  final int userId; // 사용자 ID
+  final String imageUrl; // 프로필 이미지 주소
+  final String intro; // 한줄소개 (무시)
+  final List<String> interests; // 관심사 목록
+  final bool public; // 프로필 공개 여부
+  final String username; // 아이디
+  final String nickname; // 닉네임
+  final int admitYear; // 입학년도(yyyy)
+  final bool real; // 실제 복수전공 여부
+
+  UserReturnType({
+    required this.majors,
+    required this.userId,
+    required this.imageUrl,
+    required this.intro,
+    required this.interests,
+    required this.public,
+    required this.username,
+    required this.nickname,
+    required this.admitYear,
+    required this.real,
+  });
+
+  factory UserReturnType.fromJson(Map<String, dynamic> json) {
+    var majorsList = (json['majors'] as List)
+        .map((major) => UserMajor.fromJson(major))
+        .toList();
+
+    return UserReturnType(
+      majors: majorsList,
+      userId: json['userId'],
+      imageUrl: json['imageUrl'],
+      intro: json['intro'],
+      interests: List<String>.from(json['interests']),
+      public: json['public'],
+      username: json['username'],
+      nickname: json['nickname'],
+      admitYear: json['admitYear'],
+      real: json['real'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'majors': majors.map((major) => major.toJson()).toList(),
+      'userId': userId,
+      'imageUrl': imageUrl,
+      'intro': intro,
+      'interests': interests,
+      'public': public,
+      'username': username,
+      'nickname': nickname,
+      'admitYear': admitYear,
+      'real': real,
     };
   }
 }

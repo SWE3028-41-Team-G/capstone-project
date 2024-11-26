@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/home.dart';
 import 'package:frontend/initial_page.dart';
 import 'package:frontend/register/register.dart';
 
@@ -189,7 +188,6 @@ class _RegisterProfileState extends State<RegisterProfile> {
                         widget.registerData['nickname'] = _nickname;
                         widget.registerData['public'] = _selectedOption;
                         widget.registerData['interests'] = _interests;
-                        // widget.registerData['pin'] = widget.pin;
                         // widget.registerData['intro'] = " ";
 
                         // 이미지 임시 업로드 POST ----------------------------------------------------
@@ -222,17 +220,12 @@ class _RegisterProfileState extends State<RegisterProfile> {
                             } else {
                               // 요청 실패
                               debugPrint("요청 실패: ${response.body}");
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text("서버 오류가 발생했습니다. 다시 시도해주세요.")),
-                              );
                             }
                           } catch (e) {
                             // 네트워크 또는 기타 오류 처리
                             debugPrint("오류 발생: $e");
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text("오류가 발생했습니다. 인터넷 연결을 확인해주세요.")),
+                              SnackBar(content: Text("오류가 발생했습니다.")),
                             );
                           }
                         } else {
@@ -303,8 +296,7 @@ class _RegisterProfileState extends State<RegisterProfile> {
                           // 네트워크 또는 기타 오류 처리
                           debugPrint("오류 발생: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text("오류가 발생했습니다. 인터넷 연결을 확인해주세요.")),
+                            SnackBar(content: Text("오류가 발생했습니다.")),
                           );
                         }
                       }
