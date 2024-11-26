@@ -49,7 +49,7 @@ async function main() {
   const user2 = await prisma.user.create({
     data: {
       username: 'user02',
-      password: await hash('anotherpassword'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
       nickname: 'user02',
       email: 'user02@example.com',
       UserMajor: {
