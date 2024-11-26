@@ -5,6 +5,7 @@ import 'package:frontend/bulletin_board/article.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class BulletinBoard extends StatefulWidget {
   const BulletinBoard({super.key});
@@ -14,14 +15,18 @@ class BulletinBoard extends StatefulWidget {
 }
 
 class BulletinBoardState extends State<BulletinBoard> {
-  int _selectedFilterIndex = 0;
   // Temporal infos, soon be linked with API
-  List<dynamic> filters = [
-    ["#수학", "#전공진입"],
-    ["#졸업요건", "#수업추천"],
-    ["#꿀팁", "#복수전공", "#수업추천"],
-    ["#수학", "#소프트웨어", "#CL과목", "#꿀팁"],
+  List<dynamic> tags = [
+    "#수학",
+    "#전공진입",
+    "#꿀팁",
+    "#소프트웨어",
+    "#졸업요건",
+    "#CL과목",
+    "#수업추천",
+    "#명강의"
   ];
+  List<dynamic> selectedTags = [];
   List<dynamic> articles = [
     {
       "title": "이번 학기에 반드시 수강신청해야하는 과목",
@@ -117,95 +122,32 @@ class BulletinBoardState extends State<BulletinBoard> {
           // write button and filter settings
           Container(
             margin: EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: Icon(Icons.filter_alt),
-                    label: Text(
-                      '필터 수정',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                      ),
-                    )),
-                ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => WriteArticle()));
-                    },
-                    icon: Icon(Icons.edit),
-                    label: Text(
-                      '새 글 작성',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                      ),
-                    )),
-              ],
-            ),
+            alignment: Alignment.centerRight,
+            child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => WriteArticle()));
+                },
+                icon: Icon(Icons.edit),
+                label: Text(
+                  '새 글 작성',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                  ),
+                )),
           ),
-          // filter menus
+          // tag selection & search menu
           Container(
             margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: Column(
-              children: [
-                // Filter lists
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(filters.length, (index) {
-                      return Row(
-                        children: [
-                          if (index < filters.length) SizedBox(width: 15),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedFilterIndex = index;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _selectedFilterIndex == index
-                                  ? Colors.blueAccent
-                                  : Colors.grey,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[Text('필터#${index + 1}')],
-                            ),
-                          ),
-                        ],
-                      );
-                    }),
-                  ),
-                ),
-                // Tag results
-                Container(
-                  margin: EdgeInsets.all(10),
-                  child: Row(
-                    children: List.generate(
-                        filters[_selectedFilterIndex].length, (index) {
-                      return Row(
-                        children: [
-                          if (index < filters[_selectedFilterIndex].length)
-                            SizedBox(width: 15),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Text(filters[_selectedFilterIndex][index],
-                                  style: TextStyle(
-                                      fontSize: 15, color: Colors.lightBlue))
-                            ],
-                          ),
-                        ],
-                      );
-                    }),
-                  ),
-                ),
-              ],
+            child: MultiSelectChipField(
+              items: tags.map((e) => MultiSelectItem(e, e)).toList(),
+              title: Text('태그'),
+              onTap: (values) {
+                setState(() {
+                  selectedTags = values;
+                });
+              },
             ),
           ),
           // "Results" Textbox
