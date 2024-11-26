@@ -145,6 +145,7 @@ class _RecruitmentState extends State<Recruitment> {
                           ),
                           SizedBox(width: 10),
                           Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -152,10 +153,10 @@ class _RecruitmentState extends State<Recruitment> {
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
-                              Spacer(),
-                              Text(
-                                timestamp,
-                                style: TextStyle(fontSize: 16),
+                              Flexible(
+                                child: Text(
+                                  timestamp,
+                                ),
                               ),
                             ],
                           ),

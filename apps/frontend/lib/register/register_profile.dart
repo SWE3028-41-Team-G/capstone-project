@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
@@ -189,7 +190,7 @@ class _RegisterProfileState extends State<RegisterProfile> {
                         widget.registerData['public'] = _selectedOption;
                         widget.registerData['interests'] = _interests;
                         // widget.registerData['pin'] = widget.pin;
-                        widget.registerData['intro'] = " ";
+                        // widget.registerData['intro'] = " ";
 
                         // 이미지 임시 업로드 POST ----------------------------------------------------
                         if (_image != null) {
@@ -234,6 +235,8 @@ class _RegisterProfileState extends State<RegisterProfile> {
                                   content: Text("오류가 발생했습니다. 인터넷 연결을 확인해주세요.")),
                             );
                           }
+                        } else {
+                          debugPrint("이미지 null인지 확인 중 : $_imgUrl");
                         }
 
                         widget.registerData['profileImageUrl'] = _imgUrl;
@@ -262,9 +265,23 @@ class _RegisterProfileState extends State<RegisterProfile> {
                                 jsonEncode(widget.registerData), // JSON 형식으로 변환
                           );
 
-                          debugPrint("API 요청 URL: $request");
+                          // final Uri healthCheck =
+                          //     ApiHelper.buildRequest('health-check');
+                          // final healthResponse = await http.get(healthCheck);
+
+                          // debugPrint('Health Check URL: $healthCheck');
+                          // debugPrint(
+                          //     "healthCheck statusCode 확인 중 : ${healthResponse.statusCode}");
+                          // debugPrint(
+                          //     "healthCheck response.body 확인 중 : ${healthResponse.body}");
+
+                          debugPrint("JSON 확인 중 : ${widget.registerData}");
+
+                          debugPrint("API 요청 URL: $reqWithParams");
                           debugPrint("응답 상태 코드: ${response.statusCode}");
                           debugPrint("responseBody 디버깅주우우웅 : ${response.body}");
+                          debugPrint('응답 헤더: ${response.headers}');
+                          debugPrint('응답 이유: ${response.reasonPhrase}');
 
                           if (response.statusCode == 201) {
                             // 요청 성공
@@ -354,8 +371,12 @@ class _RegisterProfileState extends State<RegisterProfile> {
         SizedBox(
           width: 5,
         ),
-        Text(
-          "프로필 공개 여부를 선택해 주세요",
+        Flexible(
+          child: AutoSizeText(
+            "프로필 공개 여부를 선택해 주세요",
+            maxLines: 1,
+            style: TextStyle(fontSize: 18),
+          ),
         ),
         Radio<bool>(
           value: true,
@@ -367,7 +388,9 @@ class _RegisterProfileState extends State<RegisterProfile> {
             });
           },
         ),
-        Text('공개'),
+        Text(
+          '공개',
+        ),
         Radio<bool>(
           value: false,
           groupValue: _selectedOption,
