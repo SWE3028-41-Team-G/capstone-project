@@ -7,7 +7,7 @@ async function main() {
   // 시드 데이터 - Major
   const major1 = await prisma.major.create({
     data: {
-      name: 'Computer Science',
+      name: '소프트웨어학과',
       meta: {
         description: 'The study of computers and computational systems.'
       }
@@ -16,7 +16,7 @@ async function main() {
 
   const major2 = await prisma.major.create({
     data: {
-      name: 'Electrical Engineering',
+      name: '전자전기공학부',
       meta: {
         description: 'The study of electrical systems and circuitry.'
       }
@@ -26,10 +26,10 @@ async function main() {
   // 시드 데이터 - User 및 Profile
   const user1 = await prisma.user.create({
     data: {
-      username: 'johndoe',
-      password: await hash('securepassword'), // 실제 서비스에서는 암호화 필요
-      nickname: 'Johnny',
-      email: 'john@example.com',
+      username: 'user01',
+      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      nickname: 'user01',
+      email: 'user01@example.com',
       UserMajor: {
         create: [
           { majorId: major1.id }, // Computer Science 전공 추가
@@ -38,8 +38,8 @@ async function main() {
       },
       Profile: {
         create: {
-          imageUrl: 'http://example.com/johndoe.jpg',
-          intro: 'I am John, a passionate developer.',
+          imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
+          intro: '',
           public: true
         }
       }
@@ -48,10 +48,10 @@ async function main() {
 
   const user2 = await prisma.user.create({
     data: {
-      username: 'janedoe',
+      username: 'user02',
       password: await hash('anotherpassword'), // 실제 서비스에서는 암호화 필요
-      nickname: 'Janey',
-      email: 'jane@example.com',
+      nickname: 'user02',
+      email: 'user02@example.com',
       UserMajor: {
         create: [
           { majorId: major1.id } // Computer Science 전공 추가
@@ -59,8 +59,118 @@ async function main() {
       },
       Profile: {
         create: {
-          imageUrl: 'http://example.com/janedoe.jpg',
-          intro: 'Hello, I am Jane!',
+          imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
+          intro: '',
+          public: false
+        }
+      }
+    }
+  })
+
+  await prisma.user.create({
+    data: {
+      username: 'user03',
+      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      nickname: 'user03',
+      email: 'user03@example.com',
+      UserMajor: {
+        create: [
+          { majorId: major1.id }, // Computer Science 전공 추가
+          { majorId: major2.id } // Electrical Engineering 전공 추가
+        ]
+      },
+      Profile: {
+        create: {
+          imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
+          intro: '',
+          public: true
+        }
+      }
+    }
+  })
+
+  await prisma.user.create({
+    data: {
+      username: 'user04',
+      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      nickname: 'user04',
+      email: 'user04@example.com',
+      UserMajor: {
+        create: [
+          { majorId: major1.id }, // Computer Science 전공 추가
+          { majorId: major2.id } // Electrical Engineering 전공 추가
+        ]
+      },
+      Profile: {
+        create: {
+          imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
+          intro: '',
+          public: true
+        }
+      }
+    }
+  })
+
+  await prisma.user.create({
+    data: {
+      username: 'user05',
+      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      nickname: 'user05',
+      email: 'user05@example.com',
+      UserMajor: {
+        create: [
+          { majorId: major1.id }, // Computer Science 전공 추가
+          { majorId: major2.id } // Electrical Engineering 전공 추가
+        ]
+      },
+      Profile: {
+        create: {
+          imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
+          intro: '',
+          public: true
+        }
+      }
+    }
+  })
+
+  await prisma.user.create({
+    data: {
+      username: 'user06',
+      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      nickname: 'user06',
+      email: 'user06@example.com',
+      UserMajor: {
+        create: [
+          { majorId: major1.id }, // Computer Science 전공 추가
+          { majorId: major2.id } // Electrical Engineering 전공 추가
+        ]
+      },
+      Profile: {
+        create: {
+          imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
+          intro: '',
+          public: false
+        }
+      }
+    }
+  })
+
+  await prisma.user.create({
+    data: {
+      username: 'user07',
+      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      nickname: 'user07',
+      email: 'user07@example.com',
+      UserMajor: {
+        create: [
+          { majorId: major1.id }, // Computer Science 전공 추가
+          { majorId: major2.id } // Electrical Engineering 전공 추가
+        ]
+      },
+      Profile: {
+        create: {
+          imageUrl: 'https://cdn.skku-dm.site/default.jpeg',
+          intro: '',
           public: false
         }
       }
