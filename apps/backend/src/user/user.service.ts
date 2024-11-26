@@ -399,6 +399,7 @@ export class UserService {
         })
       }
     } catch (error) {
+      console.log(error)
       if (error instanceof HttpException) throw error
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -408,7 +409,6 @@ export class UserService {
           throw new NotFoundException('해당 전공이 존재하지 않습니다')
         }
       }
-
       throw new InternalServerErrorException(error)
     }
   }
