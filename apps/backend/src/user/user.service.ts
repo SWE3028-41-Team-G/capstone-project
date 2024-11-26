@@ -380,7 +380,9 @@ export class UserService {
           Profile: {
             create: {
               public: userDTO.public,
-              imageUrl: userDTO.profileImageUrl,
+              imageUrl:
+                userDTO.profileImageUrl ??
+                'https://cdn.skku-dm.site/default.jpeg',
               intro: '',
               interests: userDTO.interests
             }
