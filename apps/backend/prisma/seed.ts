@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { hash } from 'argon2'
 
 const prisma = new PrismaClient()
 
@@ -26,7 +27,7 @@ async function main() {
   const user1 = await prisma.user.create({
     data: {
       username: 'johndoe',
-      password: 'securepassword', // 실제 서비스에서는 암호화 필요
+      password: await hash('securepassword'), // 실제 서비스에서는 암호화 필요
       nickname: 'Johnny',
       email: 'john@example.com',
       UserMajor: {
@@ -48,7 +49,7 @@ async function main() {
   const user2 = await prisma.user.create({
     data: {
       username: 'janedoe',
-      password: 'anotherpassword', // 실제 서비스에서는 암호화 필요
+      password: await hash('anotherpassword'), // 실제 서비스에서는 암호화 필요
       nickname: 'Janey',
       email: 'jane@example.com',
       UserMajor: {
