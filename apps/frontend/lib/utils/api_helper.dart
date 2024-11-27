@@ -99,7 +99,7 @@ class AuthProvider with ChangeNotifier {
     _accessToken = await secureStorage.read(key: 'access_token');
   }
 
-  // 요청에 Authorization 헤더 포함
+  // GET 요청에 Authorization 헤더 포함
   Future<http.Response> get(String endpoint) async {
     try {
       await init();
@@ -122,6 +122,35 @@ class AuthProvider with ChangeNotifier {
 
       return response;
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  // PUT 요청에 Authorization 헤더 포함
+  Future<http.Response> put(String endpoint, Map<String, dynamic> body) async {
+    try {
+      await init();
+      final response = await http.put(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: await _getAuthHeaders(isJson: true),
+        body: jsonEncode(body),
+      );
+
+      debugPrint("토큰 포함 PUT statusCode : ${response.statusCode}");
+      debugPrint("토큰 포함 PUT response.body : ${response.body}");
+
+      if (response.statusCode == 401) {
+        debugPrint("여기까지는 가고 있나요?");
+        await refreshAccessToken();
+        return await http.put(
+          Uri.parse('$baseUrl$endpoint'),
+          headers: await _getAuthHeaders(isJson: true),
+          body: jsonEncode(body),
+        );
+      }
+      return response;
+    } catch (e) {
+      debugPrint("PUT 요청 중 오류 발생: $e");
       rethrow;
     }
   }
@@ -159,7 +188,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // 토큰 갱신 요청 (만약 Access Token이 만료되었으면 호출됨)
+  // 토큰 갱신 요청 (만약 Access Token이 만료되었으면 호출됨) 수정해야됨 ===================================================
   Future<void> refreshAccessToken() async {
     try {
       final reissueUri = ApiHelper.buildRequest('auth/reissue');
@@ -168,12 +197,15 @@ class AuthProvider with ChangeNotifier {
         headers: await _getAuthHeaders(),
       );
 
+      debugPrint("토큰 갱신 요청 확인 중 : ${response.statusCode}");
+      debugPrint("토큰 갱신 요청 response.body 확인 중 : ${response.body}");
+
       if (response.statusCode == 201) {
         // 새로운 Access Token을 서버에서 반환
         var newAccessToken = jsonDecode(response.body)['access_token'];
         if (newAccessToken != null) {
           // 새로운 Access Token을 secure storage에 저장
-          await _saveAccessToken(newAccessToken); // Bearer 접두사 포함하여 저장
+          await _saveAccessToken(newAccessToken);
         }
       } else {
         throw Exception('토큰 갱신 실패');
@@ -184,14 +216,20 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Authorization 헤더를 가져오기 위한 메서드
-  Future<Map<String, String>> _getAuthHeaders() async {
+  Future<Map<String, String>> _getAuthHeaders({bool isJson = false}) async {
     if (_accessToken == null) {
       throw Exception('Access Token이 없습니다.');
     }
 
-    return {
-      'Authorization': _accessToken!,
+    final headers = {
+      'authorization': _accessToken!,
     };
+
+    if (isJson) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    return headers;
   }
 
   // 프로필 데이터 가져오기

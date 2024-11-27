@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/chatting_room.dart';
 import 'package:frontend/register/major.dart';
@@ -477,10 +478,13 @@ class _SquarePageState extends State<SquarePage> {
                             SizedBox(
                               width: 7,
                             ),
-                            Text(
-                              '모집글 작성',
-                              style: TextStyle(
-                                color: Colors.white,
+                            Flexible(
+                              child: AutoSizeText(
+                                '모집글 작성',
+                                maxLines: 1,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],

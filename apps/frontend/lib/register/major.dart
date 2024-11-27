@@ -56,7 +56,17 @@ class MajorProvider with ChangeNotifier {
   // 선택된 Major를 설정하는 함수
   void setSelectedMajor(String key, Major? major) {
     _selectedMajors[key] = major;
+    debugPrint("setSelectedMajor 호출: $_selectedMajors");
     notifyListeners(); // 상태 업데이트 후 리빌드
+  }
+
+  // 특정 키에 해당하는 선택된 Major를 삭제하는 함수
+  void removeSelectedMajor(String key) {
+    if (_selectedMajors.containsKey(key)) {
+      debugPrint("removeSelectedMajor 호출: $_selectedMajors");
+      _selectedMajors.remove(key); // 키 삭제
+      notifyListeners(); // 상태 갱신
+    }
   }
 
   // API 호출 함수
@@ -80,8 +90,10 @@ class MajorDropdown extends StatefulWidget {
   final String labelText;
   final bool isStyled;
   final String majorKey;
-  const MajorDropdown(
+  Major? value;
+  MajorDropdown(
       {super.key,
+      this.value,
       required this.labelText,
       required this.isStyled,
       required this.majorKey});
@@ -91,14 +103,13 @@ class MajorDropdown extends StatefulWidget {
 }
 
 class _MajorDropdownState extends State<MajorDropdown> {
-  Major? _selectedMajor; // 선택된 학과를 저장하는 변수
-
   // FocusNode를 클래스 내에서 선언
   final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+
     // 데이터를 로드를 위해 Provider를 통해 loadMajors 호출
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MajorProvider>(context, listen: false).loadMajors();
@@ -140,6 +151,9 @@ class _MajorDropdownState extends State<MajorDropdown> {
 
     // 선택된 전공을 가져오기 (Provider에서 관리)
     Major? selectedMajor = majorProvider.getSelectedMajor(widget.majorKey);
+    if (widget.value != null) {
+      selectedMajor = widget.value;
+    }
 
     // true면 내부 전공 dropdown false면 register 전공 dropdown
     if (widget.isStyled) {

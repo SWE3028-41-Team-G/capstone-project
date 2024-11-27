@@ -7,14 +7,22 @@ import 'package:frontend/square/square.dart';
 import 'package:frontend/profile/profile.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final int initialIndex;
+
+  Home({super.key, this.initialIndex = 0});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  int _selectedIndex = 0; // initial selected tab index
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onItemTapped(int index) {
     setState(() {

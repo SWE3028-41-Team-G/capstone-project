@@ -25,7 +25,7 @@ class ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    var userData = authProvider.user!;
+    var userData = authProvider.user;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -60,7 +60,7 @@ class ProfileState extends State<Profile> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         // 프로필 수정으로 이동
                         Navigator.push(
                           context,
@@ -111,7 +111,7 @@ class ProfileState extends State<Profile> {
                             Radius.circular(8),
                           ),
                           child: Image.network(
-                            userData.imageUrl,
+                            userData!.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),

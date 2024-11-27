@@ -163,9 +163,6 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    // provider 이용해서 majorID 관리하기
-    final selectedMajors = majorProvider.selectedMajors;
-
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
@@ -194,6 +191,8 @@ class _RegisterState extends State<Register> {
         actions: [
           IconButton(
             onPressed: () {
+              majorProvider.removeSelectedMajor('primaryMajor');
+              majorProvider.removeSelectedMajor('secondMajor');
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const InitialPage()),
@@ -570,6 +569,7 @@ class CustomTextFormField extends StatefulWidget {
   final void Function(String?)? onSaved;
   final void Function(String?)? onChanged;
   final bool obscureText;
+  final TextEditingController? textEditingController;
 
   const CustomTextFormField(
       {super.key,
@@ -578,7 +578,8 @@ class CustomTextFormField extends StatefulWidget {
       this.validator,
       this.onSaved,
       this.obscureText = false,
-      this.onChanged});
+      this.onChanged,
+      this.textEditingController});
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -610,6 +611,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       child: TextFormField(
         focusNode: _focusNode,
         obscureText: widget.obscureText,
+        controller: widget.textEditingController,
         decoration: InputDecoration(
           labelText: widget.labelText,
           labelStyle: TextStyle(

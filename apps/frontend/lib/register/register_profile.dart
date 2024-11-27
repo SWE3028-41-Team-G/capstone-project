@@ -163,14 +163,10 @@ class _RegisterProfileState extends State<RegisterProfile> {
                     backgroundColor: Colors.grey[400]!,
                     text: "이전",
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-
-                        // 프로필 등록으로 이동
-                        Navigator.pop(
-                          context,
-                        );
-                      }
+                      // 회원가입 첫번재 화면으로 이동
+                      Navigator.pop(
+                        context,
+                      );
                     },
                   ),
                   CustomButton(
