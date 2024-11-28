@@ -20,11 +20,12 @@ android {
     }
 
     signingConfigs {
+        debug {}
         release {
-          storeFile file("../key.jks")
-          storePassword SIGNED_STORE_PASSWORD
-          keyAlias SIGNED_KEY_ALIAS
-          keyPassword SIGNED_KEY_PASSWORD
+          storeFile file(project.hasProperty('KEY_FILE_PATH') ? KEY_FILE_PATH : "key.jks")
+          storePassword project.hasProperty('SIGNED_STORE_PASSWORD') ? SIGNED_STORE_PASSWORD : "debug"
+          keyAlias project.hasProperty('SIGNED_KEY_ALIAS') ? SIGNED_KEY_ALIAS : "debug"
+          keyPassword project.hasProperty('SIGNED_KEY_PASSWORD') ? SIGNED_KEY_PASSWORD : "debug"
         }
     }
 
@@ -40,6 +41,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
             signingConfig signingConfigs.release
         }
