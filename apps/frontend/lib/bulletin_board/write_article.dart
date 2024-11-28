@@ -1,7 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/bulletin_board/bulletin_board.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:frontend/bulletin_board/bulletin_board.dart';
+import 'package:frontend/utils/api_helper.dart';
 
 class WriteArticle extends StatefulWidget {
   const WriteArticle({super.key});
@@ -12,6 +17,11 @@ class WriteArticle extends StatefulWidget {
 
 class _WriteArticleState extends State<WriteArticle> {
   final _formKey = GlobalKey<FormState>();
+
+  AuthProvider? authProvider;
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
+
   // Temporal infos, soon be linked with API
   List<dynamic> tags = [
     "#수학",
@@ -23,8 +33,14 @@ class _WriteArticleState extends State<WriteArticle> {
     "#수업추천",
     "#명강의"
   ];
-
   List<dynamic> selectedTags = [];
+
+  @override
+  void initState() {
+    super.initState();
+    authProvider = Provider.of<AuthProvider>(context, listen: false);
+    var userData = authProvider?.user;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +66,15 @@ class _WriteArticleState extends State<WriteArticle> {
                   side: BorderSide.none,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(40))),
-              onPressed: () {},
+              onPressed: () async {
+                try {
+                  final response = await AuthProvider
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('오류 발생: $e')),
+                  );
+                }            
+              },
               child: Text(
                 '완료',
                 style: TextStyle(
@@ -69,6 +93,7 @@ class _WriteArticleState extends State<WriteArticle> {
                 child: Column(
                   children: [
                     TextFormField(
+                      controller: titleController,
                       decoration: InputDecoration(
                           hintText: "제목을 입력해 주세요",
                           hintStyle:
@@ -91,6 +116,7 @@ class _WriteArticleState extends State<WriteArticle> {
                       height: 10,
                     ),
                     TextFormField(
+                        controller: contentController,
                         minLines: 20,
                         maxLines: null,
                         keyboardType: TextInputType.multiline,
