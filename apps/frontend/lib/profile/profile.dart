@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/initial_page.dart';
 import 'package:frontend/profile/modify_profile.dart';
@@ -88,17 +89,13 @@ class ProfileState extends State<Profile> {
               Container(
                   margin: EdgeInsets.only(bottom: 15),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    border: Border.all(
+                      color: Colors.grey[400]!, // 테두리 색상
+                      width: 0.8,
+                    ),
                     borderRadius: BorderRadius.all(
                       Radius.circular(8),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        blurRadius: 1,
-                        spreadRadius: 1,
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
@@ -116,88 +113,92 @@ class ProfileState extends State<Profile> {
                           ),
                         ),
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            userData.nickname,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AutoSizeText(
+                              userData!.nickname,
+                              style: TextStyle(
+                                color: Colors.grey[800],
+                                fontSize: 20,
+                              ),
+                              maxLines: 1,
                             ),
-                          ),
-                          Text(
-                            "❶ ${userData.majors[0].major.name}",
-                            style: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 18,
+                            AutoSizeText(
+                              "❶ ${userData.majors[0].major.name}",
+                              style: TextStyle(
+                                color: Colors.grey[800],
+                                fontSize: 18,
+                              ),
                             ),
-                          ),
-                          Text(
-                            userData.real
-                                ? "❷ ${userData.majors[1].major.name}" // real이 true일 경우
-                                : "❷ 해당없음", // real이 false일 경우
-                            style: TextStyle(
-                              color: Colors.grey[800],
-                              fontSize: 18,
+                            AutoSizeText(
+                              userData.real
+                                  ? "❷ ${userData.majors[1].major.name}" // real이 true일 경우
+                                  : "❷ 해당없음", // real이 false일 경우
+                              style: TextStyle(
+                                color: Colors.grey[800],
+                                fontSize: 18,
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 6, horizontal: 12),
-                                  margin: EdgeInsets.symmetric(horizontal: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.lightBlue[200],
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(8),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 6, horizontal: 12),
+                                    margin: EdgeInsets.symmetric(horizontal: 5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.lightBlue[200],
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      userData.interests[0],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                      overflow: TextOverflow
+                                          .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
                                     ),
                                   ),
-                                  child: Text(
-                                    userData.interests[0],
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                    overflow: TextOverflow
-                                        .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                                  SizedBox(
+                                    width: 3,
                                   ),
-                                ),
-                                SizedBox(
-                                  width: 3,
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 6, horizontal: 12),
-                                  // margin: EdgeInsets.symmetric(horizontal: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.lightGreen[200],
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(8),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 6, horizontal: 12),
+                                    // margin: EdgeInsets.symmetric(horizontal: 5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.lightGreen[200],
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      userData.interests[1],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                      overflow: TextOverflow
+                                          .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
                                     ),
                                   ),
-                                  child: Text(
-                                    userData.interests[1],
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                    overflow: TextOverflow
-                                        .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       )
                     ],
                   )),
@@ -205,7 +206,7 @@ class ProfileState extends State<Profile> {
               // mock apply
               GestureDetector(
                 onTap: () {
-                  debugPrint("모의지원에서 테스트 중 : ${userData!.nickname}");
+                  showComingSoonDialog(context);
                 },
                 child: Container(
                   width: double.infinity,
@@ -213,7 +214,7 @@ class ProfileState extends State<Profile> {
                   margin: EdgeInsets.symmetric(vertical: 10),
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
                   decoration: BoxDecoration(
-                    color: Colors.lightGreen[800],
+                    color: Colors.blueGrey[400],
                     borderRadius: BorderRadius.all(
                       Radius.circular(8),
                     ),
@@ -225,9 +226,21 @@ class ProfileState extends State<Profile> {
                       ),
                     ],
                   ),
-                  child: Text(
-                    "모의 지원",
-                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Icon(
+                      //   Icons.format_list_numbered,
+                      //   color: Colors.white,
+                      // ),
+                      // SizedBox(
+                      //   width: 5,
+                      // ),
+                      Text(
+                        "복수전공 모의 지원",
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -319,57 +332,62 @@ class ProfileState extends State<Profile> {
               ),
               Divider(),
               // Settings
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        '앱 설정',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
+              GestureDetector(
+                onTap: () {
+                  showComingSoonDialog(context);
+                },
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          '앱 설정',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Text('다크모드',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                          )),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Text('알림 설정',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                          )),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Text('비밀번호 변경',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                          )),
-                    ),
-                  ],
+                      SizedBox(
+                        height: 12,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text('다크모드',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                            )),
+                      ),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text('알림 설정',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                            )),
+                      ),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text('비밀번호 변경',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                            )),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               // 탈퇴하기 버튼
@@ -457,4 +475,48 @@ class ProfileState extends State<Profile> {
       },
     );
   }
+}
+
+void showComingSoonDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        content: Container(
+          width: 200,
+          margin: EdgeInsets.symmetric(vertical: 20),
+          child: Row(
+            children: [
+              Icon(
+                Icons.construction,
+                color: Colors.grey[700],
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Flexible(
+                child: AutoSizeText(
+                  "아직 준비중인 서비스입니다!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, color: Colors.grey[700]),
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // actions: [
+        //   TextButton(
+        //     child: Text(
+        //       "확인",
+        //       style: TextStyle(color: Colors.green[700]),
+        //     ),
+        //     onPressed: () {
+        //       Navigator.of(context).pop(); // 다이얼로그 닫기
+        //     },
+        //   ),
+        // ],
+      );
+    },
+  );
 }

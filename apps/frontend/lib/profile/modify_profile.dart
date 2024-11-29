@@ -1,14 +1,17 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+
 import 'package:frontend/home.dart';
 import 'package:frontend/register/major.dart';
 import 'package:frontend/register/register.dart';
 import 'package:frontend/utils/api_helper.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 
 class ModifyProfile extends StatefulWidget {
   const ModifyProfile({super.key});
@@ -21,6 +24,7 @@ class _ModifyProfileState extends State<ModifyProfile> {
   final _formKey = GlobalKey<FormState>(); // GlobalKey for Form
 
   XFile? _image; //이미지를 담을 변수 선언
+  String? _imgUrl;
   final ImagePicker picker = ImagePicker(); //ImagePicker 초기화
 
   // FocusNode를 클래스 내에서 선언
@@ -211,16 +215,16 @@ class _ModifyProfileState extends State<ModifyProfile> {
                         }
                         if (keyword1.text.isNotEmpty && keyword2.text.isEmpty) {
                           interests.add(keyword1.text);
-                          interests.add(userData!.interests[1]);
+                          interests.add(userData.interests[1]);
                           modifyProfile['interests'] = interests;
                         }
                         if (keyword2.text.isNotEmpty && keyword1.text.isEmpty) {
-                          interests.add(userData!.interests[0]);
+                          interests.add(userData.interests[0]);
                           interests.add(keyword2.text);
                           modifyProfile['interests'] = interests;
                         }
                         if (keyword1.text.isNotEmpty &&
-                            keyword1.text.isNotEmpty) {
+                            keyword2.text.isNotEmpty) {
                           interests.add(keyword1.text);
                           interests.add(keyword2.text);
                           modifyProfile['interests'] = interests;
@@ -255,9 +259,77 @@ class _ModifyProfileState extends State<ModifyProfile> {
 
                         debugPrint("modifyProfile 확인 중 : $modifyProfile");
 
+                        // 이미지 수정 PUT ----------------------------------------------------
+                        if (_image != null) {
+                          final Uri imgRequest = ApiHelper.buildRequest(
+                              'users/profile/image'); // API endpoint
+                          // XFile을 멀티파트 파일로 변환
+                          final imgPut =
+                              http.MultipartRequest('PUT', imgRequest);
+                          imgPut.headers.addAll({
+                            'authorization':
+                                authProvider?.accessToken as String,
+                            // 'Content-Type': 'multipart/form-data',
+                          });
+                          final file = await http.MultipartFile.fromPath(
+                            'image',
+                            _image!.path,
+                          );
+                          // 파일 용량 확인
+                          int fileSizeInBytes = File(_image!.path).lengthSync();
+                          double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+                          debugPrint(
+                              "이미지 파일 크기 확인 중: ${fileSizeInMB.toStringAsFixed(2)} MB");
+                          imgPut.files.add(file);
+                          try {
+                            final imgResponse = await imgPut.send();
+                            final response =
+                                await http.Response.fromStream(imgResponse);
+
+                            debugPrint(
+                                "image put statuscode 확인 중 : ${response.statusCode}");
+
+                            if (imgResponse.statusCode == 200) {
+                              // 요청 성공
+                              final responseData = jsonDecode(response.body);
+                              setState(() {
+                                _imgUrl = responseData['url']
+                                    as String; // URL 값 추출 및 저장
+                              });
+                              debugPrint("이미지 수정 성공! ^___^");
+                              debugPrint(
+                                  "responseBody 확인 중 : $_imgUrl"); // 응답 JSON 파싱
+                              // modifyProfile['profileImageUrl'] = _imgUrl;
+                            } else {
+                              // 요청 실패
+                              debugPrint("요청 실패: ${response.body}");
+                            }
+                          } catch (e) {
+                            // 네트워크 또는 기타 오류 처리
+                            debugPrint("오류 발생: $e");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("오류가 발생했습니다.")),
+                            );
+                          }
+                        } else {
+                          debugPrint("이미지 null인지 확인 중 : $_image");
+                        }
+
                         if (modifyProfile.isEmpty) {
                           // 프로필로 이동
-                          Navigator.pop(context);
+                          if (_image == null) {
+                            Navigator.pop(context);
+                          } else {
+                            // 프로필로 이동
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Home(
+                                        initialIndex: 3,
+                                      )),
+                              (Route<dynamic> route) => false,
+                            );
+                          }
                         } else {
                           try {
                             // PUT 요청 보내기

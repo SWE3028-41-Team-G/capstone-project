@@ -76,6 +76,7 @@ class AuthProvider with ChangeNotifier {
         // cookie_jar가 자동으로 쿠키에 저장
         _isLoggedIn = true; // 로그인 성공 시 로그인 상태로 설정
         notifyListeners(); // 상태 변경 알림
+        // fetchProfileData();
       } else {
         var msg = jsonDecode(response.body)['message'];
         ScaffoldMessenger.of(context).showSnackBar(
