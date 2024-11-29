@@ -37,6 +37,8 @@ export class SquareController {
     updateSquareDto: {
       name?: string
       max?: number
+      title?: string
+      content?: string
     },
     @Req() req: AuthenticatedRequest
   ) {
