@@ -41,6 +41,28 @@ export class SquareService {
     })
   }
 
+  // Square 업데이트
+  async updateSquare(
+    squareId: number,
+    data: { name?: string; max?: number },
+    userId: number
+  ) {
+    // Square 존재 여부 확인, 리더만 수정 가능
+    const square = await this.prisma.square.findUnique({
+      where: { id: squareId, leaderId: userId }
+    })
+
+    if (!square) {
+      throw new NotFoundException(`Square with ID ${squareId} not found`)
+    }
+
+    // Square 업데이트
+    return this.prisma.square.update({
+      where: { id: squareId },
+      data
+    })
+  }
+
   // User가 Square에 가입
   async joinSquare(squareId: number, userId: number) {
     // Square의 현재 가입된 인원을 확인

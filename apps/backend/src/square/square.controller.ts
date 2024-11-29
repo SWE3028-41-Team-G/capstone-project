@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Param, Get, Delete } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  Delete,
+  Patch,
+  Req
+} from '@nestjs/common'
+import type { AuthenticatedRequest } from '@/auth/class/authenticated-request.interface'
 import { SquareService } from './square.service'
 
 @Controller('square')
@@ -18,6 +28,23 @@ export class SquareController {
     }
   ) {
     return this.squareService.createSquare(createSquareDto)
+  }
+
+  @Patch(':squareId')
+  async updateSquare(
+    @Param('squareId') squareId: number,
+    @Body()
+    updateSquareDto: {
+      name?: string
+      max?: number
+    },
+    @Req() req: AuthenticatedRequest
+  ) {
+    return this.squareService.updateSquare(
+      +squareId,
+      updateSquareDto,
+      req.user.id
+    )
   }
 
   // User가 Square에 가입
