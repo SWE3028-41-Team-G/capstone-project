@@ -60,8 +60,8 @@ model UserMajor {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  User  User  @relation(fields: [userId], references: [id])
-  Major Major @relation(fields: [majorId], references: [id])
+  User  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Major Major @relation(fields: [majorId], references: [id], onDelete: Cascade)
 
   @@id([userId, majorId])
   @@index([userId])
@@ -79,7 +79,7 @@ model Profile {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Square {
@@ -91,7 +91,7 @@ model Square {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  leader      User         @relation(fields: [leaderId], references: [id])
+  leader      User         @relation(fields: [leaderId], references: [id], onDelete: Cascade)
   UserSquare  UserSquare[] /// members
   SquarePosts SquarePost[]
 }
@@ -103,8 +103,8 @@ model UserSquare {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user   User   @relation(fields: [userId], references: [id])
-  square Square @relation(fields: [squareId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  square Square @relation(fields: [squareId], references: [id], onDelete: Cascade)
 
   @@id([userId, squareId])
   @@map("user_square")
@@ -120,8 +120,8 @@ model SquarePost {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user              User                @relation(fields: [userId], references: [id])
-  square            Square              @relation(fields: [squareId], references: [id])
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  square            Square              @relation(fields: [squareId], references: [id], onDelete: Cascade)
   SquarePostComment SquarePostComment[]
 
   @@map("square_post")
@@ -136,8 +136,8 @@ model SquarePostComment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user       User       @relation(fields: [userId], references: [id])
-  squarePost SquarePost @relation(fields: [squarePostId], references: [id])
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  squarePost SquarePost @relation(fields: [squarePostId], references: [id], onDelete: Cascade)
 }
 
 model Post {
@@ -153,7 +153,7 @@ model Post {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// 게시판 글의 댓글
@@ -169,9 +169,9 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user   User     @relation(fields: [userId], references: [id])
-  post   Post     @relation(fields: [postId], references: [id])
-  parent Comment? @relation("NestedComment", fields: [parentId], references: [id])
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent Comment? @relation("NestedComment", fields: [parentId], references: [id], onDelete: Cascade)
 }
 
 model Tag {
@@ -181,7 +181,7 @@ model Tag {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  Post   Post? @relation(fields: [postId], references: [id])
+  Post   Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId Int?
 }
 
@@ -191,8 +191,8 @@ model MockApply {
   majorId Int   @map("major_id")
   score   Float // 전체평점
 
-  user  User  @relation(fields: [userId], references: [id])
-  major Major @relation(fields: [majorId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  major Major @relation(fields: [majorId], references: [id], onDelete: Cascade)
 
   @@map("mock_apply")
 }

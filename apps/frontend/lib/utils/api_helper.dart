@@ -156,6 +156,62 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // POST 요청에 Authorization 헤더 포함
+  Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
+    try {
+      await init();
+      final response = await http.post(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: await _getAuthHeaders(isJson: true),
+        body: jsonEncode(body),
+      );
+
+      debugPrint("토큰 포함 POST statusCode : ${response.statusCode}");
+      debugPrint("토큰 포함 POST response.body : ${response.body}");
+
+      if (response.statusCode == 401) {
+        debugPrint("여기까지는 가고 있나요?");
+        await refreshAccessToken();
+        return await http.post(
+          Uri.parse('$baseUrl$endpoint'),
+          headers: await _getAuthHeaders(isJson: true),
+          body: jsonEncode(body),
+        );
+      }
+      return response;
+    } catch (e) {
+      debugPrint("POST 요청 중 오류 발생: $e");
+      rethrow;
+    }
+  }
+
+  // DELETE 요청에 Authorization 헤더 포함
+  Future<http.Response> deletw(String endpoint) async {
+    try {
+      await init();
+      final response = await http.delete(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: await _getAuthHeaders(),
+      );
+
+      debugPrint("토큰 포함 DELETE statusCode : ${response.statusCode}");
+      debugPrint("토큰 포함 DELETE response.body : ${response.body}");
+
+      // 만약 401 Unauthorized 에러가 발생하면, 토큰 갱신을 시도
+      if (response.statusCode == 401) {
+        await refreshAccessToken(); // 토큰 갱신
+        return await http.delete(
+          Uri.parse('$baseUrl/$endpoint'),
+          headers: await _getAuthHeaders(),
+        ); // 갱신된 토큰으로 재시도
+      }
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // 로그아웃 처리
   Future<void> logout() async {
     try {

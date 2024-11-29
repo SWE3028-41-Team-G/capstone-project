@@ -1,7 +1,8 @@
 import {
   Injectable,
   BadRequestException,
-  NotFoundException
+  NotFoundException,
+  ForbiddenException
 } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -38,6 +39,68 @@ export class SquareService {
       })
 
       return square
+    })
+  }
+
+  // Square와 SquarePost 업데이트
+  async updateSquare(
+    squareId: number,
+    updateSquareDto: {
+      name?: string
+      max?: number
+      title?: string
+      content?: string
+    },
+    userId: number
+  ) {
+    const { name, max, title, content } = updateSquareDto
+
+    // Square 존재 여부 및 리더 권한 확인
+    const square = await this.prisma.square.findUnique({
+      where: { id: squareId },
+      include: { leader: true }
+    })
+
+    if (!square) {
+      throw new NotFoundException(`Square with ID ${squareId} not found`)
+    }
+
+    if (square.leaderId !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to update this square'
+      )
+    }
+
+    // 트랜잭션을 사용하여 Square와 SquarePost를 원자적으로 업데이트
+    return this.prisma.$transaction(async (tx) => {
+      // Square 업데이트
+      const updatedSquare = await tx.square.update({
+        where: { id: squareId },
+        data: {
+          name: name || undefined,
+          max: max || undefined
+        }
+      })
+
+      // SquarePost 업데이트 (최신 게시글을 업데이트한다고 가정)
+      if (title || content) {
+        const latestPost = await tx.squarePost.findFirst({
+          where: { squareId },
+          orderBy: { createdAt: 'desc' } // 최신 게시글 기준
+        })
+
+        if (latestPost) {
+          await tx.squarePost.update({
+            where: { id: latestPost.id },
+            data: {
+              title: title || undefined,
+              content: content || undefined
+            }
+          })
+        }
+      }
+
+      return updatedSquare
     })
   }
 

@@ -137,7 +137,7 @@ class BulletinBoardState extends State<BulletinBoard> {
                   ),
                 )),
           ),
-          // tag selection & search menu
+          // tag selection & search menu - stores LOCALLY if needed
           Container(
             margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: MultiSelectChipField(
