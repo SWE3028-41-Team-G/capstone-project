@@ -68,21 +68,18 @@ class _WriteArticleState extends State<WriteArticle> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(40))),
               onPressed: () async {
+                Map<String, dynamic> body = {
+                  'title': titleController.text,
+                  'content': contentController.text + selectedTags.join(""),
+                  'userId': userData!.userId,
+                };
+
                 try {
-                  Map<String, dynamic> body = {
-                    'title': titleController.text,
-                    'content': contentController.text,
-                    'userId': userData!.userId,
-                  };
-                  final response = await authProvider?.post('board', body);
-                  if (response?.statusCode == 201) {
+                  final response = await authProvider.post('board', body);
+                  if (response.statusCode == 201) {
                     debugPrint("게시판 글 작성 성공!!!!!");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('게시판 글 작성 요청 성공')),
-                    );
                     Navigator.pop(context);
                   } else {
-                    // 실패
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('게시판 글 작성 요청 실패')),
                     );
