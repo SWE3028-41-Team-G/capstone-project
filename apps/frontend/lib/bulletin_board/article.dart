@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:frontend/utils/api_helper.dart';
+import 'package:frontend/bulletin_board/update_article.dart';
 
 class Article extends StatefulWidget {
-  final String title;
+  final int id;
 
-  const Article({super.key, required this.title});
+  const Article({super.key, required this.id});
   @override
   State<Article> createState() => _ArticleState();
 }
@@ -52,11 +56,14 @@ class _ArticleState extends State<Article> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    var userData = authProvider.user;
+
     // 모집글
     String imageUrl = postData['imageUrl'] as String;
     String nickname = postData['nickname'] as String;
     String timestamp = postData['timestamp'] as String;
-    // String title = postData['title'] as String;
+    String title = postData['title'] as String;
     String content = postData['content'] as String;
 
     return Scaffold(
@@ -100,6 +107,7 @@ class _ArticleState extends State<Article> {
                       ),
                       SizedBox(width: 10),
                       Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -107,12 +115,45 @@ class _ArticleState extends State<Article> {
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          Spacer(),
-                          Text(
-                            timestamp,
-                            style: TextStyle(fontSize: 16),
+                          Flexible(
+                            child: Text(
+                              timestamp,
+                            ),
                           ),
                         ],
+                      ),
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () async {
+                          if (postData["userId"] != userData!.userId) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('글 작성자만 수정이 가능합니다.')),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UpdateArticle(
+                                        id: widget.id,
+                                        initTitle: title,
+                                        initContent: content,
+                                      )),
+                            );
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Text('글 수정',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 15,
+                                )),
+                            Icon(
+                              Icons.chevron_right,
+                              color: Colors.grey,
+                            )
+                          ],
+                        ),
                       ),
                       SizedBox(width: 10),
                     ],
@@ -121,7 +162,7 @@ class _ArticleState extends State<Article> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                   child: Text(
-                    widget.title,
+                    title,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -133,6 +174,27 @@ class _ArticleState extends State<Article> {
                   ),
                 ),
                 SizedBox(height: 10),
+                Row(
+                  children: [
+                    Spacer(),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.heart,
+                            color: Colors.pinkAccent,
+                            size: 16,
+                          ),
+                          Text("${postData["likes"]}",
+                              style: TextStyle(
+                                color: Colors.pinkAccent,
+                              )),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
                 Divider(),
                 SizedBox(height: 10),
                 ListView.builder(

@@ -186,7 +186,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   // DELETE 요청에 Authorization 헤더 포함
-  Future<http.Response> deletw(String endpoint) async {
+  Future<http.Response> delete(String endpoint) async {
     try {
       await init();
       final response = await http.delete(
