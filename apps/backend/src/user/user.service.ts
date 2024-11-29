@@ -66,8 +66,22 @@ export class UserService {
         `profile/${userId}`
       )
 
-      // Production 기준으로 작성
-      return { url: `https://cdn.skku-dm.site/${result.src}` }
+      const newUrl = `https://cdn.skku-dm.site/${result.src}`
+
+      await this.prisma.user.update({
+        where: {
+          id: userId
+        },
+        data: {
+          Profile: {
+            update: {
+              imageUrl: newUrl
+            }
+          }
+        }
+      })
+
+      return { url: newUrl }
     } catch (error) {
       if (error instanceof HttpException) throw error
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
