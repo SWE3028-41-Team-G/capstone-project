@@ -38,12 +38,13 @@ class _WriteArticleState extends State<WriteArticle> {
   @override
   void initState() {
     super.initState();
-    authProvider = Provider.of<AuthProvider>(context, listen: false);
-    var userData = authProvider?.user;
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    var userData = authProvider.user;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
@@ -68,12 +69,29 @@ class _WriteArticleState extends State<WriteArticle> {
                       borderRadius: BorderRadius.circular(40))),
               onPressed: () async {
                 try {
-                  final response = await AuthProvider
+                  Map<String, dynamic> body = {
+                    'title': titleController.text,
+                    'content': contentController.text,
+                    'userId': userData!.userId,
+                  };
+                  final response = await authProvider?.post('board', body);
+                  if (response?.statusCode == 201) {
+                    debugPrint("게시판 글 작성 성공!!!!!");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('게시판 글 작성 요청 성공')),
+                    );
+                    Navigator.pop(context);
+                  } else {
+                    // 실패
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('게시판 글 작성 요청 실패')),
+                    );
+                  }
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('오류 발생: $e')),
                   );
-                }            
+                }
               },
               child: Text(
                 '완료',

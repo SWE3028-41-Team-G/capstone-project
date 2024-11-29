@@ -139,7 +139,7 @@ class BulletinBoardState extends State<BulletinBoard> {
           ),
           // tag selection & search menu - stores LOCALLY if needed
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),p
+            margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: MultiSelectChipField(
               items: tags.map((e) => MultiSelectItem(e, e)).toList(),
               title: Text('태그'),
