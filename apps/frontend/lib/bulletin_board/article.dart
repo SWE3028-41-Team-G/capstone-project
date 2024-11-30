@@ -280,10 +280,10 @@ class _ArticleState extends State<Article> {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: widget.Comments.length,
                   itemBuilder: (context, index) {
-                    String cmtImage = widget.Comments[index]['imageUrl']!;
-                    String cmtName = widget.Comments[index]['nickname']!;
-                    String cmtContent = widget.Comments[index]['content']!;
-                    String cmtTime = widget.Comments[index]['timestamp']!;
+                    // String cmtImage = widget.Comments[index]['imageUrl']!;
+                    // String cmtName = widget.Comments[index]['nickname']!;
+                    // String cmtContent = widget.Comments[index]['content']!;
+                    // String cmtTime = widget.Comments[index]['timestamp']!;
                     return Container(
                       margin: EdgeInsets.symmetric(vertical: 5),
                       child: Column(
@@ -299,10 +299,10 @@ class _ArticleState extends State<Article> {
                                     topLeft: Radius.circular(8),
                                     topRight: Radius.circular(8),
                                   ),
-                                  child: Image.network(
-                                    cmtImage,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  // child: Image.network(
+                                  //   // cmtImage,
+                                  //   // fit: BoxFit.cover,
+                                  // ),
                                 ),
                               ),
                               SizedBox(width: 10),
@@ -312,30 +312,30 @@ class _ArticleState extends State<Article> {
                                   children: [
                                     Row(
                                       children: [
-                                        Text(
-                                          cmtName,
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold),
-                                        ),
+                                        // Text(
+                                        //   cmtName,
+                                        //   style: TextStyle(
+                                        //       fontSize: 16,
+                                        //       fontWeight: FontWeight.bold),
+                                        // ),
                                         SizedBox(
                                           width: 10,
                                         ),
-                                        Text(
-                                          cmtTime,
-                                          style: TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey[400]),
-                                        ),
+                                        // Text(
+                                        //   cmtTime,
+                                        //   style: TextStyle(
+                                        //       fontSize: 13,
+                                        //       color: Colors.grey[400]),
+                                        // ),
                                       ],
                                     ),
                                     SizedBox(height: 5),
                                     Container(
                                       padding: EdgeInsets.only(right: 10),
-                                      child: Text(
-                                        cmtContent,
-                                        style: TextStyle(fontSize: 15),
-                                      ),
+                                      // child: Text(
+                                      //   cmtContent,
+                                      //   style: TextStyle(fontSize: 15),
+                                      // ),
                                     ),
                                   ],
                                 ),
@@ -388,7 +388,7 @@ class _ArticleState extends State<Article> {
                               if (response.statusCode == 201) {
                                 debugPrint("게시판 댓글 작성 성공!!!!!");
                                 setState(() {
-                                  articles = jsonDecode(response.body);
+                                  // articles = jsonDecode(response.body);
                                 });
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(

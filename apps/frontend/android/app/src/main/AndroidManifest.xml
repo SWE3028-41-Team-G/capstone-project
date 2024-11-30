@@ -47,12 +47,17 @@
     </queries>
 
     <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="http" />
-            <data android:scheme="https" />
-        </intent>
-    </queries>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="http" />
+    </intent>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https" />
+    </intent>
+</queries>
+
 
 </manifest>
