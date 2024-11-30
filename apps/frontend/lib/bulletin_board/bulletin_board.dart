@@ -101,7 +101,7 @@ class BulletinBoardState extends State<BulletinBoard> {
                   ),
                 )),
           ),
-          // tag selection & search menu - stores LOCALLY if needed
+          // tag selection & search menu
           Container(
             margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: MultiSelectChipField(
@@ -163,7 +163,17 @@ class BulletinBoardState extends State<BulletinBoard> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Article(id: 1)));
+                            builder: (context) => Article(
+                                  id: articles[index]["id"],
+                                  title: articles[index]["title"],
+                                  content: articles[index]["content"],
+                                  userId: articles[index]["userId"],
+                                  likes: articles[index]["likes"],
+                                  tags: articles[index]["tags"],
+                                  Comments: articles[index]["Comments"],
+                                  createdAt: articles[index]["createdAt"],
+                                  updatedAt: articles[index]["updatedAt"],
+                                )));
                     // builder: (context) => Article(
                     //     id: int.parse("${articles[index]["id"]}"))));
                   },
