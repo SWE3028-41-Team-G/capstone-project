@@ -14,6 +14,7 @@ export class SquareService {
   async createSquare(data: {
     name: string
     leaderId: number
+    majorId: number
     max: number
     postTitle: string
     postContent: string
@@ -24,7 +25,8 @@ export class SquareService {
         data: {
           name: data.name,
           leaderId: data.leaderId,
-          max: data.max
+          max: data.max,
+          majorId: data.majorId
         }
       })
 
@@ -48,12 +50,13 @@ export class SquareService {
     updateSquareDto: {
       name?: string
       max?: number
+      majorId?: number
       title?: string
       content?: string
     },
     userId: number
   ) {
-    const { name, max, title, content } = updateSquareDto
+    const { name, max, title, content, majorId } = updateSquareDto
 
     // Square 존재 여부 및 리더 권한 확인
     const square = await this.prisma.square.findUnique({
@@ -78,7 +81,8 @@ export class SquareService {
         where: { id: squareId },
         data: {
           name: name || undefined,
-          max: max || undefined
+          max: max || undefined,
+          majorId: majorId || undefined
         }
       })
 

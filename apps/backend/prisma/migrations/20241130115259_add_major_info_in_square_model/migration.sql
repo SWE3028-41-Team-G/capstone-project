@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Square" ADD COLUMN     "majorId" INTEGER NOT NULL DEFAULT 1;
+
+-- AddForeignKey
+ALTER TABLE "Square" ADD CONSTRAINT "Square_majorId_fkey" FOREIGN KEY ("majorId") REFERENCES "Major"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

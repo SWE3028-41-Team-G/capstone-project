@@ -49,6 +49,7 @@ model Major {
 
   UserMajor UserMajor[]
   MockApply MockApply[]
+  Square    Square[]
 }
 
 model UserMajor {
@@ -86,12 +87,14 @@ model Square {
   id       Int    @id @default(autoincrement())
   name     String @unique
   leaderId Int    @map("leader_id")
+  majorId  Int    @default(1) // Sqaure 모집 타겟 전공
   max      Int    @default(2) /// 정원
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   leader      User         @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+  major       Major        @relation(fields: [majorId], references: [id])
   UserSquare  UserSquare[] /// members
   SquarePosts SquarePost[]
 }
