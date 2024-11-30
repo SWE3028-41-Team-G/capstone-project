@@ -312,15 +312,12 @@ async function main() {
     }
   })
 
-  // 시드 데이터 - Post 및 Tag
+  // 시드 데이터 - Post
   const post1 = await prisma.post.create({
     data: {
       title: 'My First Post',
       content: 'This is the content of my first post.',
-      userId: user1.id,
-      tags: {
-        create: [{ name: 'Tech' }, { name: 'Introduction' }]
-      }
+      userId: user1.id
     }
   })
 

@@ -150,7 +150,6 @@ model Post {
   userId  Int /// 글 작성자
   likes   Int    @default(0)
 
-  tags    Tag[]
   Comment Comment[]
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -175,17 +174,6 @@ model Comment {
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   parent Comment? @relation("NestedComment", fields: [parentId], references: [id], onDelete: Cascade)
-}
-
-model Tag {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  Post   Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId Int?
 }
 
 model MockApply {
