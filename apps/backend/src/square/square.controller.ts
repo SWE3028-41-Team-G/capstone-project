@@ -22,6 +22,7 @@ export class SquareController {
     createSquareDto: {
       name: string
       leaderId: number
+      majorId: number
       max: number
       postTitle: string
       postContent: string
@@ -37,6 +38,7 @@ export class SquareController {
     updateSquareDto: {
       name?: string
       max?: number
+      majorId?: number
       title?: string
       content?: string
     },
