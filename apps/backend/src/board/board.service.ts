@@ -7,11 +7,19 @@ export class BoardService {
 
   async findAll(tags?: string[]) {
     return this.prisma.post.findMany({
-      where: whereCondition,
+      where: tags?.length
+        ? {
+            OR: tags.map((tag) => ({
+              OR: [
+                { content: { contains: tag, mode: 'insensitive' } },
+                { title: { contains: tag, mode: 'insensitive' } }
+              ]
+            }))
+          }
+        : undefined,
       include: {
-        tags: true,
         Comment: true,
-        user: true // 작성자 정보 포함
+        user: true
       }
     })
   }
@@ -20,24 +28,32 @@ export class BoardService {
     return this.prisma.post.findUnique({
       where: { id },
       include: {
-        tags: true,
         Comment: true,
         user: true
       }
     })
   }
 
-  async create(data: { title: string; content: string; userId: number }) {
+  async create(data: {
+    title: string
+    content: string
+    userId: number
+    tags?: string[]
+  }) {
     return this.prisma.post.create({
       data: {
         title: data.title,
         content: data.content,
-        userId: data.userId
+        userId: data.userId,
+        tags: data.tags ?? []
       }
     })
   }
 
-  async update(id: number, data: { title?: string; content?: string }) {
+  async update(
+    id: number,
+    data: { title?: string; content?: string; tags?: string[] }
+  ) {
     return this.prisma.post.update({
       where: { id },
       data

@@ -7,7 +7,8 @@ import {
   Put,
   Delete,
   Patch,
-  Query
+  Query,
+  ParseArrayPipe
 } from '@nestjs/common'
 import { BoardService } from './board.service'
 
@@ -16,7 +17,10 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Get()
-  async findAll(@Query('tags') tags?: string) {
+  async findAll(
+    @Query('tags', new ParseArrayPipe({ items: String, optional: true }))
+    tags?: string[]
+  ) {
     return this.boardService.findAll(tags)
   }
 
@@ -27,7 +31,13 @@ export class BoardController {
 
   @Post()
   async create(
-    @Body() createPostDto: { title: string; content: string; userId: number }
+    @Body()
+    createPostDto: {
+      title: string
+      content: string
+      userId: number
+      tags?: string[]
+    }
   ) {
     return this.boardService.create(createPostDto)
   }
@@ -35,7 +45,7 @@ export class BoardController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() updatePostDto: { title?: string; content?: string }
+    @Body() updatePostDto: { title?: string; content?: string; tags?: string[] }
   ) {
     return this.boardService.update(+id, updatePostDto)
   }
