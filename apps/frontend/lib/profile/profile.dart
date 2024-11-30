@@ -324,18 +324,11 @@ class ProfileState extends State<Profile> {
                                         if (await canLaunchUrl(_url1)) {
                                           await launchUrl(
                                             _url1,
-                                            mode: LaunchMode.inAppWebView,
                                           );
                                         } else {
                                           debugPrint(
                                               "Unable to launch URL!!!!!!!!");
                                         }
-
-                                        // await launchUrl(
-                                        //   _url1,
-                                        //   mode: LaunchMode
-                                        //       .inAppWebView, // 앱 내에서 열기
-                                        // );
                                       },
                                       child: AutoSizeText(
                                         '학사제도 바로가기',
@@ -351,28 +344,52 @@ class ProfileState extends State<Profile> {
                                     SizedBox(
                                       height: 20,
                                     ),
-                                    AutoSizeText(
-                                      '교육과정 바로가기',
-                                      style: GoogleFonts.jua(
-                                        fontSize: 22,
-                                        color: Colors.blueAccent,
-                                        decorationColor: Colors.blueAccent,
-                                        decoration: TextDecoration.underline,
+                                    GestureDetector(
+                                      onTap: () async {
+                                        if (await canLaunchUrl(_url2)) {
+                                          await launchUrl(
+                                            _url2,
+                                          );
+                                        } else {
+                                          debugPrint(
+                                              "Unable to launch URL!!!!!!!!");
+                                        }
+                                      },
+                                      child: AutoSizeText(
+                                        '교육과정 바로가기',
+                                        style: GoogleFonts.jua(
+                                          fontSize: 22,
+                                          color: Colors.blueAccent,
+                                          decorationColor: Colors.blueAccent,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        maxLines: 1,
                                       ),
-                                      maxLines: 1,
                                     ),
                                     SizedBox(
                                       height: 20,
                                     ),
-                                    AutoSizeText(
-                                      '학과/교과목 검색 바로가기',
-                                      style: GoogleFonts.jua(
-                                        fontSize: 22,
-                                        color: Colors.blueAccent,
-                                        decorationColor: Colors.blueAccent,
-                                        decoration: TextDecoration.underline,
+                                    GestureDetector(
+                                      onTap: () async {
+                                        if (await canLaunchUrl(_url3)) {
+                                          await launchUrl(
+                                            _url3,
+                                          );
+                                        } else {
+                                          debugPrint(
+                                              "Unable to launch URL!!!!!!!!");
+                                        }
+                                      },
+                                      child: AutoSizeText(
+                                        '학과/교과목 검색 바로가기',
+                                        style: GoogleFonts.jua(
+                                          fontSize: 22,
+                                          color: Colors.blueAccent,
+                                          decorationColor: Colors.blueAccent,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        maxLines: 1,
                                       ),
-                                      maxLines: 1,
                                     ),
                                   ],
                                 ),
@@ -485,7 +502,7 @@ class ProfileState extends State<Profile> {
                   ),
                 ),
               ),
-              // 탈퇴하기 버튼
+              // 로그아웃 버튼
               GestureDetector(
                 onTap: () async {
                   // 로그아웃 처리

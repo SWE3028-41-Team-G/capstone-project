@@ -32,6 +32,7 @@ class _ModifyProfileState extends State<ModifyProfile> {
 
   AuthProvider? authProvider;
   MajorProvider? majorProvider;
+  Major? primaryMajor;
   Major? doubleMajor;
   bool? selectedReal;
   bool? selectedPublic;
@@ -49,6 +50,8 @@ class _ModifyProfileState extends State<ModifyProfile> {
     authProvider = Provider.of<AuthProvider>(context, listen: false);
     majorProvider = Provider.of<MajorProvider>(context, listen: false);
     var userData = authProvider?.user;
+    primaryMajor = Major(
+        id: userData!.majors[0].major.id, name: userData.majors[0].major.name);
     doubleMajor = Major(
         id: userData!.majors[1].major.id, name: userData.majors[1].major.name);
     selectedReal = userData.real;
@@ -107,6 +110,7 @@ class _ModifyProfileState extends State<ModifyProfile> {
         actions: [
           IconButton(
             onPressed: () {
+              majorProvider?.removeSelectedMajor('modifyPrimaryMajor');
               majorProvider?.removeSelectedMajor('modifySecondMajor');
               Navigator.pop(context);
             },
@@ -134,6 +138,16 @@ class _ModifyProfileState extends State<ModifyProfile> {
                     textEditingController: nickname,
                   ),
                   _openProfile(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  MajorDropdown(
+                    isStyled: false,
+                    value: primaryMajor,
+                    majorKey:
+                        'modifyPrimaryMajor', // 수정필요 ------------------------------------
+                    labelText: "원전공을 선택해 주세요",
+                  ),
                   SizedBox(
                     height: 10,
                   ),
@@ -239,6 +253,15 @@ class _ModifyProfileState extends State<ModifyProfile> {
                               "??? : ${majorProvider!.getSelectedMajor('modifySecondMajor')!.id}");
                           modifyProfile['dualMajorId'] = majorProvider!
                               .getSelectedMajor('modifySecondMajor')!
+                              .id;
+                        }
+                        if (majorProvider!
+                                .getSelectedMajor('modifyPrimaryMajor') !=
+                            null) {
+                          debugPrint(
+                              "??? : ${majorProvider!.getSelectedMajor('modifyPrimaryMajor')!.id}");
+                          modifyProfile['majorId'] = majorProvider!
+                              .getSelectedMajor('modifyPrimaryMajor')!
                               .id;
                         }
                         if (selectedReal != userData.real) {
