@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:frontend/initial_page.dart';
 import 'package:frontend/profile/modify_profile.dart';
 import 'package:frontend/utils/api_helper.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // import 'package:fluttertoast/fluttertoast.dart';
 // import 'dart:convert';
@@ -16,6 +18,12 @@ class Profile extends StatefulWidget {
 }
 
 class ProfileState extends State<Profile> {
+  final Uri _url1 =
+      Uri.parse('https://www.skku.edu/skku/edu/bachelor/ca_de_schedule01.do');
+  final Uri _url2 =
+      Uri.parse('https://www.skku.edu/skku/about/status/state_02_2012.do');
+  final Uri _url3 =
+      Uri.parse('https://www.skku.edu/skku/edu/bachelor/curriculum.do');
   @override
   void initState() {
     super.initState();
@@ -293,37 +301,124 @@ class ProfileState extends State<Profile> {
                     SizedBox(
                       height: 7,
                     ),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      child: Row(
+                    // 졸업요건 관련 URL 연결하기
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              height: 300,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () async {
+                                        if (await canLaunchUrl(_url1)) {
+                                          await launchUrl(
+                                            _url1,
+                                            mode: LaunchMode.inAppWebView,
+                                          );
+                                        } else {
+                                          debugPrint(
+                                              "Unable to launch URL!!!!!!!!");
+                                        }
+
+                                        // await launchUrl(
+                                        //   _url1,
+                                        //   mode: LaunchMode
+                                        //       .inAppWebView, // 앱 내에서 열기
+                                        // );
+                                      },
+                                      child: AutoSizeText(
+                                        '학사제도 바로가기',
+                                        style: GoogleFonts.jua(
+                                          fontSize: 22,
+                                          color: Colors.blueAccent,
+                                          decorationColor: Colors.blueAccent,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    AutoSizeText(
+                                      '교육과정 바로가기',
+                                      style: GoogleFonts.jua(
+                                        fontSize: 22,
+                                        color: Colors.blueAccent,
+                                        decorationColor: Colors.blueAccent,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    AutoSizeText(
+                                      '학과/교과목 검색 바로가기',
+                                      style: GoogleFonts.jua(
+                                        fontSize: 22,
+                                        color: Colors.blueAccent,
+                                        decorationColor: Colors.blueAccent,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      child: Column(
                         children: [
-                          Expanded(
-                            child: Text('원전공',
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 18)),
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text('원전공',
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 18)),
+                                ),
+                                Text(' ${userData.majors[0].major.name}',
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 18))
+                              ],
+                            ),
                           ),
-                          Text(' ${userData.majors[0].major.name}',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 18))
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text('복수전공',
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 18)),
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text('복수전공',
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 18)),
+                                ),
+                                Text(
+                                    userData.real
+                                        ? userData.majors[1].major
+                                            .name // real이 true일 경우
+                                        : "해당없음", // real이 false일 경우,
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 18))
+                              ],
+                            ),
                           ),
-                          Text(
-                              userData.real
-                                  ? userData
-                                      .majors[1].major.name // real이 true일 경우
-                                  : "해당없음", // real이 false일 경우,
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 18))
                         ],
                       ),
                     ),

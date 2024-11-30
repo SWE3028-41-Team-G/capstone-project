@@ -299,7 +299,6 @@ class _ModifyProfileState extends State<ModifyProfile> {
                               debugPrint("이미지 수정 성공! ^___^");
                               debugPrint(
                                   "responseBody 확인 중 : $_imgUrl"); // 응답 JSON 파싱
-                              // modifyProfile['profileImageUrl'] = _imgUrl;
                             } else {
                               // 요청 실패
                               debugPrint("요청 실패: ${response.body}");
@@ -314,6 +313,8 @@ class _ModifyProfileState extends State<ModifyProfile> {
                         } else {
                           debugPrint("이미지 null인지 확인 중 : $_image");
                         }
+
+                        // 여기 확인하기 ===========================================================
 
                         if (modifyProfile.isEmpty) {
                           // 프로필로 이동

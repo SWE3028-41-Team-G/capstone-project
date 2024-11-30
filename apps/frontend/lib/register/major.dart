@@ -75,6 +75,7 @@ class MajorProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners(); // 로딩 상태 알리기
       final majors = await fetchMajor(); // 데이터 로드
+      debugPrint("전공들 잘 들어오고 있나요 : $majors");
       _majors = majors;
       _isLoading = false;
       notifyListeners(); // 데이터 로드 후 상태 갱신

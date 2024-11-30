@@ -1,8 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
 import 'package:frontend/register/register.dart';
 import 'package:frontend/utils/api_helper.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class InitialPage extends StatefulWidget {
   const InitialPage({
@@ -28,32 +30,38 @@ class _InitialPageState extends State<InitialPage> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.only(top: 100),
+          padding: EdgeInsets.only(top: 130),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.network(
-                  // SKKU 로고 사진
-                  width: 150,
-                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJxeZwPm3efZhPfYvvalvurcIEA-vQssxoEA&s"),
-              SizedBox(
-                height: 50,
+              Image.asset(
+                'assets/Emblem_01.jpg',
+                fit: BoxFit.contain,
+                width: 150,
+                height: 150,
+                alignment: Alignment.center,
               ),
-              Text(
+              SizedBox(
+                height: 30,
+              ),
+              AutoSizeText(
                 // Title
                 "SKKU-DM",
-                style: TextStyle(
+                style: GoogleFonts.kanit(
                   fontSize: 50,
-                  color: Colors.black,
+                  color: Colors.grey[900],
+                  fontWeight: FontWeight.bold,
                 ),
+                maxLines: 1,
               ),
-              Text(
+              AutoSizeText(
                 // Subtitle
-                "Connection with SKKU Double Majors",
-                style: TextStyle(
-                  fontSize: 15,
+                "성균관대학교 복수전공생들을 위한 커뮤니티",
+                style: GoogleFonts.sunflower(
+                  fontSize: 17,
                   color: Colors.grey,
                 ),
+                maxLines: 1,
               ),
               SizedBox(
                 height: 30,
