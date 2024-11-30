@@ -5,21 +5,7 @@ import { PrismaService } from '../prisma/prisma.service'
 export class BoardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(tags?: string) {
-    const tagArray = tags ? tags.split(',') : []
-
-    const whereCondition = tags
-      ? {
-          tags: {
-            some: {
-              name: {
-                in: tagArray
-              }
-            }
-          }
-        }
-      : {}
-
+  async findAll(tags?: string[]) {
     return this.prisma.post.findMany({
       where: whereCondition,
       include: {

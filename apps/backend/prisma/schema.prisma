@@ -144,11 +144,12 @@ model SquarePostComment {
 }
 
 model Post {
-  id      Int    @id @default(autoincrement())
+  id      Int      @id @default(autoincrement())
   title   String
   content String
   userId  Int /// 글 작성자
-  likes   Int    @default(0)
+  likes   Int      @default(0)
+  tags    String[] @default([])
 
   Comment Comment[]
 
