@@ -43,15 +43,21 @@ export class AuthService {
       )
     }
 
-    return await this.createJwtTokens(user.id, user.username)
+    return await this.createJwtTokens(
+      user.id,
+      user.username,
+      user.nickname,
+      user.Profile.imageUrl ?? 'https://cdn.skku-dm.site/default.jpeg'
+    )
   }
 
   async updateJwtTokens(refreshToken: string) {
-    const { userId, username } = await this.verifyJwtToken(refreshToken)
+    const { userId, username, nickname, profileImgUrl } =
+      await this.verifyJwtToken(refreshToken)
     if (!(await this.isValidRefreshToken(refreshToken, userId))) {
       throw new UnauthorizedException('Unidentified refresh token')
     }
-    return await this.createJwtTokens(userId, username)
+    return await this.createJwtTokens(userId, username, nickname, profileImgUrl)
   }
 
   async verifyJwtToken(token: string, options: JwtVerifyOptions = {}) {
@@ -76,8 +82,13 @@ export class AuthService {
     return true
   }
 
-  async createJwtTokens(userId: number, username: string) {
-    const payload: JwtPayload = { userId, username }
+  async createJwtTokens(
+    userId: number,
+    username: string,
+    nickname: string,
+    profileImgUrl?: string
+  ) {
+    const payload: JwtPayload = { userId, username, nickname, profileImgUrl }
     const accessToken = await this.jwtService.signAsync(payload, {
       expiresIn: ACCESS_TOKEN_EXPIRE_TIME
     })

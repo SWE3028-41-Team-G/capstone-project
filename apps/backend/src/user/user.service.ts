@@ -13,7 +13,7 @@ import { emailAuthenticationPinCacheKey } from '@/common/cache/keys'
 import { EmailService } from '@/email/email.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { StorageService } from '@/storage/storage.service'
-import { Prisma, type User } from '@prisma/client'
+import { Prisma, type Profile, type User } from '@prisma/client'
 import { hash } from 'argon2'
 import { Cache } from 'cache-manager'
 import { CreateUserDTO } from './dto/create-user.dto'
@@ -401,10 +401,19 @@ export class UserService {
     }
   }
 
-  async getUserCredential(username: string): Promise<User> {
+  async getUserCredential(
+    username: string
+  ): Promise<User & { Profile: Partial<Profile> }> {
     try {
       const user = await this.prisma.user.findUniqueOrThrow({
-        where: { username }
+        where: { username },
+        include: {
+          Profile: {
+            select: {
+              imageUrl: true
+            }
+          }
+        }
       })
 
       return user
