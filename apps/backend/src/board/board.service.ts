@@ -9,19 +9,16 @@ export class BoardService {
     return this.prisma.post.findMany({
       where: tags?.length
         ? {
-            OR: tags.map((tag) => ({
-              OR: [
-                { content: { contains: tag, mode: 'insensitive' } },
-                { title: { contains: tag, mode: 'insensitive' } }
-              ]
-            }))
+            tags: {
+              hasSome: tags,
+            },
           }
         : undefined,
       include: {
         Comment: true,
-        user: true
-      }
-    })
+        user: true,
+      },
+    });
   }
 
   async findOne(id: number) {
