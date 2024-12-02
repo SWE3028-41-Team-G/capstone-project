@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home.dart';
@@ -95,8 +97,24 @@ class _WriteRecruitState extends State<WriteRecruit> {
                       if (response?.statusCode == 201) {
                         // 성공적으로 처리됨
                         debugPrint("SQURE 모집글 작성 성공!!!!!");
+                        final responseData = jsonDecode(response!.body);
+                        final squareId = responseData['id'];
+                        debugPrint("squareId 확인 중 : $squareId");
+                        debugPrint(
+                            "userId 확인 중 : ${authProvider?.user?.userId}");
 
-                        majorProvider?.removeSelectedMajor('writeRecruitMajor');
+                        final regSquareResponse = await authProvider?.post(
+                            'square/$squareId/join',
+                            {"userId": authProvider?.user?.userId});
+                        debugPrint(
+                            "주소 확인 중 : ${regSquareResponse?.toString()}");
+
+                        debugPrint(
+                            "스퀘어 작성자 가입 response.statusCode 확인 중 : ${regSquareResponse?.statusCode}");
+                        debugPrint(
+                            "스퀘어 작성자 가입 작성 response.body 확인 중 : ${regSquareResponse?.body}");
+
+                        majorProvider.removeSelectedMajor('writeRecruitMajor');
                         // SQUARE로 이동
                         Navigator.pushAndRemoveUntil(
                           context,

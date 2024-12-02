@@ -135,7 +135,7 @@ class ProfileState extends State<Profile> {
                               maxLines: 1,
                             ),
                             AutoSizeText(
-                              "❶ ${userData.majors[0].major.name}",
+                              "❶ ${userData.majors.firstWhere((major) => major.origin).major.name}",
                               style: TextStyle(
                                 color: Colors.grey[800],
                                 fontSize: 18,
@@ -143,7 +143,7 @@ class ProfileState extends State<Profile> {
                             ),
                             AutoSizeText(
                               userData.real
-                                  ? "❷ ${userData.majors[1].major.name}" // real이 true일 경우
+                                  ? "❷ ${userData.majors.firstWhere((major) => !major.origin).major.name}" // real이 true일 경우
                                   : "❷ 해당없음", // real이 false일 경우
                               style: TextStyle(
                                 color: Colors.grey[800],
@@ -410,7 +410,8 @@ class ProfileState extends State<Profile> {
                                       style: TextStyle(
                                           color: Colors.black, fontSize: 18)),
                                 ),
-                                Text(' ${userData.majors[0].major.name}',
+                                Text(
+                                    ' ${userData.majors.firstWhere((major) => major.origin).major.name}',
                                     style: TextStyle(
                                         color: Colors.grey, fontSize: 18))
                               ],
@@ -428,7 +429,10 @@ class ProfileState extends State<Profile> {
                                 ),
                                 Text(
                                     userData.real
-                                        ? userData.majors[1].major
+                                        ? userData.majors
+                                            .firstWhere(
+                                                (major) => !major.origin)
+                                            .major
                                             .name // real이 true일 경우
                                         : "해당없음", // real이 false일 경우,
                                     style: TextStyle(

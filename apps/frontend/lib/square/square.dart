@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/utils/api_helper.dart';
+import 'package:http/http.dart' as http;
 import 'package:frontend/chatting_room.dart';
 import 'package:frontend/register/major.dart';
 import 'package:frontend/square/recruitment.dart';
 import 'package:frontend/square/write_recruit.dart';
+import 'package:provider/provider.dart';
 
 // import 'package:http/http.dart' as http; // will be used later for API connection
 
@@ -366,190 +371,250 @@ class SquarePage extends StatefulWidget {
 }
 
 class _SquarePageState extends State<SquarePage> {
-  Future<void> _refreshData() async {
-    // 데이터를 새로고침하는 작업
-    await Future.delayed(Duration(seconds: 2));
+  AuthProvider? authProvider;
+  List<dynamic> squareList = [];
+  bool isLoading = true; // 로딩 상태를 나타내는 변수
+
+  Future<void> fetchSquareList() async {
+    // 스퀘어 리스트를 받아오기
+    try {
+      // GET 요청 전송
+      final response = await authProvider?.get('square');
+      debugPrint("스퀘어 데이터 GET statusCode: ${response?.statusCode}");
+      debugPrint("스퀘어 데이터 response.body: ${response?.body}");
+
+      if (response?.statusCode == 200) {
+        final data = jsonDecode(response!.body);
+        // squareList 에 data 넣기
+        squareList = data
+            .map((item) => {
+                  'id': item['id'],
+                  'name': item['name'],
+                  'leader': {
+                    'id': item['leader']['id'],
+                    'username': item['leader']['username'],
+                    'nickname': item['leader']['nickname'],
+                  },
+                  'max': item['max'],
+                  'members': (item['UserSquare'] as List)
+                      .map((userSquare) => {
+                            'userId': userSquare['userId'],
+                            'user': {
+                              'id': userSquare['user']['id'],
+                              'username': userSquare['user']['username'],
+                              'nickname': userSquare['user']['nickname'],
+                            }
+                          })
+                      .toList(),
+                  'posts': (item['SquarePosts'] as List)
+                      .map((post) => {
+                            'id': post['id'],
+                            'title': post['title'],
+                            'content': post['content'],
+                            'createdAt': post['createdAt'],
+                            'updatedAt': post['updatedAt'],
+                            'comments': (post['SquarePostComment'] as List)
+                                .map((comment) => {
+                                      'id': comment['id'],
+                                      'createdAt': comment['createdAt'],
+                                      'updatedAt': comment['updatedAt'],
+                                      'userId': comment['userId'],
+                                      'content': comment['content'],
+                                      'squarePostId': comment['squarePostId'],
+                                    })
+                                .toList(),
+                          })
+                      .toList(),
+                  'createdAt': item['createdAt'],
+                  'updatedAt': item['updatedAt'],
+                })
+            .toList();
+        setState(() {
+          isLoading = false; // 데이터 로딩 완료 시 상태 변경
+        });
+
+        debugPrint("스퀘어 리스트 저장 완료: $squareList");
+      } else {
+        setState(() {
+          isLoading = false; // 오류 발생 시에도 로딩 상태를 해제
+        });
+        throw Exception('스퀘어 전체 리스트 데이터를 가져오지 못했습니다.');
+      }
+    } catch (e) {
+      debugPrint('스퀘어 전체 리스트 데이터 가져오는 중 오류 발생: $e');
+      rethrow;
+    }
   }
 
-  List<Map<String, dynamic>> postList = [
-    {
-      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
-      "content":
-          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
-      "confirmNumber": 1,
-      "recruitNumber": 4
-    },
-    {
-      "title": "운영체제 같이 공부하실 솦트 복전생 찾아여",
-      "content":
-          "이번에 엄영익 교수님 운영체제 듣을 예정인데(만약 수강신청 성공한다면...) 혹시 같이 으샤으샤 공부하실 복전생있나요?? 저도 잘하는 건 아니라 같이 힘내서 xv6 뿌실 전우 구해요!!",
-      "confirmNumber": 2,
-      "recruitNumber": 4
-    },
-    {
-      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
-      "content":
-          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
-      "confirmNumber": 3,
-      "recruitNumber": 4
-    },
-    {
-      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
-      "content":
-          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
-      "confirmNumber": 3,
-      "recruitNumber": 6
-    },
-    {
-      "title": "24학년도 1학기 솦트 복수전공 합격생을 매우매우 찾습니다!",
-      "content":
-          "안녕하세요, 저는 이번 24학년도 1학기에 소프트웨어학과 복수전공에 합격한 사람입니다ㅎㅎ 저와 함께 복수전공을 시작할 복전 새내기를 찾고자 이 글을 적게 되었습니다.",
-      "confirmNumber": 4,
-      "recruitNumber": 7
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _refreshData();
+  }
+
+  Future<void> _refreshData() async {
+    // 데이터를 새로고침하는 작업
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      isLoading = true; // 새로고침 시 로딩 상태 설정
+    });
+    await fetchSquareList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // setState(() {
+    //   fetchSquareList(squareList);
+    // });
     return RefreshIndicator(
       onRefresh: _refreshData,
       color: Colors.green[700],
       child: Scaffold(
-        body: Container(
-          margin: EdgeInsets.symmetric(horizontal: 17),
-          child: Column(
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
-                child: Row(
+        body: isLoading
+            ? Center(child: CircularProgressIndicator()) // 로딩 중일 때 로딩 스피너 표시
+            : Container(
+                margin: EdgeInsets.symmetric(horizontal: 17),
+                child: Column(
                   children: [
-                    Flexible(
-                      flex: 3,
-                      child: MajorDropdown(
-                        isStyled: true,
-                        majorKey: 'square_Major',
-                        labelText: "모집대상 전공",
-                      ),
-                    ),
-                    Spacer(),
-                    Flexible(
-                      flex: 2,
-                      child: ElevatedButton(
-                        // 모집글 작성 버튼 -----------------------------------------------
-                        style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 15),
-                            backgroundColor: Colors.grey[400],
-                            side: BorderSide.none,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10))),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => WriteRecruit()));
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              color: Colors.white,
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            flex: 3,
+                            child: MajorDropdown(
+                              isStyled: true,
+                              majorKey: 'square_Major',
+                              labelText: "모집대상 전공",
                             ),
-                            SizedBox(
-                              width: 7,
-                            ),
-                            Flexible(
-                              child: AutoSizeText(
-                                '모집글 작성',
-                                maxLines: 1,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
+                          ),
+                          Spacer(),
+                          Flexible(
+                            flex: 2,
+                            child: ElevatedButton(
+                              // 모집글 작성 버튼 -----------------------------------------------
+                              style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 15),
+                                  backgroundColor: Colors.grey[400],
+                                  side: BorderSide.none,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10))),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => WriteRecruit()));
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    width: 7,
+                                  ),
+                                  Flexible(
+                                    child: AutoSizeText(
+                                      '모집글 작성',
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      // 모집글 목록들 ----------------------------------------------------------
+                      child: ListView.builder(
+                          itemCount: squareList.length,
+                          itemBuilder: (context, index) {
+                            int reversedIndex = squareList.length - 1 - index;
+                            String title =
+                                squareList[reversedIndex]['posts'][0]['title'];
+                            String content = squareList[reversedIndex]['posts']
+                                [0]['content'];
+                            int confirmNumber =
+                                squareList[reversedIndex]['members'].length;
+                            int recruitNumber =
+                                squareList[reversedIndex]['max'];
+
+                            return GestureDetector(
+                              onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Recruitment())),
+                              child: Container(
+                                margin: EdgeInsets.only(bottom: 12),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 15, horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  border: Border.all(color: Colors.grey[300]!),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          flex: 8,
+                                          child: Text(
+                                            title,
+                                            style: TextStyle(
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Text(
+                                          '($confirmNumber/$recruitNumber)',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: confirmNumber <=
+                                                    recruitNumber / 2
+                                                ? Colors.blue
+                                                : Colors.red,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      content,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                    )
                   ],
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                // 모집글 목록들 ----------------------------------------------------------
-                child: ListView.builder(
-                    itemCount: postList.length,
-                    itemBuilder: (context, index) {
-                      String title = postList[index]['title'];
-                      String content = postList[index]['content'];
-                      int confirmNumber = postList[index]['confirmNumber'];
-                      int recruitNumber = postList[index]['recruitNumber'];
-
-                      return GestureDetector(
-                        onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Recruitment())),
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 12),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 15, horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(8),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    flex: 8,
-                                    child: Text(
-                                      title,
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Text(
-                                    '($confirmNumber/$recruitNumber)',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: confirmNumber <= recruitNumber / 2
-                                          ? Colors.blue
-                                          : Colors.red,
-                                    ),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                content,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-              )
-            ],
-          ),
-        ),
       ),
     );
   }

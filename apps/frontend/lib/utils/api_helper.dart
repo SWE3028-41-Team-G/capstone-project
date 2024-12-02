@@ -308,6 +308,7 @@ class AuthProvider with ChangeNotifier {
         // JSON 데이터 파싱 및 UserReturnType 객체 생성
         final data = jsonDecode(response.body);
         _user = UserReturnType.fromJson(data);
+        debugPrint("UserReturnType으로 변환 후 전공 확인 : ${_user?.majors}");
 
         notifyListeners(); // 상태 변경 알림
       } else {
@@ -339,6 +340,11 @@ class UserMajor {
       'origin': origin,
       'Major': major.toJson(),
     };
+  }
+
+  @override
+  String toString() {
+    return 'UserMajor(origin: $origin, major: $major)';
   }
 }
 

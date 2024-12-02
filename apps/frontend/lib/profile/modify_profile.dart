@@ -51,9 +51,11 @@ class _ModifyProfileState extends State<ModifyProfile> {
     majorProvider = Provider.of<MajorProvider>(context, listen: false);
     var userData = authProvider?.user;
     primaryMajor = Major(
-        id: userData!.majors[0].major.id, name: userData.majors[0].major.name);
+        id: userData!.majors.firstWhere((major) => major.origin).major.id,
+        name: userData.majors.firstWhere((major) => major.origin).major.name);
     doubleMajor = Major(
-        id: userData!.majors[1].major.id, name: userData.majors[1].major.name);
+        id: userData.majors.firstWhere((major) => !major.origin).major.id,
+        name: userData.majors.firstWhere((major) => !major.origin).major.name);
     selectedReal = userData.real;
     selectedPublic = userData.public;
     // FocusNode에 리스너 추가하여 포커스 상태 추적
@@ -141,6 +143,7 @@ class _ModifyProfileState extends State<ModifyProfile> {
                   SizedBox(
                     height: 10,
                   ),
+                  // 원전공 수정 좀 이상한 듯 일단 빼버리기... ===================================
                   MajorDropdown(
                     isStyled: false,
                     value: primaryMajor,
