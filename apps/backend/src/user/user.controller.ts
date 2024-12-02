@@ -56,9 +56,18 @@ export class UserController {
     return await this.userService.getProfile(req.user.id, req.user.id)
   }
 
-  @Get('related/profile')
+  @Get('related/profiles')
   async getSimillarUserProfile(@Req() req: AuthenticatedRequest) {
     return await this.userService.getRelatedUserProfiles(req.user.id)
+  }
+
+  @Get('majors/profiles')
+  async getUserProfilesByMajors(
+    @Query('majorId', new ParseIntPipe({ optional: true })) majorId?: number,
+    @Query('dualMajorId', new ParseIntPipe({ optional: true }))
+    dualMajorId?: number
+  ) {
+    return await this.getUserProfilesByMajors(majorId, dualMajorId)
   }
 
   @Put('profile')

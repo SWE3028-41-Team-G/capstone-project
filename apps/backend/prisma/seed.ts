@@ -86,7 +86,7 @@ async function main() {
         data: {
           name: majorName,
           meta: {
-            description: `${majorName}에 대한 설명입니다.` // 메타 설명 기본값
+            description: `${majorName}에 대한 설명입니다.`
           }
         }
       })
@@ -100,14 +100,11 @@ async function main() {
   const user1 = await prisma.user.create({
     data: {
       username: 'user01',
-      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'),
       nickname: 'user01',
       email: 'user01@example.com',
       UserMajor: {
-        create: [
-          { majorId: major1.id }, // Computer Science 전공 추가
-          { majorId: major2.id } // Electrical Engineering 전공 추가
-        ]
+        create: [{ majorId: major1.id }, { majorId: major2.id }]
       },
       Profile: {
         create: {
@@ -123,13 +120,11 @@ async function main() {
   const user2 = await prisma.user.create({
     data: {
       username: 'user02',
-      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'),
       nickname: 'user02',
       email: 'user02@example.com',
       UserMajor: {
-        create: [
-          { majorId: major1.id } // Computer Science 전공 추가
-        ]
+        create: [{ majorId: major1.id }]
       },
       Profile: {
         create: {
@@ -138,21 +133,19 @@ async function main() {
           public: false,
           interests: ['관심사 1', '관심사 2']
         }
-      }
+      },
+      real: false
     }
   })
 
   await prisma.user.create({
     data: {
       username: 'user03',
-      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'),
       nickname: 'user03',
       email: 'user03@example.com',
       UserMajor: {
-        create: [
-          { majorId: major1.id }, // Computer Science 전공 추가
-          { majorId: major2.id } // Electrical Engineering 전공 추가
-        ]
+        create: [{ majorId: major1.id }, { majorId: major2.id }]
       },
       Profile: {
         create: {
@@ -168,14 +161,11 @@ async function main() {
   await prisma.user.create({
     data: {
       username: 'user04',
-      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'),
       nickname: 'user04',
       email: 'user04@example.com',
       UserMajor: {
-        create: [
-          { majorId: major1.id }, // Computer Science 전공 추가
-          { majorId: major2.id } // Electrical Engineering 전공 추가
-        ]
+        create: [{ majorId: major1.id }, { majorId: major2.id }]
       },
       Profile: {
         create: {
@@ -191,14 +181,11 @@ async function main() {
   await prisma.user.create({
     data: {
       username: 'user05',
-      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'),
       nickname: 'user05',
       email: 'user05@example.com',
       UserMajor: {
-        create: [
-          { majorId: major1.id }, // Computer Science 전공 추가
-          { majorId: major2.id } // Electrical Engineering 전공 추가
-        ]
+        create: [{ majorId: major1.id }, { majorId: major2.id }]
       },
       Profile: {
         create: {
@@ -214,14 +201,11 @@ async function main() {
   await prisma.user.create({
     data: {
       username: 'user06',
-      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'),
       nickname: 'user06',
       email: 'user06@example.com',
       UserMajor: {
-        create: [
-          { majorId: major1.id }, // Computer Science 전공 추가
-          { majorId: major2.id } // Electrical Engineering 전공 추가
-        ]
+        create: [{ majorId: major1.id }, { majorId: major2.id }]
       },
       Profile: {
         create: {
@@ -237,14 +221,11 @@ async function main() {
   await prisma.user.create({
     data: {
       username: 'user07',
-      password: await hash('1234'), // 실제 서비스에서는 암호화 필요
+      password: await hash('1234'),
       nickname: 'user07',
       email: 'user07@example.com',
       UserMajor: {
-        create: [
-          { majorId: major1.id }, // Computer Science 전공 추가
-          { majorId: major2.id } // Electrical Engineering 전공 추가
-        ]
+        create: [{ majorId: major1.id }, { majorId: major2.id }]
       },
       Profile: {
         create: {
@@ -316,8 +297,18 @@ async function main() {
   const post1 = await prisma.post.create({
     data: {
       title: 'My First Post',
-      content: 'This is the content of my first post.',
-      userId: user1.id
+      content: 'This is the content of my first post',
+      userId: user1.id,
+      tags: ['소프트웨어학과', '전자전기']
+    }
+  })
+
+  const post2 = await prisma.post.create({
+    data: {
+      title: 'My Second Post',
+      content: 'This is the content of my second post',
+      userId: user1.id,
+      tags: ['복수전공', '전자전기2']
     }
   })
 
@@ -351,6 +342,7 @@ async function main() {
     squarePostComment1,
     squarePostComment2,
     post1,
+    post2,
     comment1,
     comment2
   })
