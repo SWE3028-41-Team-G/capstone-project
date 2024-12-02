@@ -179,7 +179,7 @@ export class UserService {
         }
       })
 
-      return await this.prisma.user.findMany({
+      const users = await this.prisma.user.findMany({
         where: {
           Profile: {
             public: true
@@ -222,13 +222,28 @@ export class UserService {
               origin: true,
               Major: {
                 select: {
+                  id: true,
                   name: true
                 }
               }
             }
           }
         },
-        take: 10
+        take: 12
+      })
+
+      return users.map((user) => {
+        return {
+          majors: [...user.UserMajor],
+          userId: user.id,
+          imageUrl: user.Profile.imageUrl,
+          interests: user.Profile.interests,
+          public: user.Profile.public,
+          username: user.username,
+          nickname: user.nickname,
+          adminYear: user.admitYear,
+          real: user.real
+        }
       })
     } catch (error) {
       if (
