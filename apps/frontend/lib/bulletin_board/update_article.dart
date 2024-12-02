@@ -30,14 +30,15 @@ class _UpdateArticleState extends State<UpdateArticle> {
 
   // Temporal infos, soon be linked with API
   List<dynamic> tags = [
-    "#수학",
-    "#전공진입",
-    "#꿀팁",
-    "#소프트웨어",
-    "#졸업요건",
-    "#CL과목",
-    "#수업추천",
-    "#명강의"
+    "수학",
+    "전공진입",
+    "꿀팁",
+    "소프트웨어",
+    "졸업요건",
+    "CL과목",
+    "수업추천",
+    "명강의",
+    "복수전공",
   ];
   List<dynamic> selectedTags = [];
 
@@ -172,7 +173,8 @@ class _UpdateArticleState extends State<UpdateArticle> {
                       height: 15,
                     ),
                     MultiSelectChipField(
-                      items: tags.map((e) => MultiSelectItem(e, e)).toList(),
+                      items:
+                          tags.map((e) => MultiSelectItem(e, '#$e')).toList(),
                       title: Text('태그'),
                       onTap: (values) {
                         setState(() {
