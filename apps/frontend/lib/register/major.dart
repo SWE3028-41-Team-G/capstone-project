@@ -193,6 +193,7 @@ class _MajorDropdownState extends State<MajorDropdown> {
           items: items,
           value: selectedMajor?.id,
           focusNode: _focusNode,
+          isExpanded: true,
           onChanged: (value) {
             setState(() {
               // 전공이 선택되면 해당 전공을 Provider에 업데이트
@@ -216,7 +217,7 @@ class _MajorDropdownState extends State<MajorDropdown> {
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Colors.green[700]!, width: 1.5),
             ),
-            contentPadding: EdgeInsets.symmetric(vertical: 23, horizontal: 13),
+            contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           ),
         ),
       );

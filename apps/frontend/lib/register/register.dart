@@ -368,6 +368,8 @@ class _RegisterState extends State<Register> {
                           borderSide:
                               BorderSide(color: Colors.green[700]!, width: 1.5),
                         ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 20, horizontal: 13),
                       ),
                       value: selectedDoubleMajor,
                       items: [
@@ -668,7 +670,9 @@ class _NumberRangeDropdownState extends State<NumberRangeDropdown> {
       child: DropdownButtonFormField<int>(
         decoration: InputDecoration(
           labelText: widget.labelText,
+          labelStyle: TextStyle(color: Colors.grey[600]),
           border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 13),
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.green[700]!, width: 1.5),
           ),

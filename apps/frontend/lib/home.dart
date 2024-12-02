@@ -8,8 +8,9 @@ import 'package:frontend/profile/profile.dart';
 
 class Home extends StatefulWidget {
   final int initialIndex;
+  final int squareIndex;
 
-  Home({super.key, this.initialIndex = 0});
+  Home({super.key, this.initialIndex = 0, this.squareIndex = 0});
 
   @override
   State<Home> createState() => _HomeState();
@@ -38,7 +39,9 @@ class _HomeState extends State<Home> {
         index: _selectedIndex,
         children: <Widget>[
           BulletinBoard(),
-          Square(),
+          Square(
+            initialPage: widget.squareIndex,
+          ),
           ChatRoomsScreen(),
           Profile(),
         ],
