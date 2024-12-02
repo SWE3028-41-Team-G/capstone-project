@@ -135,15 +135,23 @@ export class SquareService {
   }
 
   // 모든 Square 조회
-  async findAllSquares() {
+  async findAllSquares(majorId?: number) {
     return this.prisma.square.findMany({
+      where: {
+        majorId: majorId
+      },
       include: {
         leader: true, // Square 리더 정보 포함
         UserSquare: {
           include: { user: true } // 가입된 User 정보 포함
         },
-        SquarePosts: true // 게시글 정보 포함
-      }
+        SquarePosts: {
+          include: {
+            SquarePostComment: true
+          }
+        } // 게시글 정보 포함,
+      },
+      take: 20
     })
   }
 

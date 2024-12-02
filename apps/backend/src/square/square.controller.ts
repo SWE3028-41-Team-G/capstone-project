@@ -6,7 +6,9 @@ import {
   Get,
   Delete,
   Patch,
-  Req
+  Req,
+  Query,
+  ParseIntPipe
 } from '@nestjs/common'
 import type { AuthenticatedRequest } from '@/auth/class/authenticated-request.interface'
 import { SquareService } from './square.service'
@@ -62,8 +64,10 @@ export class SquareController {
 
   // 모든 Square 조회
   @Get()
-  async findAllSquares() {
-    return this.squareService.findAllSquares()
+  async findAllSquares(
+    @Query('majorId', new ParseIntPipe({ optional: true })) majorId?: number
+  ) {
+    return this.squareService.findAllSquares(majorId)
   }
 
   // SquarePost에 댓글 추가
