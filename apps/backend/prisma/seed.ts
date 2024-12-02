@@ -296,8 +296,18 @@ async function main() {
   const post1 = await prisma.post.create({
     data: {
       title: 'My First Post',
-      content: 'This is the content of my first post.',
-      userId: user1.id
+      content: 'This is the content of my first post',
+      userId: user1.id,
+      tags: ['소프트웨어학과', '전자전기']
+    }
+  })
+
+  const post2 = await prisma.post.create({
+    data: {
+      title: 'My Second Post',
+      content: 'This is the content of my second post',
+      userId: user1.id,
+      tags: ['복수전공', '전자전기2']
     }
   })
 
@@ -331,6 +341,7 @@ async function main() {
     squarePostComment1,
     squarePostComment2,
     post1,
+    post2,
     comment1,
     comment2
   })
