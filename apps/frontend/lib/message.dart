@@ -1,120 +1,113 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/chatting_room.dart';
+import 'package:frontend/dm/chat_room.dart';
+import 'package:frontend/models/chat_room.dart';
+import 'package:frontend/services/chat_service.dart';
+import 'package:frontend/utils/api_helper.dart';
+import 'package:provider/provider.dart';
 
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-class Message extends StatefulWidget {
-  const Message({super.key});
-
+class ChatRoomsScreen extends StatefulWidget {
   @override
-  MessageState createState() => MessageState();
+  _ChatRoomsScreenState createState() => _ChatRoomsScreenState();
 }
 
-class MessageState extends State<Message> {
-  // Temporal infos
-  List<dynamic> chatrooms = [
-    {"title": "김성균", "lastMessage": "감사합니다!", "unreadMessageCounts": 2},
-    {"title": "이율전", "lastMessage": "저도 그 수업 듣는데", "unreadMessageCounts": 0},
-    {
-      "title": "수학과-소프트웨어학과 복전생 모임",
-      "lastMessage": "과제 너무 많네요 ㅠㅠ",
-      "unreadMessageCounts": 6
-    },
-    {
-      "title": "농구 좋아하는 사람들 모임",
-      "lastMessage": "내일 저녁 8시 학교 코트에서 농구하실분?",
-      "unreadMessageCounts": 13
-    },
-  ]; // Temporal
+class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
+  late ChatService chatService;
 
   @override
   void initState() {
     super.initState();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    chatService = ChatService(
+      token: authProvider.accessToken?.replaceAll('Bearer ', '') ??
+          '', // Bearer 제거
+      userId: authProvider.user?.userId ?? 0,
+    );
   }
-
-  // API - GET chatroom infos
-  // Future<void> _fetchChatrooms() async {
-  //   final response = await http.get(
-  //     Uri.parse('https://skku-dm.site/'),
-  //     headers: {},
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     setState(() {
-  //       chatrooms = json.decode(response.body)['chatrooms'];
-  //     });
-  //   } else {
-  //     print('Debugging for GET - Filters list');
-  //     print(response.statusCode);
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Message',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-          ),
-        ),
-        shape: Border(bottom: BorderSide(color: Colors.grey, width: 1)),
+        title: Text('채팅'),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: chatrooms.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom: BorderSide(color: Colors.grey, width: 2))),
-                    child: ListTile(
-                        title: Text(
-                          "${chatrooms[index]["title"]}",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+      body: StreamBuilder<List<ChatRoom>>(
+        stream: chatService.roomsStream,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          final rooms = snapshot.data!;
+          if (rooms.isEmpty) {
+            return Center(child: Text('참여 중인 채팅방이 없습니다.'));
+          }
+
+          return ListView.builder(
+            itemCount: rooms.length,
+            itemBuilder: (context, index) {
+              final room = rooms[index];
+              return ListTile(
+                title: Text(room.name),
+                subtitle: Text(
+                  room.lastMessage?.message ?? '새로운 대화를 시작해보세요',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: room.unreadCount > 0
+                    ? Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
                         ),
-                        subtitle: Text(
-                          "${chatrooms[index]["lastMessage"]}",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        child: Text(
+                          room.unreadCount.toString(),
+                          style: TextStyle(color: Colors.white),
                         ),
-                        trailing: Text(
-                          "${chatrooms[index]["unreadMessageCounts"]}",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 10,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => (ChattingRoom(
-                                        nickname:
-                                            "${chatrooms[index]["title"]}",
-                                      ))));
-                        }));
-              },
-            ),
-          ),
-        ],
+                      )
+                    : null,
+                onTap: () => _openChatRoom(room.roomId),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: _createNewRoom,
       ),
     );
+  }
+
+  void _openChatRoom(String roomId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatRoomScreen(
+          roomId: roomId,
+          chatService: chatService,
+        ),
+      ),
+    );
+  }
+
+  void _createNewRoom() async {
+    try {
+      await chatService.createRoom(
+        '새로운 채팅방',
+        [/* 참여자 ID 목록 */],
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('채팅방 생성에 실패했습니다.')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    chatService.dispose();
+    super.dispose();
   }
 }
