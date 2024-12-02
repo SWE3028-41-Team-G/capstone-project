@@ -65,6 +65,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/Emblem_01.jpg
+    - assets/app_icon.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

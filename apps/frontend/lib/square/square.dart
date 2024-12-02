@@ -35,6 +35,7 @@ class SquareState extends State<Square> {
     super.initState();
     // 외부에서 전달받은 initialPage로 PageController의 초기 페이지를 설정
     _pageController = PageController(initialPage: widget.initialPage);
+    _currentPage = widget.initialPage;
   }
 
   @override
@@ -48,26 +49,6 @@ class SquareState extends State<Square> {
       _currentPage = index;
     });
   }
-
-  // API - GET friends
-  // Future<void> _fetchFriends() async {
-  //   final response = await http.get(
-  //     Uri.parse(''),
-  //     headers: {
-
-  //     },
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     setState(() {
-  //       filters = jsonDecode(response.body)['friends'];
-  //     });
-  //   }
-  //   else {
-  //     print('Debugging for GET - Friends list');
-  //     print(response.statusCode);
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -387,7 +368,7 @@ class SquarePage extends StatefulWidget {
 class _SquarePageState extends State<SquarePage> {
   Future<void> _refreshData() async {
     // 데이터를 새로고침하는 작업
-    await Future.delayed(Duration());
+    await Future.delayed(Duration(seconds: 2));
   }
 
   List<Map<String, dynamic>> postList = [
@@ -432,6 +413,7 @@ class _SquarePageState extends State<SquarePage> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: _refreshData,
+      color: Colors.green[700],
       child: Scaffold(
         body: Container(
           margin: EdgeInsets.symmetric(horizontal: 17),
