@@ -158,6 +158,69 @@ export class UserService {
     }
   }
 
+  async getUserProfilesByMajors(majorId: number, dualMajorId: number) {
+    try {
+      const users = await this.prisma.user.findMany({
+        where: {
+          Profile: {
+            public: true
+          },
+          UserMajor: {
+            some: {
+              majorId: {
+                in: [majorId, dualMajorId]
+              }
+            }
+          }
+        },
+        select: {
+          id: true,
+          admitYear: true,
+          username: true,
+          nickname: true,
+          real: true,
+          Profile: {
+            select: {
+              public: true,
+              imageUrl: true,
+              intro: true,
+              interests: true
+            }
+          },
+          UserMajor: {
+            select: {
+              origin: true,
+              Major: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            }
+          }
+        },
+        take: 12
+      })
+
+      return users.map((user) => {
+        return {
+          majors: [...user.UserMajor],
+          userId: user.id,
+          imageUrl: user.Profile.imageUrl,
+          interests: user.Profile.interests,
+          public: user.Profile.public,
+          username: user.username,
+          nickname: user.nickname,
+          adminYear: user.admitYear,
+          real: user.real
+        }
+      })
+    } catch (error) {
+      console.log(error)
+      throw new InternalServerErrorException(error)
+    }
+  }
+
   async getRelatedUserProfiles(userId: number) {
     try {
       const user = await this.prisma.user.findUniqueOrThrow({
