@@ -158,20 +158,24 @@ export class UserService {
     }
   }
 
-  async getUserProfilesByMajors(majorId: number, dualMajorId: number) {
+  async getUserProfilesByMajors(majorId?: number, dualMajorId?: number) {
     try {
+      const majorIds = [majorId, dualMajorId].filter((id) => id !== undefined)
+
       const users = await this.prisma.user.findMany({
         where: {
           Profile: {
             public: true
           },
-          UserMajor: {
-            some: {
-              majorId: {
-                in: [majorId, dualMajorId]
+          ...(majorIds.length > 0 && {
+            UserMajor: {
+              some: {
+                majorId: {
+                  in: majorIds
+                }
               }
             }
-          }
+          })
         },
         select: {
           id: true,
