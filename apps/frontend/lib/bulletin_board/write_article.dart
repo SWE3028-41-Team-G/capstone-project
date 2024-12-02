@@ -70,8 +70,9 @@ class _WriteArticleState extends State<WriteArticle> {
               onPressed: () async {
                 Map<String, dynamic> body = {
                   'title': titleController.text,
-                  'content': contentController.text + selectedTags.join(""),
+                  'content': contentController.text,
                   'userId': userData!.userId,
+                  'tags': selectedTags,
                 };
 
                 try {

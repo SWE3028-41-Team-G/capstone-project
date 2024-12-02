@@ -132,7 +132,7 @@ class BulletinBoardState extends State<BulletinBoard> {
                     onPressed: () async {
                       try {
                         final response = await authProvider
-                            .get('board?tags${selectedTags.join(",")}');
+                            .get('board?tags=${selectedTags.toString()}');
                         if (response.statusCode == 200) {
                           debugPrint("게시판 글 검색 성공!!!!!");
                           setState(() {
@@ -164,18 +164,8 @@ class BulletinBoardState extends State<BulletinBoard> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => Article(
-                                  id: articles[index]["id"],
-                                  title: articles[index]["title"],
-                                  content: articles[index]["content"],
-                                  userId: articles[index]["userId"],
-                                  likes: articles[index]["likes"],
-                                  tags: articles[index]["tags"],
-                                  Comments: articles[index]["Comments"],
-                                  createdAt: articles[index]["createdAt"],
-                                  updatedAt: articles[index]["updatedAt"],
+                                  id: articles[index]["id"];
                                 )));
-                    // builder: (context) => Article(
-                    //     id: int.parse("${articles[index]["id"]}"))));
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -212,6 +202,21 @@ class BulletinBoardState extends State<BulletinBoard> {
                                     Text("${articles[index]["likes"]}",
                                         style: TextStyle(
                                           color: Colors.pinkAccent,
+                                        )),
+                                  ],
+                                ),
+                                SizedBox(width: 3),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.comment,
+                                      color: Colors.black,
+                                      size: 16,
+                                    ),
+                                    Text(
+                                        "${articles[index]["Comments"].length}",
+                                        style: TextStyle(
+                                          color: Colors.black,
                                         )),
                                   ],
                                 ),

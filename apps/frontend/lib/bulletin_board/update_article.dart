@@ -120,7 +120,8 @@ class _UpdateArticleState extends State<UpdateArticle> {
                   onPressed: () async {
                     Map<String, dynamic> body = {
                       'title': titleController.text,
-                      'content': contentController.text + selectedTags.join(""),
+                      'content': contentController.text,
+                      'tags': selectedTags,
                     };
 
                     try {
