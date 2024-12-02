@@ -133,7 +133,8 @@ async function main() {
           public: false,
           interests: ['관심사 1', '관심사 2']
         }
-      }
+      },
+      real: false
     }
   })
 
