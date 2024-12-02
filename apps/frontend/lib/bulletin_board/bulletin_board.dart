@@ -134,6 +134,7 @@ class BulletinBoardState extends State<BulletinBoard> {
                         final response = await authProvider
                             .get('board?tags=${selectedTags.toString()}');
                         if (response.statusCode == 200) {
+                          debugPrint('board?tags=${selectedTags.toString()}');
                           debugPrint("게시판 글 검색 성공!!!!!");
                           setState(() {
                             articles = jsonDecode(response.body);
@@ -163,9 +164,8 @@ class BulletinBoardState extends State<BulletinBoard> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Article(
-                                  id: articles[index]["id"];
-                                )));
+                            builder: (context) =>
+                                Article(id: articles[index]["id"])));
                   },
                   child: Container(
                     decoration: BoxDecoration(
