@@ -29,33 +29,7 @@ class BulletinBoardState extends State<BulletinBoard> {
     "#명강의"
   ];
   List<dynamic> selectedTags = [];
-  List<dynamic> articles = [
-    {
-      "title": "이번 학기에 반드시 수강신청해야하는 과목",
-      "likes": 12,
-      "content": "이번 학기에 새롭게 부임하신 이율전 교수님이 진행하시는 암호론 되시겠다. 우선 이 교수님...",
-      "tags": ["#수학", "#전공진입", "수업추천", "꿀팁"],
-    },
-    {
-      "title": "전공진입 수월하게 하는 꿀팁 공유",
-      "likes": 6,
-      "content":
-          "다들 전공진입 어떻게 할 지 슬슬 고민되시죠? 전공진입 어느 학과까지 가능한지 쉽게 알 수 있는 꿀팁 공유해...",
-      "tags": ["#수학", "#전공진입"],
-    },
-    {
-      "title": "수강신청 망친 분들 참고하세요",
-      "likes": 2,
-      "content": "참고 하라고 ㅋㅋㅋㅋㅋㅋㅋㅋ",
-      "tags": ["#수학", "#전공진입", "#도전학기"],
-    },
-    {
-      "title": "알고개 같이 공부하실 분 구해요~",
-      "likes": 1,
-      "content": "월요일 9시 OOO 교수님 알고개 수업 같이  공부하실 분 구합니다!!!",
-      "tags": ["#수학", "#전공진입", "#소프트웨어", "#학점컷"],
-    },
-  ];
+  List<dynamic> articles = [];
 
   @override
   void initState() {
@@ -131,10 +105,11 @@ class BulletinBoardState extends State<BulletinBoard> {
                 IconButton(
                     onPressed: () async {
                       try {
-                        final response = await authProvider
-                            .get('board?tags=${selectedTags.toString()}');
+                        final response = await authProvider.get(
+                            'board?tags=${selectedTags.map((item) => '"$item"').toList().toString()}');
                         if (response.statusCode == 200) {
-                          debugPrint('board?tags=${selectedTags.toString()}');
+                          debugPrint(
+                              'board?tags=${selectedTags.map((item) => '"$item"').toList().toString()}');
                           debugPrint("게시판 글 검색 성공!!!!!");
                           setState(() {
                             articles = jsonDecode(response.body);
@@ -214,7 +189,7 @@ class BulletinBoardState extends State<BulletinBoard> {
                                       size: 16,
                                     ),
                                     Text(
-                                        "${articles[index]["Comments"].length}",
+                                        "${articles[index]["Comments"].length ?? 0}",
                                         style: TextStyle(
                                           color: Colors.black,
                                         )),
@@ -240,11 +215,11 @@ class BulletinBoardState extends State<BulletinBoard> {
                               margin: EdgeInsets.all(10),
                               child: Row(
                                 children: List.generate(
-                                    articles[index]["tags"].length, (idx) {
+                                    articles[index]["tags"].length ?? 0, (idx) {
                                   return Row(
                                     children: [
                                       if (index <
-                                          articles[index]["tags"].length)
+                                          (articles[index]["tags"].length ?? 0))
                                         SizedBox(width: 15),
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
