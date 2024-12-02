@@ -61,7 +61,7 @@ export class UserController {
     return await this.userService.getRelatedUserProfiles(req.user.id)
   }
 
-  @Get('/majors/profiles')
+  @Get('majors/profiles')
   async getUserProfilesByMajors(
     @Query('majorId', ParseIntPipe) majorId: number,
     @Query('dualMajorId', ParseIntPipe) dualMajorId: number
