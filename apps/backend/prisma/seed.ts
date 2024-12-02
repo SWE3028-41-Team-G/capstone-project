@@ -104,7 +104,7 @@ async function main() {
       nickname: 'user01',
       email: 'user01@example.com',
       UserMajor: {
-        create: [{ majorId: major1.id }, { majorId: major2.id }]
+        create: [{ majorId: major1.id }, { majorId: major2.id, origin: false }]
       },
       Profile: {
         create: {
@@ -145,7 +145,7 @@ async function main() {
       nickname: 'user03',
       email: 'user03@example.com',
       UserMajor: {
-        create: [{ majorId: major1.id }, { majorId: major2.id }]
+        create: [{ majorId: major1.id }, { majorId: major2.id, origin: false }]
       },
       Profile: {
         create: {
@@ -165,7 +165,7 @@ async function main() {
       nickname: 'user04',
       email: 'user04@example.com',
       UserMajor: {
-        create: [{ majorId: major1.id }, { majorId: major2.id }]
+        create: [{ majorId: major1.id }, { majorId: major2.id, origin: false }]
       },
       Profile: {
         create: {
@@ -185,7 +185,7 @@ async function main() {
       nickname: 'user05',
       email: 'user05@example.com',
       UserMajor: {
-        create: [{ majorId: major1.id }, { majorId: major2.id }]
+        create: [{ majorId: major1.id }, { majorId: major2.id, origin: false }]
       },
       Profile: {
         create: {
@@ -205,7 +205,7 @@ async function main() {
       nickname: 'user06',
       email: 'user06@example.com',
       UserMajor: {
-        create: [{ majorId: major1.id }, { majorId: major2.id }]
+        create: [{ majorId: major1.id }, { majorId: major2.id, origin: false }]
       },
       Profile: {
         create: {
@@ -225,7 +225,7 @@ async function main() {
       nickname: 'user07',
       email: 'user07@example.com',
       UserMajor: {
-        create: [{ majorId: major1.id }, { majorId: major2.id }]
+        create: [{ majorId: major1.id }, { majorId: major2.id, origin: false }]
       },
       Profile: {
         create: {
