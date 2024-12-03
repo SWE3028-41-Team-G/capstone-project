@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
           Square(
             initialPage: widget.squareIndex,
           ),
-          Message(),
+          ChatRoomsScreen(),
           Profile(),
         ],
       ),

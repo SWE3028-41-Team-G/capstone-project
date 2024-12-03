@@ -1,117 +1,181 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/chatting_room.dart';
+import 'package:frontend/initial_page.dart';
+import 'package:frontend/models/chat_room.dart';
+import 'package:frontend/utils/jwt_helper.dart';
+import 'package:intl/intl.dart';
 
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-class Message extends StatefulWidget {
-  const Message({super.key});
-
+class ChatRoomsScreen extends StatefulWidget {
   @override
-  MessageState createState() => MessageState();
+  State<ChatRoomsScreen> createState() => _ChatRoomsScreenState();
 }
 
-class MessageState extends State<Message> {
-  // Temporal infos
-  List<dynamic> chatrooms = [
-    {"title": "김성균", "lastMessage": "감사합니다!", "unreadMessageCounts": 2},
-    {"title": "이율전", "lastMessage": "저도 그 수업 듣는데", "unreadMessageCounts": 0},
-    {
-      "title": "수학과-소프트웨어학과 복전생 모임",
-      "lastMessage": "과제 너무 많네요 ㅠㅠ",
-      "unreadMessageCounts": 6
-    },
-    {
-      "title": "농구 좋아하는 사람들 모임",
-      "lastMessage": "내일 저녁 8시 학교 코트에서 농구하실분?",
-      "unreadMessageCounts": 13
-    },
-  ]; // Temporal
+class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String? _accessToken;
 
   @override
   void initState() {
     super.initState();
+    _loadAccessToken();
   }
 
-  // API - GET chatroom infos
-  // Future<void> _fetchChatrooms() async {
-  //   final response = await http.get(
-  //     Uri.parse('https://skku-dm.site/'),
-  //     headers: {},
-  //   );
+  Future<void> _loadAccessToken() async {
+    final token = await _secureStorage.read(key: 'access_token');
+    setState(() {
+      _accessToken = token;
+    });
+  }
 
-  //   if (response.statusCode == 200) {
-  //     setState(() {
-  //       chatrooms = json.decode(response.body)['chatrooms'];
-  //     });
-  //   } else {
-  //     print('Debugging for GET - Filters list');
-  //     print(response.statusCode);
-  //   }
-  // }
+  void _handleLogout(BuildContext context) async {
+    await _secureStorage.delete(key: 'access_token');
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => InitialPage()),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_accessToken == null) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final userPayload = JwtHelper.parseJwt(_accessToken!);
+    final currentUserId = userPayload['userId'].toString();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Message',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
+        title: Text('채팅방 목록'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => _handleLogout(context),
+          ),
+        ],
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('chatrooms')
+            .where('participants', arrayContains: currentUserId)
+            .orderBy('lastMessageTime', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          final chatRooms = snapshot.data!.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return ChatRoom.fromMap(data, doc.id);
+          }).toList();
+
+          return ListView.builder(
+            itemCount: chatRooms.length,
+            itemBuilder: (context, index) {
+              final chatRoom = chatRooms[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(userPayload['imageUrl'] ?? ''),
+                  child: (userPayload['imageUrl'] ?? '').isEmpty
+                      ? Text(chatRoom.name[0])
+                      : null,
+                ),
+                title: Text(chatRoom.name),
+                subtitle: Text(chatRoom.lastMessage),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      DateFormat('MM/dd HH:mm')
+                          .format(chatRoom.lastMessageTime),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(
+                        chatRoomId: chatRoom.id,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _showCreateChatRoomDialog(context),
+      ),
+    );
+  }
+
+  void _showCreateChatRoomDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final userPayload = JwtHelper.parseJwt(_accessToken!);
+    final currentUserId = userPayload['userId'].toString();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('새 채팅방 만들기'),
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(
+            hintText: '채팅방 이름을 입력하세요',
           ),
         ),
-        shape: Border(bottom: BorderSide(color: Colors.grey, width: 1)),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: chatrooms.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom: BorderSide(color: Colors.grey, width: 2))),
-                    child: ListTile(
-                        title: Text(
-                          "${chatrooms[index]["title"]}",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          "${chatrooms[index]["lastMessage"]}",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Text(
-                          "${chatrooms[index]["unreadMessageCounts"]}",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 10,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => (ChattingRoom(
-                                        nickname:
-                                            "${chatrooms[index]["title"]}",
-                                      ))));
-                        }));
-              },
-            ),
+        actions: [
+          TextButton(
+            child: Text('취소'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: Text('만들기'),
+            onPressed: () async {
+              if (nameController.text.trim().isEmpty) return;
+
+              final chatRoomRef = await _firestore.collection('chatrooms').add({
+                'name': nameController.text.trim(),
+                'participants': [currentUserId],
+                'lastMessageTime': DateTime.now(),
+                'lastMessage': '채팅방이 생성되었습니다.',
+                'createdBy': currentUserId,
+                'createdAt': DateTime.now(),
+                'participantDetails': [
+                  {
+                    'userId': currentUserId,
+                    'nickname': userPayload['nickname'],
+                    'imageUrl': userPayload['imageUrl'] ?? '',
+                  }
+                ],
+              });
+
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    chatRoomId: chatRoomRef.id,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

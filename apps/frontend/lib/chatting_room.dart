@@ -1,151 +1,203 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/models/message_model.dart';
+import 'package:frontend/models/user_info.dart';
+import 'package:frontend/utils/jwt_helper.dart';
 
-class ChattingRoom extends StatefulWidget {
-  final String nickname;
+class ChatScreen extends StatefulWidget {
+  final String chatRoomId;
 
-  const ChattingRoom({super.key, required this.nickname});
+  ChatScreen({required this.chatRoomId});
+
   @override
-  State<ChattingRoom> createState() => _ChattingRoomState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChattingRoomState extends State<ChattingRoom> {
-  final _formKey = GlobalKey<FormState>();
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String? _accessToken;
 
-  final ScrollController _scrollController = ScrollController();
-  final TextEditingController _textController = TextEditingController();
-
-  final List<Map<String, String>> _messages = [];
-
-  // 현재 시간
-  String _getCurrentTimestamp() {
-    final now = DateTime.now();
-    final formatter = DateFormat('HH:mm');
-    return formatter.format(now);
+  @override
+  void initState() {
+    super.initState();
+    _loadAccessToken();
   }
 
-  // 채팅 입력 아이콘 클릭 시
-  void _onSendPressed() {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _messages.add({
-          'timestamp': _getCurrentTimestamp(),
-          'content': _textController.text,
-        });
-        print("This is List: $_messages");
-        _textController.clear();
-      });
+  Future<void> _loadAccessToken() async {
+    final token = await _secureStorage.read(key: 'access_token');
+    setState(() {
+      _accessToken = token;
+    });
+  }
 
-      // 추가된 곳으로 스크롤 위치
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-        }
-      });
-    }
+  void _sendMessage() async {
+    if (_messageController.text.trim().isEmpty || _accessToken == null) return;
+
+    final userPayload = JwtHelper.parseJwt(_accessToken!);
+
+    final userInfo = UserInfo(
+      userId: userPayload['userId'] as int,
+      username: userPayload['username'] as String,
+      nickname: userPayload['nickname'] as String,
+      profileImgUrl: userPayload['profileImgUrl'] as String,
+    );
+
+    final message = ChatMessage(
+      senderId: userPayload['userId'].toString(),
+      message: _messageController.text.trim(),
+      timestamp: DateTime.now(),
+      readBy: [userPayload['userId'].toString()],
+      userInfo: userInfo,
+    );
+
+    await _firestore
+        .collection('chatrooms')
+        .doc(widget.chatRoomId)
+        .collection('messages')
+        .add(message.toMap());
+
+    await _firestore.collection('chatrooms').doc(widget.chatRoomId).update({
+      'lastMessage': message.message,
+      'lastMessageTime': message.timestamp,
+    });
+
+    _messageController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.nickname,
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
-      body: Container(
-        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: Column(
-          children: [
-            // 채팅 내용 --------------------------------------------------------
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final message = _messages[index];
-                  final timestamp = message['timestamp']!;
-                  final content = message['content']!;
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          timestamp,
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 7,
-                      ),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width *
-                                0.6), // Max width를 70%로 제한
-                        child: Container(
-                          margin: EdgeInsets.symmetric(vertical: 5),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 15, horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.lightGreen.shade100,
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                          ),
-                          child: Text(
-                            content,
-                            style: TextStyle(fontSize: 15, color: Colors.black),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+    if (_accessToken == null) {
+      return Center(child: CircularProgressIndicator());
+    }
 
-            // 채팅 입력 ---------------------------------------------------------
-            Form(
-              key: _formKey,
-              child: Container(
-                margin: EdgeInsets.only(top: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        maxLines: 2,
-                        controller: _textController,
-                        decoration: InputDecoration(
-                          hintText: '내용을 입력하세요...',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.all(10),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              CupertinoIcons.paperplane_fill,
-                              color: Colors.grey[500],
-                            ),
-                            onPressed: _onSendPressed,
+    // JWT 토큰에서 현재 사용자 ID 가져오기
+    final userPayload = JwtHelper.parseJwt(_accessToken!);
+    final currentUserId = userPayload['userId'].toString();
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Chat Room')),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('chatrooms')
+                  .doc(widget.chatRoomId)
+                  .collection('messages')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final messages = snapshot.data!.docs.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  return ChatMessage.fromMap(data);
+                }).toList();
+
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final isMe = message.senderId == currentUserId;
+
+                    if (!message.readBy.contains(currentUserId)) {
+                      _firestore
+                          .collection('chatrooms')
+                          .doc(widget.chatRoomId)
+                          .collection('messages')
+                          .doc(snapshot.data!.docs[index].id)
+                          .update({
+                        'readBy': FieldValue.arrayUnion([currentUserId])
+                      });
+                    }
+
+                    return Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (!isMe) ...[
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundImage: NetworkImage(
+                                      message.userInfo.profileImgUrl),
+                                ),
+                                SizedBox(width: 8),
+                              ],
+                              Text(
+                                message.userInfo.nickname,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '댓글을 입력해주세요.';
-                          }
-                          return null;
-                        },
-                        onChanged: (text) {
-                          // 댓글 입력 처리
-                        },
+                          SizedBox(height: 4),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: isMe ? Colors.blue : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
+                            child: Text(
+                              message.message,
+                              style: TextStyle(
+                                color: isMe ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
+                          if (isMe) ...[
+                            SizedBox(height: 4),
+                            Text(
+                              '읽음 ${message.readBy.length}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    );
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: '메시지를 입력하세요',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: _sendMessage,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

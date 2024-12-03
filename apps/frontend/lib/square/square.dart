@@ -2,9 +2,8 @@ import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/chat_room.dart';
 import 'package:frontend/utils/api_helper.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/chatting_room.dart';
 import 'package:frontend/register/major.dart';
 import 'package:frontend/square/recruitment.dart';
 import 'package:frontend/square/write_recruit.dart';
@@ -223,12 +222,12 @@ class _DMPageState extends State<DMPage> {
                 index % 2 == 0; // 왼쪽, 1이면 오른쪽
 
                 return GestureDetector(
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => (ChattingRoom(
-                                nickname: nickname,
-                              )))),
+                  // onTap: () => Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: (context) => (ChatRoom(
+                  //               nickname: nickname,
+                  //             )))),
                   child: Container(
                     margin: EdgeInsets.all(5),
                     decoration: BoxDecoration(
