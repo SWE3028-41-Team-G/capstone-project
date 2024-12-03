@@ -22,30 +22,56 @@ class _ArticleState extends State<Article> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController commentController = TextEditingController();
 
-  // Temporal data, will be linked with API soon
-  var postData = {
-    // "createdAt": "11/20 12:30",
-  };
+  // linked with API
+  var postData = {};
   var writerProfile = {};
   List<dynamic> commentUserProfiles = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchpostData();
-    _fetchUserProfile();
-    _fetchCommentsData();
-    debugPrint(commentUserProfiles.toString()); //debug
+    _fetchInfos();
   }
 
-  Future<void> _fetchpostData() async {
+  Future<void> _fetchInfos() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     try {
-      final response = await authProvider.get('board/${widget.id}');
+      var response = await authProvider.get('board/${widget.id}');
       if (response.statusCode == 200) {
         setState(() {
           postData = jsonDecode(response.body);
         });
+
+        response =
+            await authProvider.get('users/${postData['userId']}/profile');
+        if (response.statusCode == 200) {
+          setState(() {
+            writerProfile = jsonDecode(response.body);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('작성자 정보 검색 실패')),
+          );
+        }
+
+        for (dynamic comment in postData["Comment"]) {
+          response =
+              await authProvider.get('users/${comment["userId"]}/profile');
+          if (response.statusCode == 200) {
+            setState(() {
+              commentUserProfiles.add(jsonDecode(response.body));
+            });
+          }
+        }
+        // postData["Comment"].forEach((comment) async {
+        //   response =
+        //       await authProvider.get('users/${comment["userId"]}/profile');
+        //   if (response.statusCode == 200) {
+        //     setState(() {
+        //       commentUserProfiles.add(jsonDecode(response.body));
+        //     });
+        //   }
+        // });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('글 정보 가져오기 실패')),
@@ -58,50 +84,42 @@ class _ArticleState extends State<Article> {
     }
   }
 
-  Future<void> _fetchUserProfile() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    try {
-      final response =
-          await authProvider.get('users/${postData['userId']}/profile');
-      if (response.statusCode == 200) {
-        setState(() {
-          writerProfile = jsonDecode(response.body);
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('작성자 정보 검색 실패')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('오류 발생: $e')),
-      );
-    }
-  }
-
-  Future<void> _fetchCommentsData() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    try {
-      postData["Comment"].forEach((comment) async {
-        final response =
-            await authProvider.get('users/${comment["userId"]}/profile');
-        if (response.statusCode == 200) {
-          setState(() {
-            commentUserProfiles.add(response);
-          });
-        }
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('오류 발생: $e')),
-      );
-    }
-  }
+  // Future<void> _fetchCommentsData() async {
+  //   final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  //   try {
+  //     postData["Comment"].forEach((comment) async {
+  //       final response =
+  //           await authProvider.get('users/${comment["userId"]}/profile');
+  //       if (response.statusCode == 200) {
+  //         setState(() {
+  //           commentUserProfiles.add(response);
+  //         });
+  //       }
+  //     });
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('오류 발생: $e')),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     var userData = authProvider.user;
+
+    debugPrint('-------댓글정보 parsing 상태확인-------');
+    debugPrint(postData["Comment"].toString()); //debug
+    debugPrint('-------작성자 정보 상태확인-------');
+    debugPrint(writerProfile.toString()); //debug
+    debugPrint('-------댓글 유저ID parsing 확인-------');
+    List ids = [];
+    postData["Comment"].forEach((comment) {
+      ids.add(comment["userId"]);
+    });
+    debugPrint(ids.toString()); //debug
+    debugPrint('-------댓글 작성자 정보 상태확인-------');
+    debugPrint(commentUserProfiles.toString()); //debug
 
     // 모집글
     String imageUrl =
@@ -255,7 +273,7 @@ class _ArticleState extends State<Article> {
                           Icon(
                             CupertinoIcons.heart,
                             color: Colors.pinkAccent,
-                            size: 16,
+                            size: 20,
                           ),
                           Text("$likes",
                               style: TextStyle(
@@ -263,7 +281,21 @@ class _ArticleState extends State<Article> {
                               )),
                         ],
                       ),
-                    )
+                    ),
+                    SizedBox(width: 3),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.comment,
+                          color: Colors.black,
+                          size: 20,
+                        ),
+                        Text("${postData["Comment"].length ?? 0}",
+                            style: TextStyle(
+                              color: Colors.black,
+                            )),
+                      ],
+                    ),
                   ],
                 ),
                 Divider(),
@@ -383,7 +415,7 @@ class _ArticleState extends State<Article> {
                                   'board/${widget.id}/comment', body);
                               if (response.statusCode == 201) {
                                 debugPrint("게시판 댓글 작성 성공!!!!!");
-                                _fetchpostData();
+                                _fetchInfos();
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text('게시판 글 검색 실패')),
