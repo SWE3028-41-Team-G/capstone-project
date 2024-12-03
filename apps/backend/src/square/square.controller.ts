@@ -35,7 +35,7 @@ export class SquareController {
 
   @Patch(':squareId')
   async updateSquare(
-    @Param('squareId') squareId: number,
+    @Param('squareId', ParseIntPipe) squareId: number,
     @Body()
     updateSquareDto: {
       name?: string
@@ -56,7 +56,7 @@ export class SquareController {
   // User가 Square에 가입
   @Post(':squareId/join')
   async joinSquare(
-    @Param('squareId') squareId: number,
+    @Param('squareId', ParseIntPipe) squareId: number,
     @Body() joinDto: { userId: number }
   ) {
     return this.squareService.joinSquare(squareId, joinDto.userId)
@@ -73,7 +73,7 @@ export class SquareController {
   // SquarePost에 댓글 추가
   @Post(':postId/comments')
   async addComment(
-    @Param('postId') postId: number,
+    @Param('postId', ParseIntPipe) postId: number,
     @Body() commentDto: { userId: number; content: string }
   ) {
     return this.squareService.addComment(postId, commentDto)
@@ -81,7 +81,7 @@ export class SquareController {
 
   // SquarePost 댓글 삭제
   @Delete('comments/:commentId')
-  async deleteComment(@Param('commentId') commentId: number) {
+  async deleteComment(@Param('commentId', ParseIntPipe) commentId: number) {
     return this.squareService.deleteComment(commentId)
   }
 }
