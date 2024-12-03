@@ -36,7 +36,7 @@ class _RecruitmentState extends State<Recruitment> {
 
   Future<void> _fetchUserData() async {
     try {
-      cmtUserData = await getUserDataFromComments(comments);
+      cmtUserData = (await getUserDataFromComments(comments))!;
       debugPrint("cmtUserData 확인 중 : $cmtUserData");
     } catch (e) {
       debugPrint('_fetchUserData 로드 중 오류 발생: $e');
@@ -50,7 +50,7 @@ class _RecruitmentState extends State<Recruitment> {
     return formattedDate;
   }
 
-  Future<List<Map<String, dynamic>>> getUserDataFromComments(
+  Future<List<Map<String, dynamic>>?> getUserDataFromComments(
       List<Map<String, dynamic>> comments) async {
     try {
       // 중복된 userId를 제거하기 위해 Set을 사용
@@ -86,8 +86,9 @@ class _RecruitmentState extends State<Recruitment> {
       return userDataList;
     } catch (e) {
       debugPrint('getUserDataFromComments 중 오류 발생: $e');
-      rethrow;
+      // rethrow;
     }
+    return null;
   }
 
   Future<Map<String, dynamic>?> getCmtUserById(int userId) async {
@@ -108,8 +109,16 @@ class _RecruitmentState extends State<Recruitment> {
           'nickname': nickname,
           'imageUrl': imageUrl,
         };
-      } else {
-        throw Exception('댓글 작성자 데이터를 가져오지 못했습니다.');
+      } else if (response.body.isEmpty) {
+        String nickname = "익명";
+        String imageUrl =
+            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg';
+        return {
+          'id': userId,
+          'nickname': nickname,
+          'imageUrl': imageUrl,
+        };
+        // throw Exception('댓글 작성자 데이터를 가져오지 못했습니다.');
       }
     } catch (e) {
       debugPrint('getCmtUserById 중 오류 발생: $e');
@@ -156,7 +165,7 @@ class _RecruitmentState extends State<Recruitment> {
               ),
             ),
           ),
-          body: FutureBuilder<List<Map<String, dynamic>>>(
+          body: FutureBuilder<List<Map<String, dynamic>>?>(
             future: getUserDataFromComments(comments),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -169,7 +178,7 @@ class _RecruitmentState extends State<Recruitment> {
                 cmtUserData = snapshot.data!;
 
                 // 모집글 작성자 데이터 설정
-                Map<String, dynamic> leaderData = cmtUserData.firstWhere(
+                Map<String, dynamic> leaderDatas = cmtUserData.firstWhere(
                   (element) =>
                       element['id'] == widget.squarePost['leader']['id'],
                   orElse: () => {
@@ -179,9 +188,9 @@ class _RecruitmentState extends State<Recruitment> {
                   },
                 );
 
-                String imageUrl = leaderData['imageUrl'] ?? 'default_image_url';
-                String nickname =
-                    widget.squarePost['leader']['nickname'] as String;
+                String nickname = leaderDatas['nickname'] ?? '익명';
+                String imageUrl =
+                    leaderDatas['imageUrl'] ?? 'default_image_url';
                 String timestamp =
                     formatDate(widget.squarePost['createdAt'] as String);
                 String title = widget.squarePost['posts'][0]['title'] as String;
