@@ -1,12 +1,17 @@
 import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/chatting_room.dart';
+import 'package:frontend/initial_page.dart';
 import 'package:frontend/models/chat_room.dart';
 import 'package:frontend/utils/api_helper.dart';
 import 'package:frontend/register/major.dart';
 import 'package:frontend/square/recruitment.dart';
 import 'package:frontend/square/write_recruit.dart';
+import 'package:frontend/utils/jwt_helper.dart';
 import 'package:provider/provider.dart';
 
 // import 'package:http/http.dart' as http; // will be used later for API connection
@@ -117,19 +122,53 @@ class DMPage extends StatefulWidget {
 }
 
 class _DMPageState extends State<DMPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String? _accessToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeToken();
+  }
+
+  Future<void> _initializeToken() async {
+    try {
+      final token = await _secureStorage.read(key: 'access_token');
+      if (!mounted) return;
+
+      if (token == null) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => InitialPage()),
+          (route) => false,
+        );
+        return;
+      }
+
+      setState(() {
+        _accessToken = token;
+      });
+    } catch (e) {
+      print('Error in _initializeToken: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var students = [
       {
+        'userId': '2',
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': '명륜이',
+        'nickname': 'user02',
         'primaryMajor': '경제학과',
         'secondMajor': '소프트웨어학과',
         'keyword1': '산책하기',
         'keyword2': '매일 헬스장 가서 운동하기'
       },
       {
+        'userId': '3',
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
         'nickname': '명륜이',
@@ -139,6 +178,7 @@ class _DMPageState extends State<DMPage> {
         'keyword2': '운동'
       },
       {
+        'userId': '4',
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
         'nickname': '외로운 늑대',
@@ -148,6 +188,7 @@ class _DMPageState extends State<DMPage> {
         'keyword2': '침대에 누워있기'
       },
       {
+        'userId': '5',
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
         'nickname': '명륜이',
@@ -157,6 +198,7 @@ class _DMPageState extends State<DMPage> {
         'keyword2': '운동'
       },
       {
+        'userId': '6',
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
         'nickname': '명륜이',
@@ -166,6 +208,7 @@ class _DMPageState extends State<DMPage> {
         'keyword2': '운동'
       },
       {
+        'userId': '7',
         'imageUrl':
             'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
         'nickname': '명륜이',
@@ -212,6 +255,7 @@ class _DMPageState extends State<DMPage> {
               itemCount: students.length,
               itemBuilder: (context, index) {
                 var student = students[index];
+                String userId = student['userId']!;
                 String imageUrl = student['imageUrl']!;
                 String nickname = student['nickname'] ?? 'Unknown';
                 String primaryMajor = student['primaryMajor']!;
@@ -220,14 +264,41 @@ class _DMPageState extends State<DMPage> {
                 String keyword2 = student['keyword2']!;
 
                 index % 2 == 0; // 왼쪽, 1이면 오른쪽
+                final userPayload = JwtHelper.parseJwt(_accessToken!);
+                final currentUserId = userPayload['userId'].toString();
 
                 return GestureDetector(
-                  // onTap: () => Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (context) => (ChatRoom(
-                  //               nickname: nickname,
-                  //             )))),
+                  onTap: () async {
+                    final chatRoomRef =
+                        await _firestore.collection('chatrooms').add({
+                      'name': "[DM] " +  userPayload['nickname'] + ", " + nickname,
+                      'participants': [currentUserId, userId],
+                      'lastMessageTime': DateTime.now(),
+                      'lastMessage': '채팅방이 생성되었습니다.',
+                      'createdBy': currentUserId,
+                      'createdAt': DateTime.now(),
+                      'participantDetails': [
+                        {
+                          'userId': currentUserId,
+                          'nickname': userPayload['nickname'],
+                          'profileImgUrl': userPayload['profileImgUrl'] ?? '',
+                        },
+                        {
+                          'userId': userId,
+                          'nickname': nickname,
+                          'profileImgUrl': imageUrl,
+                        }
+                      ],
+                    });
+
+                    if (!mounted) return;
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                ChatScreen(chatRoomId: chatRoomRef.id)));
+                  },
                   child: Container(
                     margin: EdgeInsets.all(5),
                     decoration: BoxDecoration(

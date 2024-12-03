@@ -193,6 +193,8 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
             onPressed: () async {
               if (nameController.text.trim().isEmpty) return;
 
+              print(userPayload);
+
               final chatRoomRef = await _firestore.collection('chatrooms').add({
                 'name': nameController.text.trim(),
                 'participants': [currentUserId],

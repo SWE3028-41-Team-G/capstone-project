@@ -32,7 +32,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initializeChat() async {
     try {
       final token = await _secureStorage.read(key: 'access_token');
-      print('Token loaded: ${token != null}');
 
       if (!mounted) return;
 
@@ -209,13 +208,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                   CircleAvatar(
                                     radius: 16,
                                     backgroundImage: message.userInfo
-                                                .profileImgUrl?.isNotEmpty ==
+                                                .profileImgUrl.isNotEmpty ==
                                             true
                                         ? NetworkImage(
                                             message.userInfo.profileImgUrl!)
                                         : null,
                                     child: message.userInfo.profileImgUrl
-                                                ?.isEmpty !=
+                                                .isEmpty !=
                                             false
                                         ? Text(message.userInfo.nickname[0])
                                         : null,
@@ -223,7 +222,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   const SizedBox(width: 8),
                                 ],
                                 Text(
-                                  message.userInfo.nickname,
+                                  isMe ? '나' : message.userInfo.nickname,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
@@ -246,7 +245,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                               ),
                             ),
-                            if (isMe) ...[
+                            ...[
                               const SizedBox(height: 4),
                               Text(
                                 '읽음 ${message.readBy.length}',
