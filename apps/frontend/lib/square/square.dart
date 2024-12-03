@@ -372,6 +372,7 @@ class SquarePage extends StatefulWidget {
 
 class _SquarePageState extends State<SquarePage> {
   AuthProvider? authProvider;
+  MajorProvider? majorProvider;
   List<dynamic> squareList = [];
   bool isLoading = true; // 로딩 상태를 나타내는 변수
 
@@ -450,94 +451,194 @@ class _SquarePageState extends State<SquarePage> {
   void initState() {
     super.initState();
     authProvider = Provider.of<AuthProvider>(context, listen: false);
+    majorProvider = Provider.of<MajorProvider>(context, listen: false);
     _refreshData();
   }
 
   Future<void> _refreshData() async {
     // 데이터를 새로고침하는 작업
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(Duration());
     setState(() {
       isLoading = true; // 새로고침 시 로딩 상태 설정
+      majorProvider?.removeSelectedMajor('square_Major');
     });
     await fetchSquareList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // setState(() {
-    //   fetchSquareList(squareList);
-    // });
     return RefreshIndicator(
       onRefresh: _refreshData,
       color: Colors.green[700],
       child: Scaffold(
-        body: isLoading
-            ? Center(child: CircularProgressIndicator()) // 로딩 중일 때 로딩 스피너 표시
-            : Container(
-                margin: EdgeInsets.symmetric(horizontal: 17),
-                child: Column(
+        body: Container(
+          margin: EdgeInsets.symmetric(horizontal: 17),
+          child: Column(
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                child: Row(
                   children: [
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 10),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            flex: 3,
-                            child: MajorDropdown(
-                              isStyled: true,
-                              majorKey: 'square_Major',
-                              labelText: "모집대상 전공",
-                            ),
-                          ),
-                          Spacer(),
-                          Flexible(
-                            flex: 2,
-                            child: ElevatedButton(
-                              // 모집글 작성 버튼 -----------------------------------------------
-                              style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 15),
-                                  backgroundColor: Colors.grey[400],
-                                  side: BorderSide.none,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => WriteRecruit()));
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                    width: 7,
-                                  ),
-                                  Flexible(
-                                    child: AutoSizeText(
-                                      '모집글 작성',
-                                      maxLines: 1,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                    Flexible(
+                      flex: 3,
+                      child: MajorDropdown(
+                        isStyled: true,
+                        majorKey: 'square_Major',
+                        labelText: "모집대상 전공",
+                        // 모집대상 전공별 SQUARE 검색하기 -------------------------------
+                        onChanged: () async {
+                          try {
+                            // GET 요청 전송
+                            debugPrint(
+                                "스퀘어 검색 주소 확인 : square?majorId=${majorProvider?.selectedMajors['square_Major'].id}");
+                            final response = await authProvider?.get(
+                                'square?majorId=${majorProvider?.selectedMajors['square_Major'].id}');
+                            debugPrint(
+                                "모집대상 전공 스퀘어 검색 GET statusCode: ${response?.statusCode}");
+                            debugPrint(
+                                "모집대상 전공 스퀘어 검색 response.body: ${response?.body}");
+
+                            if (response?.statusCode == 200) {
+                              final responseData = jsonDecode(response!.body);
+                              // squareList 에 data 넣기
+                              squareList = responseData
+                                  .map((item) => {
+                                        'id': item['id'],
+                                        'name': item['name'],
+                                        'leader': {
+                                          'id': item['leader']['id'],
+                                          'username': item['leader']
+                                              ['username'],
+                                          'nickname': item['leader']
+                                              ['nickname'],
+                                        },
+                                        'max': item['max'],
+                                        'members': (item['UserSquare'] as List)
+                                            .map((userSquare) => {
+                                                  'userId':
+                                                      userSquare['userId'],
+                                                  'user': {
+                                                    'id': userSquare['user']
+                                                        ['id'],
+                                                    'username':
+                                                        userSquare['user']
+                                                            ['username'],
+                                                    'nickname':
+                                                        userSquare['user']
+                                                            ['nickname'],
+                                                  }
+                                                })
+                                            .toList(),
+                                        'posts': (item['SquarePosts'] as List)
+                                            .map((post) => {
+                                                  'id': post['id'],
+                                                  'title': post['title'],
+                                                  'content': post['content'],
+                                                  'createdAt':
+                                                      post['createdAt'],
+                                                  'updatedAt':
+                                                      post['updatedAt'],
+                                                  'comments':
+                                                      (post['SquarePostComment']
+                                                              as List)
+                                                          .map((comment) => {
+                                                                'id': comment[
+                                                                    'id'],
+                                                                'createdAt':
+                                                                    comment[
+                                                                        'createdAt'],
+                                                                'updatedAt':
+                                                                    comment[
+                                                                        'updatedAt'],
+                                                                'userId': comment[
+                                                                    'userId'],
+                                                                'content': comment[
+                                                                    'content'],
+                                                                'squarePostId':
+                                                                    comment[
+                                                                        'squarePostId'],
+                                                              })
+                                                          .toList(),
+                                                })
+                                            .toList(),
+                                        'createdAt': item['createdAt'],
+                                        'updatedAt': item['updatedAt'],
+                                      })
+                                  .toList();
+                              setState(() {
+                                isLoading = false; // 데이터 로딩 완료 시 상태 변경
+                              });
+
+                              debugPrint(
+                                  "모집대상 전공 스퀘어 검색 리스트 저장 완료: $squareList");
+                            } else {
+                              setState(() {
+                                isLoading = false; // 오류 발생 시에도 로딩 상태를 해제
+                              });
+                              throw Exception(
+                                  '모집대상 전공 스퀘어 검색 리스트 데이터를 가져오지 못했습니다.');
+                            }
+                          } catch (e) {
+                            debugPrint('모집대상 전공 스퀘어 검색 데이터 가져오는 중 오류 발생: $e');
+                            rethrow;
+                          }
+                        },
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
+                    Spacer(),
+                    Flexible(
+                      flex: 2,
+                      child: ElevatedButton(
+                        // 모집글 작성 버튼 -----------------------------------------------
+                        style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 15),
+                            backgroundColor: Colors.grey[400],
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10))),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WriteRecruit()));
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 7,
+                            ),
+                            Flexible(
+                              child: AutoSizeText(
+                                '모집글 작성',
+                                maxLines: 1,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    Expanded(
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                      color: Colors.green[700],
+                    )) // 로딩 중일 때 로딩 스피너 표시
+                  : Expanded(
                       // 모집글 목록들 ----------------------------------------------------------
                       child: ListView.builder(
                           itemCount: squareList.length,
@@ -556,7 +657,9 @@ class _SquarePageState extends State<SquarePage> {
                               onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => Recruitment())),
+                                      builder: (context) => Recruitment(
+                                          squarePost:
+                                              squareList[reversedIndex]))),
                               child: Container(
                                 margin: EdgeInsets.only(bottom: 12),
                                 padding: EdgeInsets.symmetric(
@@ -612,9 +715,9 @@ class _SquarePageState extends State<SquarePage> {
                             );
                           }),
                     )
-                  ],
-                ),
-              ),
+            ],
+          ),
+        ),
       ),
     );
   }

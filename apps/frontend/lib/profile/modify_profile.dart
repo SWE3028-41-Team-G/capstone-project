@@ -53,9 +53,12 @@ class _ModifyProfileState extends State<ModifyProfile> {
     primaryMajor = Major(
         id: userData!.majors.firstWhere((major) => major.origin).major.id,
         name: userData.majors.firstWhere((major) => major.origin).major.name);
-    doubleMajor = Major(
-        id: userData.majors.firstWhere((major) => !major.origin).major.id,
-        name: userData.majors.firstWhere((major) => !major.origin).major.name);
+    if (userData.real) {
+      doubleMajor = Major(
+          id: userData.majors.firstWhere((major) => !major.origin).major.id,
+          name:
+              userData.majors.firstWhere((major) => !major.origin).major.name);
+    }
     selectedReal = userData.real;
     selectedPublic = userData.public;
     // FocusNode에 리스너 추가하여 포커스 상태 추적
