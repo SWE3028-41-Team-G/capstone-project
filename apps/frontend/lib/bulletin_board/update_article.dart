@@ -85,7 +85,7 @@ class _UpdateArticleState extends State<UpdateArticle> {
                     try {
                       final response =
                           await authProvider.delete('board/${widget.id}');
-                      if (response.statusCode == 204) {
+                      if (response.statusCode == 200) {
                         debugPrint("게시판 글 삭제 성공!!!!!");
                         Navigator.pop(context);
                       } else {
@@ -128,7 +128,7 @@ class _UpdateArticleState extends State<UpdateArticle> {
                     try {
                       final response =
                           await authProvider.put('board/${widget.id}', body);
-                      if (response.statusCode == 201) {
+                      if (response.statusCode == 200) {
                         debugPrint("게시판 글 수정 성공!!!!!");
                         Navigator.pop(context);
                       } else {

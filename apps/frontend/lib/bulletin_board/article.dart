@@ -84,25 +84,6 @@ class _ArticleState extends State<Article> {
     }
   }
 
-  // Future<void> _fetchCommentsData() async {
-  //   final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  //   try {
-  //     postData["Comment"].forEach((comment) async {
-  //       final response =
-  //           await authProvider.get('users/${comment["userId"]}/profile');
-  //       if (response.statusCode == 200) {
-  //         setState(() {
-  //           commentUserProfiles.add(response);
-  //         });
-  //       }
-  //     });
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('오류 발생: $e')),
-  //     );
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
