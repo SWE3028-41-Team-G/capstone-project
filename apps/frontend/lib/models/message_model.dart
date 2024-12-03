@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user_info.dart';
 
 class ChatMessage {
@@ -23,6 +24,7 @@ class ChatMessage {
       'readBy': readBy,
       'userInfo': {
         'userId': userInfo.userId,
+        'username': userInfo.username,
         'nickname': userInfo.nickname,
         'profileImgUrl': userInfo.profileImgUrl,
       },
@@ -30,12 +32,19 @@ class ChatMessage {
   }
 
   factory ChatMessage.fromMap(Map<String, dynamic> map) {
+    final userInfoMap = map['userInfo'] as Map<String, dynamic>;
+
     return ChatMessage(
-      senderId: map['senderId'],
-      message: map['message'],
-      timestamp: map['timestamp'].toDate(),
-      readBy: List<String>.from(map['readBy'] ?? []),
-      userInfo: UserInfo.fromJson(map['userInfo']),
+      senderId: map['senderId'] as String,
+      message: map['message'] as String,
+      timestamp: (map['timestamp'] as Timestamp).toDate(),
+      readBy: List<String>.from(map['readBy'] as List),
+      userInfo: UserInfo(
+        userId: userInfoMap['userId'] as int,
+        username: userInfoMap['nickname'] as String,
+        nickname: userInfoMap['nickname'] as String,
+        profileImgUrl: userInfoMap['profileImgUrl'] as String,
+      ),
     );
   }
 }

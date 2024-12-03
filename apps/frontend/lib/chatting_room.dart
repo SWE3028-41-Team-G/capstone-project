@@ -8,7 +8,7 @@ import 'package:frontend/utils/jwt_helper.dart';
 class ChatScreen extends StatefulWidget {
   final String chatRoomId;
 
-  ChatScreen({required this.chatRoomId});
+  const ChatScreen({super.key, required this.chatRoomId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -19,179 +19,270 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
   String? _accessToken;
+  bool _isLoading = true;
+  late Stream<QuerySnapshot> _messagesStream;
+  String _chatRoomTitle = 'DM';
 
   @override
   void initState() {
     super.initState();
-    _loadAccessToken();
+    _initializeChat();
   }
 
-  Future<void> _loadAccessToken() async {
-    final token = await _secureStorage.read(key: 'access_token');
-    setState(() {
-      _accessToken = token;
-    });
+  Future<void> _initializeChat() async {
+    try {
+      final token = await _secureStorage.read(key: 'access_token');
+      print('Token loaded: ${token != null}');
+
+      if (!mounted) return;
+
+      if (token == null) {
+        Navigator.pop(context);
+        return;
+      }
+
+      final chatRoomDoc =
+          await _firestore.collection('chatrooms').doc(widget.chatRoomId).get();
+
+      _messagesStream = _firestore
+          .collection('chatrooms')
+          .doc(widget.chatRoomId)
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .snapshots();
+
+      print('Chat Room ID: ${widget.chatRoomId}');
+
+      setState(() {
+        _accessToken = token;
+        _isLoading = false;
+        _chatRoomTitle = chatRoomDoc.data()?['name'] ?? 'DM';
+      });
+    } catch (e) {
+      print('Error in _initializeChat: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
-  void _sendMessage() async {
+  Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty || _accessToken == null) return;
 
-    final userPayload = JwtHelper.parseJwt(_accessToken!);
+    try {
+      final userPayload = JwtHelper.parseJwt(_accessToken!);
+      print('Sending message as user: ${userPayload['userId']}');
 
-    final userInfo = UserInfo(
-      userId: userPayload['userId'] as int,
-      username: userPayload['username'] as String,
-      nickname: userPayload['nickname'] as String,
-      profileImgUrl: userPayload['profileImgUrl'] as String,
-    );
+      final userInfo = UserInfo(
+        userId: userPayload['userId'] as int,
+        username: userPayload['username'] as String,
+        nickname: userPayload['nickname'] as String,
+        profileImgUrl: userPayload['profileImgUrl'] as String,
+      );
 
-    final message = ChatMessage(
-      senderId: userPayload['userId'].toString(),
-      message: _messageController.text.trim(),
-      timestamp: DateTime.now(),
-      readBy: [userPayload['userId'].toString()],
-      userInfo: userInfo,
-    );
+      final message = ChatMessage(
+        senderId: userPayload['userId'].toString(),
+        message: _messageController.text.trim(),
+        timestamp: DateTime.now(),
+        readBy: [userPayload['userId'].toString()],
+        userInfo: userInfo,
+      );
 
-    await _firestore
-        .collection('chatrooms')
-        .doc(widget.chatRoomId)
-        .collection('messages')
-        .add(message.toMap());
+      print('Sending message: ${message.toMap()}');
 
-    await _firestore.collection('chatrooms').doc(widget.chatRoomId).update({
-      'lastMessage': message.message,
-      'lastMessageTime': message.timestamp,
-    });
+      await _firestore.runTransaction((transaction) async {
+        try {
+          final messageRef = _firestore
+              .collection('chatrooms')
+              .doc(widget.chatRoomId)
+              .collection('messages')
+              .doc();
 
-    _messageController.clear();
+          transaction.set(messageRef, message.toMap());
+
+          final chatRoomRef =
+              _firestore.collection('chatrooms').doc(widget.chatRoomId);
+          transaction.update(chatRoomRef, {
+            'lastMessage': message.message,
+            'lastMessageTime': message.timestamp,
+          });
+
+          print('Message sent successfully');
+        } catch (e) {
+          print('Transaction error: $e');
+          rethrow;
+        }
+      });
+
+      _messageController.clear();
+    } catch (e) {
+      print('Error in _sendMessage: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('메시지 전송 중 오류가 발생했습니다.')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_accessToken == null) {
-      return Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // JWT 토큰에서 현재 사용자 ID 가져오기
+    if (_accessToken == null) {
+      return const Scaffold(body: Center(child: Text('로그인이 필요합니다.')));
+    }
+
     final userPayload = JwtHelper.parseJwt(_accessToken!);
     final currentUserId = userPayload['userId'].toString();
 
     return Scaffold(
-      appBar: AppBar(title: Text('Chat Room')),
+      appBar: AppBar(
+        title: Text(_chatRoomTitle),
+      ),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('chatrooms')
-                  .doc(widget.chatRoomId)
-                  .collection('messages')
-                  .orderBy('timestamp', descending: true)
-                  .snapshots(),
+              stream: _messagesStream,
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('오류가 발생했습니다: ${snapshot.error}'));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('메시지가 없습니다.'));
                 }
 
                 final messages = snapshot.data!.docs.map((doc) {
                   final data = doc.data() as Map<String, dynamic>;
-                  return ChatMessage.fromMap(data);
+                  try {
+                    return ChatMessage.fromMap(data);
+                  } catch (e) {
+                    print('Error parsing message: $e');
+                    rethrow;
+                  }
                 }).toList();
 
                 return ListView.builder(
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == currentUserId;
+                    try {
+                      final message = messages[index];
+                      final isMe = message.senderId == currentUserId;
 
-                    if (!message.readBy.contains(currentUserId)) {
-                      _firestore
-                          .collection('chatrooms')
-                          .doc(widget.chatRoomId)
-                          .collection('messages')
-                          .doc(snapshot.data!.docs[index].id)
-                          .update({
-                        'readBy': FieldValue.arrayUnion([currentUserId])
-                      });
-                    }
+                      if (!message.readBy.contains(currentUserId)) {
+                        _firestore
+                            .collection('chatrooms')
+                            .doc(widget.chatRoomId)
+                            .collection('messages')
+                            .doc(snapshot.data!.docs[index].id)
+                            .update({
+                          'readBy': FieldValue.arrayUnion([currentUserId])
+                        }).then((_) {
+                          print('Read status updated successfully');
+                        }).catchError((error) {
+                          print('Error updating read status: $error');
+                        });
+                      }
 
-                    return Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: isMe
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (!isMe) ...[
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundImage: NetworkImage(
-                                      message.userInfo.profileImgUrl),
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: isMe
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!isMe) ...[
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundImage: message.userInfo
+                                                .profileImgUrl?.isNotEmpty ==
+                                            true
+                                        ? NetworkImage(
+                                            message.userInfo.profileImgUrl!)
+                                        : null,
+                                    child: message.userInfo.profileImgUrl
+                                                ?.isEmpty !=
+                                            false
+                                        ? Text(message.userInfo.nickname[0])
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                                Text(
+                                  message.userInfo.nickname,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                                SizedBox(width: 8),
                               ],
-                              Text(
-                                message.userInfo.nickname,
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: isMe ? Colors.blue : Colors.grey[300],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
+                              child: Text(
+                                message.message,
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                  color: isMe ? Colors.white : Colors.black,
+                                ),
+                              ),
+                            ),
+                            if (isMe) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '읽음 ${message.readBy.length}',
+                                style: const TextStyle(
                                   fontSize: 12,
+                                  color: Colors.grey,
                                 ),
                               ),
                             ],
-                          ),
-                          SizedBox(height: 4),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: isMe ? Colors.blue : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
-                            child: Text(
-                              message.message,
-                              style: TextStyle(
-                                color: isMe ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ),
-                          if (isMe) ...[
-                            SizedBox(height: 4),
-                            Text(
-                              '읽음 ${message.readBy.length}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
                           ],
-                        ],
-                      ),
-                    );
+                        ),
+                      );
+                    } catch (e) {
+                      print('Error rendering message at index $index: $e');
+                      return const SizedBox.shrink();
+                    }
                   },
                 );
               },
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(vertical: 45.0, horizontal: 12.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _messageController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: '메시지를 입력하세요',
                       border: OutlineInputBorder(),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: const Icon(Icons.send),
                   onPressed: _sendMessage,
                 ),
               ],
@@ -200,5 +291,11 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
   }
 }
