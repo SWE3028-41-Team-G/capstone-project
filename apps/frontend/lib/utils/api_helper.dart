@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,6 +28,9 @@ class AuthProvider with ChangeNotifier {
 
   bool _isLoggedIn = false;
   String? _accessToken;
+
+  DateTime _tokenExpiry = DateTime.now();
+  Timer? _tokenRefreshTimer;
 
   bool get isLoggedIn => _isLoggedIn;
   String? get accessToken => _accessToken;
@@ -70,6 +75,10 @@ class AuthProvider with ChangeNotifier {
         if (token != null) {
           // Access Token을 secure storage에 저장
           await _saveAccessToken(token);
+
+          // 토큰 만료 시간을 설정 (예: 1시간 후로 가정)
+          _tokenExpiry = DateTime.now().add(Duration(hours: 1));
+          _scheduleTokenRefresh(); // 토큰 갱신 타이머 설정
         }
 
         // 서버는 'Set-Cookie' 헤더를 통해 Refresh Token을 제공
@@ -95,6 +104,52 @@ class AuthProvider with ChangeNotifier {
     _accessToken = token; // 인스턴스 변수에 토큰 저장
   }
 
+  // 토큰 갱신 요청 (만약 Access Token이 만료되었으면 호출됨) 수정해야됨 ===================================================
+  Future<void> refreshAccessToken() async {
+    try {
+      final reissueUri = ApiHelper.buildRequest('auth/reissue');
+      final response = await http.get(
+        reissueUri, // 토큰 갱신 엔드포인트
+        headers: await _getAuthHeaders(),
+      );
+
+      debugPrint("토큰 갱신 요청 확인 중 : ${response.statusCode}");
+      debugPrint("토큰 갱신 요청 response.body 확인 중 : ${response.body}");
+
+      if (response.statusCode == 201) {
+        // 새로운 Access Token을 서버에서 반환
+        var newAccessToken = jsonDecode(response.body)['access_token'];
+        if (newAccessToken != null) {
+          // 새로운 Access Token을 secure storage에 저장
+          await _saveAccessToken(newAccessToken);
+
+          // 새 만료 시간을 설정 (예: 1시간 후)
+          _tokenExpiry = DateTime.now().add(Duration(hours: 1));
+          _scheduleTokenRefresh();
+        }
+      } else {
+        throw Exception('토큰 갱신 실패');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // 타이머를 설정하여 만료 5분 전에 토큰을 갱신하도록 함
+  void _scheduleTokenRefresh() {
+    if (_tokenRefreshTimer != null) {
+      _tokenRefreshTimer?.cancel();
+    }
+
+    final durationUntilExpiry = _tokenExpiry.isAfter(DateTime.now())
+        ? _tokenExpiry.subtract(Duration(minutes: 5)).difference(DateTime.now())
+        : Duration.zero;
+
+    if (durationUntilExpiry > Duration.zero) {
+      _tokenRefreshTimer = Timer(durationUntilExpiry, refreshAccessToken);
+    }
+  }
+
   // Access Token을 secure storage에서 불러오기
   Future<void> _getAccessToken() async {
     _accessToken = await secureStorage.read(key: 'access_token');
@@ -115,11 +170,14 @@ class AuthProvider with ChangeNotifier {
 
       // 만약 401 Unauthorized 에러가 발생하면, 토큰 갱신을 시도
       if (response.statusCode == 401) {
-        await refreshAccessToken(); // 토큰 갱신
-        return await http.get(
-          Uri.parse('$baseUrl/$endpoint'),
-          headers: await _getAuthHeaders(),
-        ); // 갱신된 토큰으로 재시도
+        logout();
+        Fluttertoast.showToast(
+            msg: '토큰이 만료되었습니다.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
 
       return response;
@@ -142,13 +200,14 @@ class AuthProvider with ChangeNotifier {
       debugPrint("토큰 포함 PUT response.body : ${response.body}");
 
       if (response.statusCode == 401) {
-        debugPrint("여기까지는 가고 있나요?");
-        await refreshAccessToken();
-        return await http.put(
-          Uri.parse('$baseUrl$endpoint'),
-          headers: await _getAuthHeaders(isJson: true),
-          body: jsonEncode(body),
-        );
+        logout();
+        Fluttertoast.showToast(
+            msg: '토큰이 만료되었습니다.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
       return response;
     } catch (e) {
@@ -171,13 +230,14 @@ class AuthProvider with ChangeNotifier {
       debugPrint("토큰 포함 POST response.body : ${response.body}");
 
       if (response.statusCode == 401) {
-        debugPrint("여기까지는 가고 있나요?");
-        await refreshAccessToken();
-        return await http.post(
-          Uri.parse('$baseUrl$endpoint'),
-          headers: await _getAuthHeaders(isJson: true),
-          body: jsonEncode(body),
-        );
+        logout();
+        Fluttertoast.showToast(
+            msg: '토큰이 만료되었습니다.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
       return response;
     } catch (e) {
@@ -200,11 +260,14 @@ class AuthProvider with ChangeNotifier {
 
       // 만약 401 Unauthorized 에러가 발생하면, 토큰 갱신을 시도
       if (response.statusCode == 401) {
-        await refreshAccessToken(); // 토큰 갱신
-        return await http.delete(
-          Uri.parse('$baseUrl/$endpoint'),
-          headers: await _getAuthHeaders(),
-        ); // 갱신된 토큰으로 재시도
+        logout();
+        Fluttertoast.showToast(
+            msg: '토큰이 만료되었습니다.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0); // 갱신된 토큰으로 재시도
       }
 
       return response;
@@ -241,33 +304,6 @@ class AuthProvider with ChangeNotifier {
 
       _accessToken = null;
       notifyListeners(); // 상태 변경 알림
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // 토큰 갱신 요청 (만약 Access Token이 만료되었으면 호출됨) 수정해야됨 ===================================================
-  Future<void> refreshAccessToken() async {
-    try {
-      final reissueUri = ApiHelper.buildRequest('auth/reissue');
-      final response = await http.get(
-        reissueUri, // 토큰 갱신 엔드포인트
-        headers: await _getAuthHeaders(),
-      );
-
-      debugPrint("토큰 갱신 요청 확인 중 : ${response.statusCode}");
-      debugPrint("토큰 갱신 요청 response.body 확인 중 : ${response.body}");
-
-      if (response.statusCode == 201) {
-        // 새로운 Access Token을 서버에서 반환
-        var newAccessToken = jsonDecode(response.body)['access_token'];
-        if (newAccessToken != null) {
-          // 새로운 Access Token을 secure storage에 저장
-          await _saveAccessToken(newAccessToken);
-        }
-      } else {
-        throw Exception('토큰 갱신 실패');
-      }
     } catch (e) {
       rethrow;
     }
