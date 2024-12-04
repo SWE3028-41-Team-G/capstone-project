@@ -67,7 +67,7 @@ export class UserController {
     @Query('dualMajorId', new ParseIntPipe({ optional: true }))
     dualMajorId?: number
   ) {
-    return await this.getUserProfilesByMajors(majorId, dualMajorId)
+    return await this.userService.getUserProfilesByMajors(majorId, dualMajorId)
   }
 
   @Put('profile')
