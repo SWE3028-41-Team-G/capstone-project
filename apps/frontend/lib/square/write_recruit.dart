@@ -1,11 +1,15 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/home.dart';
+import 'package:frontend/initial_page.dart';
 import 'package:frontend/register/major.dart';
 import 'package:frontend/register/register.dart';
 import 'package:frontend/utils/api_helper.dart';
+import 'package:frontend/utils/jwt_helper.dart';
 import 'package:provider/provider.dart';
 
 class WriteRecruit extends StatefulWidget {
@@ -18,6 +22,9 @@ class WriteRecruit extends StatefulWidget {
 class _WriteRecruitState extends State<WriteRecruit> {
   final _formKey = GlobalKey<FormState>();
   final FocusNode _focusNode = FocusNode();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String? _accessToken;
 
   AuthProvider? authProvider;
   late MajorProvider majorProvider;
@@ -27,12 +34,35 @@ class _WriteRecruitState extends State<WriteRecruit> {
     super.initState();
     authProvider = Provider.of<AuthProvider>(context, listen: false);
     majorProvider = Provider.of<MajorProvider>(context, listen: false);
+    _initializeToken();
   }
 
   @override
   void dispose() {
     _focusNode.dispose(); // FocusNode 해제
     super.dispose();
+  }
+
+  Future<void> _initializeToken() async {
+    try {
+      final token = await _secureStorage.read(key: 'access_token');
+      if (!mounted) return;
+
+      if (token == null) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => InitialPage()),
+          (route) => false,
+        );
+        return;
+      }
+
+      setState(() {
+        _accessToken = token;
+      });
+    } catch (e) {
+      print('Error in _initializeToken: $e');
+    }
   }
 
   var title = TextEditingController();
@@ -115,6 +145,32 @@ class _WriteRecruitState extends State<WriteRecruit> {
                             "스퀘어 작성자 가입 작성 response.body 확인 중 : ${regSquareResponse?.body}");
 
                         majorProvider.removeSelectedMajor('writeRecruitMajor');
+
+                        final Map<String, dynamic> data = jsonDecode(
+                            regSquareResponse?.body.toString() ?? '');
+
+                        final userPayload = JwtHelper.parseJwt(_accessToken!);
+                        final currentUserId = userPayload['userId'].toString();
+                        final chatRoomRef = _firestore
+                            .collection('chatrooms')
+                            .doc(data['squareId'].toString());
+                        await chatRoomRef.set({
+                          'name': '[Square] ' + title.text,
+                          'participants': [currentUserId],
+                          'lastMessageTime': DateTime.now(),
+                          'lastMessage': '채팅방이 생성되었습니다.',
+                          'createdBy': currentUserId,
+                          'createdAt': DateTime.now(),
+                          'participantDetails': [
+                            {
+                              'userId': currentUserId,
+                              'nickname': userPayload['nickname'],
+                              'profileImgUrl':
+                                  userPayload['profileImgUrl'] ?? '',
+                            }
+                          ],
+                        });
+
                         // SQUARE로 이동
                         Navigator.pushAndRemoveUntil(
                           context,

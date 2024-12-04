@@ -1,9 +1,13 @@
 import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/initial_page.dart';
 import 'package:frontend/utils/api_helper.dart';
+import 'package:frontend/utils/jwt_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +23,9 @@ class _RecruitmentState extends State<Recruitment> {
   double _offsetX = 0.0; // 페이지의 밀리는 정도
   final _formKey = GlobalKey<FormState>();
   AuthProvider? authProvider;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String? _accessToken;
 
   List<Map<String, dynamic>> comments = [];
   List<Map<String, dynamic>> members = [];
@@ -35,6 +42,7 @@ class _RecruitmentState extends State<Recruitment> {
     debugPrint("해당 스퀘어 가입한 members 확인 중 : $members");
     authProvider = Provider.of<AuthProvider>(context, listen: false);
     _fetchUserData();
+    _initializeToken();
   }
 
   Future<void> _fetchUserData() async {
@@ -43,6 +51,28 @@ class _RecruitmentState extends State<Recruitment> {
       debugPrint("cmtUserData 확인 중 : $cmtUserData");
     } catch (e) {
       debugPrint('_fetchUserData 로드 중 오류 발생: $e');
+    }
+  }
+
+  Future<void> _initializeToken() async {
+    try {
+      final token = await _secureStorage.read(key: 'access_token');
+      if (!mounted) return;
+
+      if (token == null) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => InitialPage()),
+          (route) => false,
+        );
+        return;
+      }
+
+      setState(() {
+        _accessToken = token;
+      });
+    } catch (e) {
+      print('Error in _initializeToken: $e');
     }
   }
 
@@ -379,6 +409,47 @@ class _RecruitmentState extends State<Recruitment> {
                                                             "userId": regUserId
                                                           });
                                                         });
+
+                                                        final userPayload =
+                                                            JwtHelper.parseJwt(
+                                                                _accessToken!);
+                                                        final currentUserId =
+                                                            userPayload[
+                                                                    'userId']
+                                                                .toString();
+
+                                                        DocumentReference
+                                                            docRef = _firestore
+                                                                .collection(
+                                                                    'chatrooms')
+                                                                .doc(widget
+                                                                    .squarePost[
+                                                                        'id']
+                                                                    .toString());
+
+                                                        await docRef.update({
+                                                          'participants':
+                                                              FieldValue
+                                                                  .arrayUnion([
+                                                            currentUserId
+                                                          ]),
+                                                          'participantDetails':
+                                                              FieldValue
+                                                                  .arrayUnion([
+                                                            {
+                                                              'userId':
+                                                                  currentUserId,
+                                                              'nickname':
+                                                                  userPayload[
+                                                                      'nickname'],
+                                                              'profileImgUrl':
+                                                                  userPayload[
+                                                                          'profileImgUrl'] ??
+                                                                      '',
+                                                            }
+                                                          ]),
+                                                        });
+
                                                         Navigator.of(context)
                                                             .pop();
                                                         // 사용자에게 가입 성공 메시지 등을 표시할 수 있음
@@ -387,7 +458,7 @@ class _RecruitmentState extends State<Recruitment> {
                                                             .showSnackBar(
                                                           SnackBar(
                                                               content: Text(
-                                                                  '스퀘어 모임에 가입했습니다!')),
+                                                                  '스퀘어 모임에 가입했습니다! ')),
                                                         );
                                                       }
                                                     } catch (e) {
