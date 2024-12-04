@@ -188,6 +188,9 @@ export class UserService {
         where: {
           id: {
             in: response.map((item) => item.userId)
+          },
+          Profile: {
+            public: true
           }
         },
         select: {
