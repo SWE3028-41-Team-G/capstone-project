@@ -45,7 +45,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
       _chatRoomsStream = _firestore
           .collection('chatrooms')
           .where('participants', arrayContains: currentUserId)
-          .orderBy('lastMessageTime', descending: true)  // 임시로 주석 처리
+          .orderBy('lastMessageTime', descending: true) // 임시로 주석 처리
           .snapshots();
 
       setState(() {
