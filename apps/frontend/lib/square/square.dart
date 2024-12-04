@@ -27,15 +27,6 @@ class Square extends StatefulWidget {
 }
 
 class SquareState extends State<Square> {
-  // int _selectedIndex = 0; // 0 for DM, 1 for SQUARE
-  // // List<dynamic> friends = [];
-  // // List<dynamic> squares = [];
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
-
   late PageController _pageController;
   int _currentPage = 0;
 
@@ -122,311 +113,327 @@ class DMPage extends StatefulWidget {
 }
 
 class _DMPageState extends State<DMPage> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-  String? _accessToken;
+  AuthProvider? authProvider;
+  MajorProvider? majorProvider;
+  List<UserReturnType> dmList = [];
+  bool isLoading = true; // 로딩 상태를 나타내는 변수
 
   @override
   void initState() {
     super.initState();
-    _initializeToken();
+    authProvider = Provider.of<AuthProvider>(context, listen: false);
+    majorProvider = Provider.of<MajorProvider>(context, listen: false);
+    _refreshData();
   }
 
-  Future<void> _initializeToken() async {
+  Future<void> fetchDMList() async {
+    // DM 리스트를 받아오기
     try {
-      final token = await _secureStorage.read(key: 'access_token');
-      if (!mounted) return;
-
-      if (token == null) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => InitialPage()),
-          (route) => false,
-        );
-        return;
+      var response;
+      // GET 요청 전송
+      debugPrint(
+          "DM 불러오기 원전공 확인 중 : ${majorProvider?.selectedMajors['dm_primaryMajor']} ");
+      debugPrint(
+          "DM 불러오기 복수전공 확인 중 : ${majorProvider?.selectedMajors['dm_doubleMajor']} ");
+      if (majorProvider?.selectedMajors['dm_primaryMajor'] == null &&
+          majorProvider?.selectedMajors['dm_doubleMajor'] == null) {
+        response = await authProvider?.get('users/majors/profiles');
+        debugPrint("DM 데이터 GET statusCode: ${response?.statusCode}");
+        debugPrint("DM 데이터 response.body: ${response?.body}");
+      } else if (majorProvider?.selectedMajors['dm_primaryMajor'] != null &&
+          majorProvider?.selectedMajors['dm_doubleMajor'] == null) {
+        setState(() {
+          dmList = [];
+          isLoading = true;
+        });
+        response = await authProvider?.get(
+            'users/majors/profiles?majorId=${majorProvider?.selectedMajors['dm_primaryMajor'].id}');
+        debugPrint(
+            "response로 보내는 majorId 확인 중 : ${majorProvider?.selectedMajors['dm_primaryMajor'].id}");
+        debugPrint("DM 데이터 GET statusCode: ${response?.statusCode}");
+        debugPrint("DM 데이터 response.body: ${response?.body}");
+      } else if (majorProvider?.selectedMajors['dm_primaryMajor'] == null &&
+          majorProvider?.selectedMajors['dm_doubleMajor'] != null) {
+        setState(() {
+          dmList = [];
+          isLoading = true;
+        });
+        response = await authProvider?.get(
+            'users/majors/profiles?dualMajorId=${majorProvider?.selectedMajors['dm_doubleMajor'].id}');
+        debugPrint(
+            "response로 보내는 복수전공 majorId 확인 중 : ${majorProvider?.selectedMajors['dm_doubleMajor'].id}");
+        debugPrint("DM 데이터 GET statusCode: ${response?.statusCode}");
+        debugPrint("DM 데이터 response.body: ${response?.body}");
+      } else if (majorProvider?.selectedMajors['dm_primaryMajor'] != null &&
+          majorProvider?.selectedMajors['dm_doubleMajor'] != null) {
+        setState(() {
+          dmList = [];
+          isLoading = true;
+        });
+        response = await authProvider?.get(
+            'users/majors/profiles?majorId=${majorProvider?.selectedMajors['dm_primaryMajor'].id}&dualMajorId=${majorProvider?.selectedMajors['dm_doubleMajor'].id}');
+        debugPrint(
+            "response로 보내는 원전공 majorId 확인 중 : ${majorProvider?.selectedMajors['dm_primaryMajor'].id}");
+        debugPrint(
+            "response로 보내는 복수전공 majorId 확인 중 : ${majorProvider?.selectedMajors['dm_doubleMajor'].id}");
+        debugPrint("DM 데이터 GET statusCode: ${response?.statusCode}");
+        debugPrint("DM 데이터 response.body: ${response?.body}");
       }
 
-      setState(() {
-        _accessToken = token;
-      });
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response!.body);
+        // dmList 에 data 넣기
+        dmList = (data as List)
+            .map((item) => UserReturnType.fromJson(item))
+            .toList();
+
+        setState(() {
+          isLoading = false;
+        });
+
+        debugPrint("DM 리스트 저장 완료: $dmList");
+      } else {
+        setState(() {
+          isLoading = false; // 오류 발생 시에도 로딩 상태를 해제
+        });
+        // throw Exception('DM 리스트 데이터를 가져오지 못했습니다.');
+      }
     } catch (e) {
-      print('Error in _initializeToken: $e');
+      debugPrint('DM 리스트 데이터 가져오는 중 오류 발생: $e');
+      // rethrow;
     }
+  }
+
+  Future<void> _refreshData() async {
+    // 데이터를 새로고침하는 작업
+    await Future.delayed(Duration());
+    setState(() {
+      isLoading = true; // 새로고침 시 로딩 상태 설정
+      majorProvider?.removeSelectedMajor('dm_primaryMajor');
+      majorProvider?.removeSelectedMajor('dm_doubleMajor');
+    });
+    await fetchDMList();
   }
 
   @override
   Widget build(BuildContext context) {
-    var students = [
-      {
-        'userId': '2',
-        'imageUrl':
-            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': 'user02',
-        'primaryMajor': '경제학과',
-        'secondMajor': '소프트웨어학과',
-        'keyword1': '산책하기',
-        'keyword2': '매일 헬스장 가서 운동하기'
-      },
-      {
-        'userId': '3',
-        'imageUrl':
-            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': '명륜이',
-        'primaryMajor': '경제학과',
-        'secondMajor': '소프트웨어학과',
-        'keyword1': '산책',
-        'keyword2': '운동'
-      },
-      {
-        'userId': '4',
-        'imageUrl':
-            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': '외로운 늑대',
-        'primaryMajor': '통계학과',
-        'secondMajor': '소프트웨어학과',
-        'keyword1': '강아지랑 산책',
-        'keyword2': '침대에 누워있기'
-      },
-      {
-        'userId': '5',
-        'imageUrl':
-            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': '명륜이',
-        'primaryMajor': '경제학과',
-        'secondMajor': '소프트웨어학과',
-        'keyword1': '산책',
-        'keyword2': '운동'
-      },
-      {
-        'userId': '6',
-        'imageUrl':
-            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': '명륜이',
-        'primaryMajor': '경제학과',
-        'secondMajor': '소프트웨어학과',
-        'keyword1': '산책',
-        'keyword2': '운동'
-      },
-      {
-        'userId': '7',
-        'imageUrl':
-            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
-        'nickname': '명륜이',
-        'primaryMajor': '경제학과',
-        'secondMajor': '소프트웨어학과',
-        'keyword1': '산책',
-        'keyword2': '운동'
-      }
-    ];
+    List<UserReturnType> filteredList = dmList
+        .where((student) => student.userId != authProvider?.user?.userId)
+        .toList();
 
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: MajorDropdown(
-                    isStyled: true,
-                    majorKey: 'dm_primaryMajor',
-                    labelText: "원전공",
-                  ),
-                ),
-                SizedBox(
-                  width: 15,
-                ),
-                Expanded(
-                  child: MajorDropdown(
-                    isStyled: true,
-                    majorKey: 'dm_doubleMajor',
-                    labelText: "복수전공",
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 3 / 5,
-              ),
-              itemCount: students.length,
-              itemBuilder: (context, index) {
-                var student = students[index];
-                String userId = student['userId']!;
-                String imageUrl = student['imageUrl']!;
-                String nickname = student['nickname'] ?? 'Unknown';
-                String primaryMajor = student['primaryMajor']!;
-                String secondMajor = student['secondMajor']!;
-                String keyword1 = student['keyword1']!;
-                String keyword2 = student['keyword2']!;
-
-                index % 2 == 0; // 왼쪽, 1이면 오른쪽
-                final userPayload = JwtHelper.parseJwt(_accessToken!);
-                final currentUserId = userPayload['userId'].toString();
-
-                return GestureDetector(
-                  onTap: () async {
-                    final chatRoomRef =
-                        await _firestore.collection('chatrooms').add({
-                      'name': "[DM] " +  userPayload['nickname'] + ", " + nickname,
-                      'participants': [currentUserId, userId],
-                      'lastMessageTime': DateTime.now(),
-                      'lastMessage': '채팅방이 생성되었습니다.',
-                      'createdBy': currentUserId,
-                      'createdAt': DateTime.now(),
-                      'participantDetails': [
-                        {
-                          'userId': currentUserId,
-                          'nickname': userPayload['nickname'],
-                          'profileImgUrl': userPayload['profileImgUrl'] ?? '',
-                        },
-                        {
-                          'userId': userId,
-                          'nickname': nickname,
-                          'profileImgUrl': imageUrl,
-                        }
-                      ],
-                    });
-
-                    if (!mounted) return;
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                ChatScreen(chatRoomId: chatRoomRef.id)));
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(8),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          blurRadius: 1,
-                          spreadRadius: 1,
-                        ),
-                      ],
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      color: Colors.green[700],
+      child: Scaffold(
+        body: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: MajorDropdown(
+                      isStyled: true,
+                      majorKey: 'dm_primaryMajor',
+                      labelText: "원전공",
+                      onChanged: () {
+                        fetchDMList();
+                      },
                     ),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8),
-                          ),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            // height: MediaQuery.of(context).size.width *
-                            //     0.5 *
-                            //     5 /
-                            //     3 *
-                            //     0.55,
-                          ),
-                        ),
-                        Expanded(
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  Expanded(
+                    child: MajorDropdown(
+                      isStyled: true,
+                      majorKey: 'dm_doubleMajor',
+                      labelText: "복수전공",
+                      onChanged: () {
+                        fetchDMList();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                    color: Colors.green[700],
+                  )) // 로딩 중일 때 로딩 스피너 표시
+                : Expanded(
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 3 / 5,
+                      ),
+                      itemCount: filteredList.length,
+                      itemBuilder: (context, index) {
+                        var student = filteredList[index];
+                        int userId =
+                            student.userId; // 해당 프로필 유저 아이디 ------------------
+                        String imageUrl = student.imageUrl;
+                        String nickname = student.nickname;
+                        String primaryMajor = student.majors
+                            .firstWhere((major) => major.origin)
+                            .major
+                            .name;
+                        String secondMajor = student.real
+                            ? student.majors
+                                .firstWhere((major) => !major.origin)
+                                .major
+                                .name
+                            : "해당없음";
+                        String keyword1 = student.interests[0];
+                        String keyword2 = student.interests[1];
+
+                        index % 2 == 0; // 왼쪽, 1이면 오른쪽
+
+                        return GestureDetector(
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => (ChattingRoom(
+                                        nickname: nickname,
+                                      )))),
                           child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 6),
-                            padding: const EdgeInsets.all(8),
-                            width: double.infinity,
+                            margin: EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  blurRadius: 1,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  nickname,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                ClipRRect(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8),
+                                    topRight: Radius.circular(8),
                                   ),
-                                ),
-                                Text(
-                                  '❶ $primaryMajor',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[700],
+                                  child: Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: MediaQuery.of(context).size.width *
+                                        0.5 *
+                                        5 /
+                                        3 *
+                                        0.55,
                                   ),
-                                ),
-                                Text(
-                                  '❷ $secondMajor',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 5,
                                 ),
                                 Expanded(
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 6),
+                                    padding: const EdgeInsets.all(8),
+                                    width: double.infinity,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 6, horizontal: 12),
-                                          // margin: EdgeInsets.symmetric(horizontal: 5),
-                                          decoration: BoxDecoration(
-                                            color: Colors.lightBlue[200],
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(8),
-                                            ),
+                                        AutoSizeText(
+                                          nickname,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          child: Text(
-                                            keyword1,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.white,
-                                            ),
-                                            overflow: TextOverflow
-                                                .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                                        ),
+                                        AutoSizeText(
+                                          '❶ $primaryMajor',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                        AutoSizeText(
+                                          '❷ $secondMajor',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey[700],
                                           ),
                                         ),
                                         SizedBox(
-                                          width: 10,
+                                          height: 5,
                                         ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 6, horizontal: 12),
-                                          // margin: EdgeInsets.symmetric(horizontal: 5),
-                                          decoration: BoxDecoration(
-                                            color: Colors.lightGreen[200],
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(8),
+                                        Expanded(
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      vertical: 6,
+                                                      horizontal: 12),
+                                                  // margin: EdgeInsets.symmetric(horizontal: 5),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        Colors.lightBlue[200],
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                      Radius.circular(8),
+                                                    ),
+                                                  ),
+                                                  child: AutoSizeText(
+                                                    keyword1,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                    overflow: TextOverflow
+                                                        .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      vertical: 6,
+                                                      horizontal: 12),
+                                                  // margin: EdgeInsets.symmetric(horizontal: 5),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        Colors.lightGreen[200],
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                      Radius.circular(8),
+                                                    ),
+                                                  ),
+                                                  child: AutoSizeText(
+                                                    keyword2,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                    overflow: TextOverflow
+                                                        .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                          child: Text(
-                                            keyword2,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.white,
-                                            ),
-                                            overflow: TextOverflow
-                                                .ellipsis, // 글자가 넘치면 말줄임표(...)로 표시
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
+                                )
                               ],
                             ),
                           ),
-                        )
-                      ],
+                        );
+                      },
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -559,6 +566,9 @@ class _SquarePageState extends State<SquarePage> {
                         onChanged: () async {
                           try {
                             // GET 요청 전송
+                            setState(() {
+                              isLoading = true;
+                            });
                             debugPrint(
                                 "스퀘어 검색 주소 확인 : square?majorId=${majorProvider?.selectedMajors['square_Major'].id}");
                             final response = await authProvider?.get(
