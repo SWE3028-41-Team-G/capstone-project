@@ -189,6 +189,7 @@ export class UserService {
           id: {
             in: response.map((item) => item.userId)
           },
+          real: true,
           Profile: {
             public: true
           }
