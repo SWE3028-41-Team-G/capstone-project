@@ -161,9 +161,6 @@ class BulletinBoardState extends State<BulletinBoard> {
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
-                    debugPrint(articles[index]["id"]
-                        .runtimeType
-                        .toString()); //debugging
                     Navigator.push(
                         context,
                         MaterialPageRoute(

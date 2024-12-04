@@ -92,12 +92,15 @@ class MajorDropdown extends StatefulWidget {
   final bool isStyled;
   final String majorKey;
   Major? value;
-  MajorDropdown(
-      {super.key,
-      this.value,
-      required this.labelText,
-      required this.isStyled,
-      required this.majorKey});
+  void Function()? onChanged;
+  MajorDropdown({
+    super.key,
+    this.value,
+    required this.labelText,
+    required this.isStyled,
+    required this.majorKey,
+    this.onChanged,
+  });
 
   @override
   _MajorDropdownState createState() => _MajorDropdownState();
@@ -181,6 +184,9 @@ class _MajorDropdownState extends State<MajorDropdown> {
               majorProvider.setSelectedMajor(
                   widget.majorKey, major); // 선택된 전공 업데이트
             });
+            if (widget.onChanged != null) {
+              widget.onChanged!();
+            }
           },
           items: items,
           underline: Container(), // 밑줄 제거
@@ -201,6 +207,9 @@ class _MajorDropdownState extends State<MajorDropdown> {
                   majorProvider.majors.firstWhere((major) => major.id == value);
               majorProvider.setSelectedMajor(widget.majorKey, major);
             });
+            if (widget.onChanged != null) {
+              widget.onChanged!();
+            }
           },
           validator: (value) {
             if (value == null) {

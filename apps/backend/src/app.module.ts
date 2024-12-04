@@ -10,7 +10,6 @@ import { AuthModule } from './auth/auth.module'
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard'
 import { BoardModule } from './board/board.module'
 import { CacheConfigService } from './common/cache/cache-config.service'
-import { DmModule } from './dm/dm.module'
 import { EmailModule } from './email/email.module'
 import { MailerConfigService } from './email/mailer-config.service'
 import { MajorModule } from './major/marjor.module'
@@ -36,7 +35,6 @@ import { UserModule } from './user/user.module'
     BoardModule,
     StorageModule,
     SquareModule,
-    DmModule,
     MajorModule,
     ApplyModule
   ],
