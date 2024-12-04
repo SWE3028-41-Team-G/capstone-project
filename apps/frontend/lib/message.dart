@@ -161,10 +161,6 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () => _showCreateChatRoomDialog(context),
-      ),
     );
   }
 
