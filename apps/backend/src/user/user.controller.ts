@@ -63,11 +63,16 @@ export class UserController {
 
   @Get('majors/profiles')
   async getUserProfilesByMajors(
+    @Req() req: AuthenticatedRequest,
     @Query('majorId', new ParseIntPipe({ optional: true })) majorId?: number,
     @Query('dualMajorId', new ParseIntPipe({ optional: true }))
     dualMajorId?: number
   ) {
-    return await this.userService.getUserProfilesByMajors(majorId, dualMajorId)
+    return await this.userService.getUserProfilesByMajors(
+      req.user.id,
+      majorId,
+      dualMajorId
+    )
   }
 
   @Put('profile')
