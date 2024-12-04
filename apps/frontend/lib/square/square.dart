@@ -1,13 +1,17 @@
 import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/utils/api_helper.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/chatting_room.dart';
+import 'package:frontend/initial_page.dart';
+import 'package:frontend/models/chat_room.dart';
+import 'package:frontend/utils/api_helper.dart';
 import 'package:frontend/register/major.dart';
 import 'package:frontend/square/recruitment.dart';
 import 'package:frontend/square/write_recruit.dart';
+import 'package:frontend/utils/jwt_helper.dart';
 import 'package:provider/provider.dart';
 
 // import 'package:http/http.dart' as http; // will be used later for API connection
@@ -113,6 +117,9 @@ class _DMPageState extends State<DMPage> {
   MajorProvider? majorProvider;
   List<UserReturnType> dmList = [];
   bool isLoading = true; // 로딩 상태를 나타내는 변수
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String? _accessToken;
 
   @override
   void initState() {
@@ -120,6 +127,7 @@ class _DMPageState extends State<DMPage> {
     authProvider = Provider.of<AuthProvider>(context, listen: false);
     majorProvider = Provider.of<MajorProvider>(context, listen: false);
     _refreshData();
+    _initializeToken();
   }
 
   Future<void> fetchDMList() async {
@@ -211,6 +219,28 @@ class _DMPageState extends State<DMPage> {
     await fetchDMList();
   }
 
+   Future<void> _initializeToken() async {
+    try {
+      final token = await _secureStorage.read(key: 'access_token');
+      if (!mounted) return;
+
+      if (token == null) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => InitialPage()),
+          (route) => false,
+        );
+        return;
+      }
+
+      setState(() {
+        _accessToken = token;
+      });
+    } catch (e) {
+      print('Error in _initializeToken: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<UserReturnType> filteredList = dmList
@@ -286,13 +316,47 @@ class _DMPageState extends State<DMPage> {
 
                         index % 2 == 0; // 왼쪽, 1이면 오른쪽
 
+                        final userPayload = JwtHelper.parseJwt(_accessToken!);
+                        final currentUserId = userPayload['userId'].toString();
+
+
+
                         return GestureDetector(
-                          onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => (ChattingRoom(
-                                        nickname: nickname,
-                                      )))),
+                          onTap: () async {
+                            final chatRoomRef =
+                                await _firestore.collection('chatrooms').add({
+                              'name': "[DM] " +
+                                  userPayload['nickname'] +
+                                  ", " +
+                                  nickname,
+                              'participants': [currentUserId, userId.toString()],
+                              'lastMessageTime': DateTime.now(),
+                              'lastMessage': '채팅방이 생성되었습니다.',
+                              'createdBy': currentUserId,
+                              'createdAt': DateTime.now(),
+                              'participantDetails': [
+                                {
+                                  'userId': currentUserId,
+                                  'nickname': userPayload['nickname'],
+                                  'profileImgUrl':
+                                      userPayload['profileImgUrl'] ?? '',
+                                },
+                                {
+                                  'userId': userId.toString(),
+                                  'nickname': nickname,
+                                  'profileImgUrl': imageUrl,
+                                }
+                              ],
+                            });
+
+                            if (!mounted) return;
+
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                        chatRoomId: chatRoomRef.id)));
+                          },
                           child: Container(
                             margin: EdgeInsets.all(5),
                             decoration: BoxDecoration(
