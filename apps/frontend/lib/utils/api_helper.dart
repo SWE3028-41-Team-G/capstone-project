@@ -108,6 +108,7 @@ class AuthProvider with ChangeNotifier {
         Uri.parse('$baseUrl$endpoint'),
         headers: await _getAuthHeaders(),
       );
+      debugPrint("토큰 포함 GET 주소 확인 : ${Uri.parse('$baseUrl$endpoint')}");
 
       debugPrint("토큰 포함 GET statusCode : ${response.statusCode}");
       debugPrint("토큰 포함 GET response.body : ${response.body}");
@@ -401,15 +402,15 @@ class UserReturnType {
 
     return UserReturnType(
       majors: majorsList,
-      userId: json['userId'],
-      imageUrl: json['imageUrl'],
-      intro: json['intro'],
-      interests: List<String>.from(json['interests']),
-      public: json['public'],
-      username: json['username'],
-      nickname: json['nickname'],
-      admitYear: json['admitYear'],
-      real: json['real'],
+      userId: json['userId'] ?? 0,
+      imageUrl: json['imageUrl'] ?? '',
+      intro: json['intro'] ?? '',
+      interests: List<String>.from(json['interests']) ?? [],
+      public: json['public'] ?? false,
+      username: json['username'] ?? '',
+      nickname: json['nickname'] ?? '',
+      admitYear: json['admitYear'] ?? 0,
+      real: json['real'] ?? false,
     );
   }
 

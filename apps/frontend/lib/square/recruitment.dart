@@ -21,6 +21,7 @@ class _RecruitmentState extends State<Recruitment> {
   AuthProvider? authProvider;
 
   List<Map<String, dynamic>> comments = [];
+  List<Map<String, dynamic>> members = [];
   List<Map<String, dynamic>> cmtUserData = [];
   var comment = TextEditingController();
 
@@ -30,6 +31,8 @@ class _RecruitmentState extends State<Recruitment> {
     debugPrint("squarePost 정보 확인 중 : ${widget.squarePost}");
     comments = widget.squarePost['posts'][0]['comments'];
     debugPrint("comments 확인 중 : $comments");
+    members = widget.squarePost['members'];
+    debugPrint("해당 스퀘어 가입한 members 확인 중 : $members");
     authProvider = Provider.of<AuthProvider>(context, listen: false);
     _fetchUserData();
   }
@@ -56,9 +59,9 @@ class _RecruitmentState extends State<Recruitment> {
       // 중복된 userId를 제거하기 위해 Set을 사용
       Set<int> uniqueUserIds = {};
       for (var comment in comments) {
-        debugPrint("var comment in comments에서 comment 확인 중 : $comment");
-        debugPrint(
-            "var comment in comments에서 userId 확인 중 : ${comment['userId']}");
+        // debugPrint("var comment in comments에서 comment 확인 중 : $comment");
+        // debugPrint(
+        //     "var comment in comments에서 userId 확인 중 : ${comment['userId']}");
         uniqueUserIds.add(comment['userId']);
       }
 
@@ -111,8 +114,7 @@ class _RecruitmentState extends State<Recruitment> {
         };
       } else if (response.body.isEmpty) {
         String nickname = "익명";
-        String imageUrl =
-            'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg';
+        String imageUrl = 'https://cdn.skku-dm.site/default.jpeg';
         return {
           'id': userId,
           'nickname': nickname,
@@ -128,11 +130,11 @@ class _RecruitmentState extends State<Recruitment> {
 
   @override
   Widget build(BuildContext context) {
-    final FocusNode _focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     @override
     void dispose() {
-      _focusNode.dispose();
+      focusNode.dispose();
       super.dispose();
     }
 
@@ -183,8 +185,7 @@ class _RecruitmentState extends State<Recruitment> {
                       element['id'] == widget.squarePost['leader']['id'],
                   orElse: () => {
                     'nickname': '익명',
-                    'imageUrl':
-                        'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+                    'imageUrl': 'https://cdn.skku-dm.site/default.jpeg',
                   },
                 );
 
@@ -280,6 +281,153 @@ class _RecruitmentState extends State<Recruitment> {
                           SizedBox(height: 10),
                           Divider(),
                           SizedBox(height: 10),
+                          // 다 모집되었을 경우도 추가하기 ======================================================
+                          confirmNumber == recruitNumber
+                              ? Container(
+                                  padding: EdgeInsets.symmetric(vertical: 15),
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey[400],
+                                      border: Border.all(
+                                        color: Colors.grey[400]!,
+                                        width: 2.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(5.0)),
+                                  child: AutoSizeText(
+                                    "모집 완료",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )
+                              // 참가 확정하기
+                              : members.any((member) =>
+                                      member['userId'] ==
+                                      authProvider?.user?.userId)
+                                  ? Container(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 15),
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey[400],
+                                          border: Border.all(
+                                            color: Colors.grey[400]!,
+                                            width: 2.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5.0)),
+                                      child: AutoSizeText(
+                                        "참가 확정 완료",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    )
+                                  : GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Container(
+                                                width: 250,
+                                                height: 60,
+                                                padding:
+                                                    EdgeInsets.only(top: 20),
+                                                child: AutoSizeText(
+                                                  '해당 스퀘어 모임에 가입하시겠습니까?',
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text(
+                                                    '취소',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.green[700]),
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    // 스퀘어 가입 POST -------------------------------------------------
+                                                    try {
+                                                      final regSquareResponse =
+                                                          await authProvider?.post(
+                                                              'square/${widget.squarePost['id']}/join',
+                                                              {
+                                                            "userId":
+                                                                authProvider
+                                                                    ?.user
+                                                                    ?.userId
+                                                          });
+                                                      debugPrint(
+                                                          "스퀘어 가입하기 response.statusCode 확인 중 : ${regSquareResponse?.statusCode}");
+                                                      debugPrint(
+                                                          "스퀘어 가입하기 response.body 확인 중 : ${regSquareResponse?.body}");
+                                                      if (regSquareResponse
+                                                              ?.statusCode ==
+                                                          201) {
+                                                        final responseData =
+                                                            jsonDecode(
+                                                                regSquareResponse!
+                                                                    .body);
+                                                        final regUserId =
+                                                            responseData[
+                                                                'userId'];
+                                                        setState(() {
+                                                          members.add({
+                                                            "userId": regUserId
+                                                          });
+                                                        });
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                        // 사용자에게 가입 성공 메시지 등을 표시할 수 있음
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                          SnackBar(
+                                                              content: Text(
+                                                                  '스퀘어 모임에 가입했습니다!')),
+                                                        );
+                                                      }
+                                                    } catch (e) {
+                                                      debugPrint(
+                                                          '스퀘어 가입하기 중 오류 발생: $e');
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    '확인',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.green[700]),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Container(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 15),
+                                        decoration: BoxDecoration(
+                                            color: Colors.lightGreen[400],
+                                            border: Border.all(
+                                              color: Colors.lightGreen[400]!,
+                                              width: 2.0,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(5.0)),
+                                        child: AutoSizeText(
+                                          "참가 확정하기",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                          SizedBox(height: 10),
+                          Divider(),
+                          SizedBox(height: 10),
 
                           // 댓글 리스트 부분
                           ListView.builder(
@@ -294,9 +442,13 @@ class _RecruitmentState extends State<Recruitment> {
                                 orElse: () => {
                                   'nickname': '익명',
                                   'imageUrl':
-                                      'https://s3.orbi.kr/data/file/united/ade20dc8d3d033badeddf893b0763f9a.jpeg',
+                                      'https://cdn.skku-dm.site/default.jpeg',
                                 },
                               );
+
+                              bool isCmtWriter = (comments[index]['userId'] ==
+                                  authProvider?.user?.userId);
+                              int cmtId = comments[index]['id'];
 
                               String cmtImage =
                                   userData['imageUrl'] ?? 'default_image_url';
@@ -349,6 +501,102 @@ class _RecruitmentState extends State<Recruitment> {
                                                         color:
                                                             Colors.grey[400]),
                                                   ),
+                                                  Spacer(),
+                                                  // 댓글 삭제 -------------------------------------------------
+                                                  Visibility(
+                                                    visible: isCmtWriter,
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return AlertDialog(
+                                                              title: Container(
+                                                                width: 250,
+                                                                height: 50,
+                                                                padding: EdgeInsets
+                                                                    .only(
+                                                                        top:
+                                                                            20),
+                                                                child:
+                                                                    AutoSizeText(
+                                                                  '댓글을 삭제하시겠습니까?',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          17),
+                                                                  maxLines: 1,
+                                                                ),
+                                                              ),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .pop();
+                                                                  },
+                                                                  child: Text(
+                                                                    '취소',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .green[700]),
+                                                                  ),
+                                                                ),
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () async {
+                                                                    // 댓글 삭제 DELETE -------------------------------------------------
+                                                                    try {
+                                                                      final response =
+                                                                          await authProvider
+                                                                              ?.delete('square/comments/$cmtId');
+                                                                      debugPrint(
+                                                                          "댓글 삭제하기 response.statusCode 확인 중 : ${response?.statusCode}");
+                                                                      debugPrint(
+                                                                          "댓글 삭제하기 response.body 확인 중 : ${response?.body}");
+                                                                      if (response
+                                                                              ?.statusCode ==
+                                                                          200) {
+                                                                        setState(
+                                                                            () {
+                                                                          comments
+                                                                              .removeAt(index);
+                                                                        });
+                                                                        Navigator.of(context)
+                                                                            .pop();
+                                                                      }
+                                                                    } catch (e) {
+                                                                      debugPrint(
+                                                                          '댓글 삭제하기 중 오류 발생: $e');
+                                                                    }
+                                                                  },
+                                                                  child: Text(
+                                                                    '확인',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .green[700]),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                      child: AutoSizeText(
+                                                        "삭제",
+                                                        style: TextStyle(
+                                                          color: Colors.red,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  )
                                                 ],
                                               ),
                                               SizedBox(height: 5),
@@ -388,7 +636,7 @@ class _RecruitmentState extends State<Recruitment> {
                               child: TextFormField(
                                 maxLines: 2,
                                 controller: comment,
-                                focusNode: _focusNode,
+                                focusNode: focusNode,
                                 decoration: InputDecoration(
                                   hintText: '댓글을 입력하세요...',
                                   border: OutlineInputBorder(),
