@@ -47,9 +47,9 @@ class _RecruitmentState extends State<Recruitment> {
   }
 
   String formatDate(String isoString) {
-    DateTime parsedDate = DateTime.parse(isoString);
-    // 원하는 포맷 생성
-    String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(parsedDate);
+    DateTime parsedDate = DateTime.parse(isoString).toUtc();
+    DateTime koreaDate = parsedDate.add(Duration(hours: 9));
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(koreaDate);
     return formattedDate;
   }
 
