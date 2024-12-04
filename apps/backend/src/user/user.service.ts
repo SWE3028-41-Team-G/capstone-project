@@ -174,7 +174,7 @@ export class UserService {
             origin: true
           }),
           ...(dualMajorId && {
-            majorId,
+            majorId: dualMajorId,
             origin: false
           })
         },
