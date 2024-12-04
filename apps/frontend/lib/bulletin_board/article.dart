@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:frontend/utils/api_helper.dart';
 import 'package:frontend/bulletin_board/update_article.dart';
@@ -25,7 +26,7 @@ class _ArticleState extends State<Article> {
   // linked with API
   var postData = {};
   var writerProfile = {};
-  List<dynamic> commentUserProfiles = [];
+  List<dynamic> userProfiles = [];
 
   @override
   void initState() {
@@ -42,36 +43,31 @@ class _ArticleState extends State<Article> {
           postData = jsonDecode(response.body);
         });
 
-        response =
-            await authProvider.get('users/${postData['userId']}/profile');
-        if (response.statusCode == 200) {
-          setState(() {
-            writerProfile = jsonDecode(response.body);
-          });
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('작성자 정보 검색 실패')),
-          );
+        Set<int> uniqueUserIds = {postData["userId"]};
+        for (var comment in postData["Comment"]) {
+          uniqueUserIds.add(comment['userId']);
         }
 
-        for (dynamic comment in postData["Comment"]) {
-          response =
-              await authProvider.get('users/${comment["userId"]}/profile');
-          if (response.statusCode == 200) {
+        // response =
+        //     await authProvider.get('users/${postData['userId']}/profile');
+        // if (response.statusCode == 200) {
+        //   setState(() {
+        //     writerProfile = jsonDecode(response.body);
+        //   });
+        // } else {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(content: Text('작성자 정보 검색 실패')),
+        //   );
+        // }
+
+        for (int id in uniqueUserIds) {
+          response = await authProvider.get('users/$id/profile');
+          if (response.statusCode == 200 && response.body.isNotEmpty) {
             setState(() {
-              commentUserProfiles.add(jsonDecode(response.body));
+              userProfiles.add(jsonDecode(response.body));
             });
           }
         }
-        // postData["Comment"].forEach((comment) async {
-        //   response =
-        //       await authProvider.get('users/${comment["userId"]}/profile');
-        //   if (response.statusCode == 200) {
-        //     setState(() {
-        //       commentUserProfiles.add(jsonDecode(response.body));
-        //     });
-        //   }
-        // });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('글 정보 가져오기 실패')),
@@ -84,6 +80,20 @@ class _ArticleState extends State<Article> {
     }
   }
 
+  dynamic getUserData(dynamic userId) {
+    for (dynamic profile in userProfiles) {
+      if (profile["userId"] == userId) {
+        return profile;
+      }
+    }
+
+    return {
+      'userId': userId,
+      'nickname': "익명",
+      'imageUrl': 'https://cdn.skku-dm.site/default.jpeg'
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -93,20 +103,14 @@ class _ArticleState extends State<Article> {
     debugPrint(postData["Comment"].toString()); //debug
     debugPrint('-------작성자 정보 상태확인-------');
     debugPrint(writerProfile.toString()); //debug
-    debugPrint('-------댓글 유저ID parsing 확인-------');
-    List ids = [];
-    postData["Comment"].forEach((comment) {
-      ids.add(comment["userId"]);
-    });
-    debugPrint(ids.toString()); //debug
     debugPrint('-------댓글 작성자 정보 상태확인-------');
-    debugPrint(commentUserProfiles.toString()); //debug
+    debugPrint(userProfiles.toString()); //debug
 
     // 모집글
     String imageUrl =
         writerProfile['imageUrl'] ?? 'https://cdn.skku-dm.site/default.jpeg';
     String nickname = writerProfile["nickname"] ?? "익명";
-    String timestamp = DateFormat('MM/dd hh:mm')
+    String timestamp = DateFormat('yyyy-MM-dd hh:mm')
         .format(DateTime.parse(postData['createdAt']))
         .toString();
     String title = postData['title'] as String;
@@ -248,11 +252,14 @@ class _ArticleState extends State<Article> {
                   children: [
                     Spacer(),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () async {},
                       child: Row(
                         children: [
                           Icon(
                             CupertinoIcons.heart,
+                            // isLiked
+                            //     ? CupertinoIcons.heart_fill
+                            //     : CupertinoIcons.heart,
                             color: Colors.pinkAccent,
                             size: 20,
                           ),
@@ -287,10 +294,11 @@ class _ArticleState extends State<Article> {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: comments.length,
                   itemBuilder: (context, index) {
-                    String cmtImage = commentUserProfiles[index]['imageUrl']!;
-                    String cmtName = commentUserProfiles[index]['nickname']!;
+                    dynamic userData = getUserData(comments[index]['userId']);
+                    String cmtImage = userData['imageUrl']!;
+                    String cmtName = userData['nickname']!;
                     String cmtContent = comments[index]['content']!;
-                    String cmtTime = DateFormat('MM/dd hh:mm')
+                    String cmtTime = DateFormat('yyyy-MM-dd hh:mm')
                         .format(DateTime.parse(comments[index]['createdAt']!))
                         .toString();
                     return Container(
@@ -308,10 +316,10 @@ class _ArticleState extends State<Article> {
                                     topLeft: Radius.circular(8),
                                     topRight: Radius.circular(8),
                                   ),
-                                  // child: Image.network(
-                                  //   // cmtImage,
-                                  //   // fit: BoxFit.cover,
-                                  // ),
+                                  child: Image.network(
+                                    cmtImage,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                               SizedBox(width: 10),
