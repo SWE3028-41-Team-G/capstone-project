@@ -1,7 +1,27 @@
-# capstone-project
+# SKKU DM
+Service for the double marjos in SKKU(Sungkyunkwan University, South Korea).
+
+## Intro
+
+## Specs
+|part|frameworks|
+|-|-------|
+|Backend|Nestjs, Prisma|
+|Frontend|Flutter|
+|Infra|Terraform|
+|Databases|Postgresql, Redis, Firestore|
+
+## Features
+|name|description|others|
+|-|-------|--|
+|Bulletin Board|||
+|DM|||
+|Sqaure|||
 
 
-## Backend (Nestjs) 실행
+## Development
+
+### 1. Backend (Nestjs) 실행
 로컬에 docker가 설치 되어있어야함
 vscode 에서 devcontainer extension 설치 후 devcontainer 에서 열기
 
@@ -12,7 +32,7 @@ $ cd apps/backend
 $ pnpm start
 ```
 
-## Frontend (Flutter) 실행
+### 2. Frontend (Flutter) 실행
 devcontainter 에서 실행하면 안됨 (로컬에서 실행)
 로컬에 안드로이드 SDK 또는 IOS 에뮬레이터, flutter SDK가 설치 되어 있어야함
 
